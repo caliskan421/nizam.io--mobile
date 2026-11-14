@@ -16,6 +16,7 @@ import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_permissions.dart';
 import '../../domain/task_writes.dart';
+import '../../domain/work_item.dart' show TransitionActor;
 import '../decision/task_decision_flows.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
@@ -82,18 +83,19 @@ class TaskDetailActions {
     _listSheet(
       title: l.uiTasksSheetStatus,
       builder: (sheet) => [
+        ..._statusHead(targets),
         if (targets.isEmpty)
           Padding(
             padding: const EdgeInsets.all(NizamioSpacing.space2),
             child: Text(
-              l.uiTasksNoStatusTransitions,
+              _noTransitionsText,
               style: context.text.bodySm.copyWith(color: c.textMuted),
             ),
           ),
         for (final s in TaskStatus.known)
           if (s == t.status || targets.contains(s))
             _ListOption(
-              label: l.statusLabel(s),
+              label: _statusOptionLabel(t, s),
               leading: NzDot(color: statusTone(s).color(c)),
               hint: s == TaskStatus.done && open > 0 && !t.isDone
                   ? '$open ${l.uiTasksOpenSubsTail}'

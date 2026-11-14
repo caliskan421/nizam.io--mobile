@@ -2839,6 +2839,55 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeTableDue => 'Bitiş';
 
   @override
+  String get uiHomeMemberFocusKicker => 'sıradaki işin';
+
+  @override
+  String get uiHomeMemberFocusEmpty =>
+      'Şu an üzerinde çalışman gereken iş yok. Yeni görev atanınca burada görürsün.';
+
+  @override
+  String get uiHomeMemberEvidence => 'Kanıt yükle';
+
+  @override
+  String get uiHomeMemberDueToday => 'Bugün bitiyor';
+
+  @override
+  String get uiHomeMemberPriorityTail => 'öncelik';
+
+  @override
+  String get uiHomeMemberReturnedKicker => 'iade edildi';
+
+  @override
+  String get uiHomeMemberFix => 'Düzelt';
+
+  @override
+  String get uiHomeMemberTasksTitle => 'Görevlerim';
+
+  @override
+  String get uiHomeMemberTasksEmpty => 'Açık görevin yok.';
+
+  @override
+  String get uiHomeMemberStatTotal => 'toplam';
+
+  @override
+  String get uiHomeMemberStatLate => 'geciken';
+
+  @override
+  String get uiHomeMemberStatReview => 'onayda';
+
+  @override
+  String get uiHomeMemberStatDone => 'biten';
+
+  @override
+  String get uiHomeMemberUpcomingTitle => 'Yaklaşanlar';
+
+  @override
+  String get uiHomeMemberUpcomingEmpty => 'Önümüzdeki 7 günde bir şey yok.';
+
+  @override
+  String get uiHomeMemberTagDue => 'Son tarih';
+
+  @override
   String get uiIdentityLoginTitle => 'Giriş yap';
 
   @override
@@ -5676,6 +5725,96 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksListUnassigned => 'atanmamış görevler';
+
+  @override
+  String get uiTasksViewReturned => 'İade';
+
+  @override
+  String get uiTasksListReturned => 'iade edilenler';
+
+  @override
+  String get uiTasksCardAssignedBy => 'Atayan';
+
+  @override
+  String get uiTasksMemberScopeHint => 'yalnız sana atananlar';
+
+  @override
+  String get uiTasksMemberStatusDesc =>
+      'Bu görevde yalnız sana açık adımlar gösteriliyor.';
+
+  @override
+  String get uiTasksMemberNoTransitions =>
+      'Bu aşamada senin için yapılacak durum değişikliği yok; koordinatörün kararı bekleniyor.';
+
+  @override
+  String get uiTasksSubmitOption => 'Onaya sun';
+
+  @override
+  String get uiTasksSubmitTitle => 'Tamamlandı bildir';
+
+  @override
+  String get uiTasksSubmitDescHead => 'Görev';
+
+  @override
+  String get uiTasksSubmitDescTail =>
+      'onayına gider. Onaylanmazsa iade edilir.';
+
+  @override
+  String get uiTasksSubmitDescFallback => 'koordinatörün';
+
+  @override
+  String get uiTasksSubmitLateTail =>
+      'gün geç tamamlanıyor. Gecikme görevin kaydında kalır.';
+
+  @override
+  String get uiTasksSubmitNoteLabel => 'Not (isteğe bağlı)';
+
+  @override
+  String get uiTasksSubmitNoteHint => 'Koordinatöre iletmek istediğin bir not';
+
+  @override
+  String get uiTasksSubmitNoteHead => 'Onaya sunma notu';
+
+  @override
+  String get uiTasksSubmitInfo => 'Gönderilince görev “Onay bekliyor” olur.';
+
+  @override
+  String get uiTasksSubmitOk => 'Onaya gönder';
+
+  @override
+  String get uiTasksSubmitNeedEvidence =>
+      'Onaya göndermek için en az 1 kanıt dosyası gerekir.';
+
+  @override
+  String get uiTasksTSubmittedTail => 'onaya gönderildi.';
+
+  @override
+  String get uiTasksTStartedTail => 'başlatıldı.';
+
+  @override
+  String get uiTasksStartLocked => 'Ön görev bitmeden başlatılamaz.';
+
+  @override
+  String get uiTasksBandDoing => 'Bitince kanıtı ekleyip onaya sun.';
+
+  @override
+  String get uiTasksBandEvidenceTail => 'kanıt dosyası';
+
+  @override
+  String get uiTasksBandReturned => 'İade edildi';
+
+  @override
+  String get uiTasksBandFix => 'Düzeltmeye başla';
+
+  @override
+  String get uiTasksBandReview => 'Koordinatörün onayını bekliyor';
+
+  @override
+  String get uiTasksBandTodo =>
+      'Hazır olduğunda başla; görev “Devam ediyor” olur.';
+
+  @override
+  String get uiTasksBandStart => 'Başla';
 
   @override
   String get uiTasksSortStatus => 'Duruma göre';

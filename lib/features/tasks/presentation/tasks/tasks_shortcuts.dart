@@ -31,13 +31,14 @@ Future<void> showTasksShortcuts(
   final truncated =
       container.read(taskListCatalogProvider).value?.truncated ?? false;
   if (r == null) return Future.value();
-  final coordinator = container.read(effectiveAccessProvider).isCoordinatorView;
+  final access = container.read(effectiveAccessProvider);
+  final coordinator = access.isCoordinatorView;
   return NzFlyoutMenu.show(
     context,
     semanticLabel: l.uiTasksShortcuts,
     entries: [
       NzFlyoutSection(l.uiTasksFlyView),
-      for (final v in taskViewsFor(coordinator: coordinator))
+      for (final v in taskViewsFor(role: access.known ? access.role : null))
         NzFlyoutItem(
           label: l.viewLabel(v),
           dot: viewDot(v, c),

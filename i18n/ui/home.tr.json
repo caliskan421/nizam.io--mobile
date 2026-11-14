@@ -137,6 +137,22 @@
     "ui.home.qa_member": "Üye ekle",
     "ui.home.qa_member_long": "Ekibe üye ekle",
     "ui.home.table_task": "Görev",
-    "ui.home.table_due": "Bitiş"
+    "ui.home.table_due": "Bitiş",
+    "ui.home.member_focus_kicker": "sıradaki işin",
+    "ui.home.member_focus_empty": "Şu an üzerinde çalışman gereken iş yok. Yeni görev atanınca burada görürsün.",
+    "ui.home.member_evidence": "Kanıt yükle",
+    "ui.home.member_due_today": "Bugün bitiyor",
+    "ui.home.member_priority_tail": "öncelik",
+    "ui.home.member_returned_kicker": "iade edildi",
+    "ui.home.member_fix": "Düzelt",
+    "ui.home.member_tasks_title": "Görevlerim",
+    "ui.home.member_tasks_empty": "Açık görevin yok.",
+    "ui.home.member_stat_total": "toplam",
+    "ui.home.member_stat_late": "geciken",
+    "ui.home.member_stat_review": "onayda",
+    "ui.home.member_stat_done": "biten",
+    "ui.home.member_upcoming_title": "Yaklaşanlar",
+    "ui.home.member_upcoming_empty": "Önümüzdeki 7 günde bir şey yok.",
+    "ui.home.member_tag_due": "Son tarih"
   }
 }

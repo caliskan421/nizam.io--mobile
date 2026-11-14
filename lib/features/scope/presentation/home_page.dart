@@ -23,6 +23,7 @@ import '../application/scope_selection_controller.dart';
 import '../domain/home_dashboard.dart';
 import 'home/home_coordinator.dart';
 import 'home/home_coordinatorships.dart';
+import 'home/home_member.dart';
 import 'home/home_menus.dart';
 import 'home/home_overview.dart';
 import 'home/home_sections.dart';
@@ -226,6 +227,19 @@ class _Feed extends ConsumerWidget {
           wide: wide,
           onOpen: nav.openCoordinatorship,
         );
+        // Üye: odak, iade, Görevlerim, Yaklaşanlar (KPI, genel durum, koordinatörlük kartı yok).
+        if (access.isMemberView) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              greeting,
+              const Gap(NizamioSpacing.space3),
+              HomeViewLine(view: access),
+              const Gap(NizamioSpacing.gapXl),
+              HomeMemberFeed(wide: wide),
+            ],
+          );
+        }
         if (access.isCoordinatorView) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

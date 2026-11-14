@@ -3557,6 +3557,70 @@
   "@uiHomeTableDue": {
     "description": "ui.home.table_due"
   },
+  "uiHomeMemberFocusKicker": "sıradaki işin",
+  "@uiHomeMemberFocusKicker": {
+    "description": "ui.home.member_focus_kicker"
+  },
+  "uiHomeMemberFocusEmpty": "Şu an üzerinde çalışman gereken iş yok. Yeni görev atanınca burada görürsün.",
+  "@uiHomeMemberFocusEmpty": {
+    "description": "ui.home.member_focus_empty"
+  },
+  "uiHomeMemberEvidence": "Kanıt yükle",
+  "@uiHomeMemberEvidence": {
+    "description": "ui.home.member_evidence"
+  },
+  "uiHomeMemberDueToday": "Bugün bitiyor",
+  "@uiHomeMemberDueToday": {
+    "description": "ui.home.member_due_today"
+  },
+  "uiHomeMemberPriorityTail": "öncelik",
+  "@uiHomeMemberPriorityTail": {
+    "description": "ui.home.member_priority_tail"
+  },
+  "uiHomeMemberReturnedKicker": "iade edildi",
+  "@uiHomeMemberReturnedKicker": {
+    "description": "ui.home.member_returned_kicker"
+  },
+  "uiHomeMemberFix": "Düzelt",
+  "@uiHomeMemberFix": {
+    "description": "ui.home.member_fix"
+  },
+  "uiHomeMemberTasksTitle": "Görevlerim",
+  "@uiHomeMemberTasksTitle": {
+    "description": "ui.home.member_tasks_title"
+  },
+  "uiHomeMemberTasksEmpty": "Açık görevin yok.",
+  "@uiHomeMemberTasksEmpty": {
+    "description": "ui.home.member_tasks_empty"
+  },
+  "uiHomeMemberStatTotal": "toplam",
+  "@uiHomeMemberStatTotal": {
+    "description": "ui.home.member_stat_total"
+  },
+  "uiHomeMemberStatLate": "geciken",
+  "@uiHomeMemberStatLate": {
+    "description": "ui.home.member_stat_late"
+  },
+  "uiHomeMemberStatReview": "onayda",
+  "@uiHomeMemberStatReview": {
+    "description": "ui.home.member_stat_review"
+  },
+  "uiHomeMemberStatDone": "biten",
+  "@uiHomeMemberStatDone": {
+    "description": "ui.home.member_stat_done"
+  },
+  "uiHomeMemberUpcomingTitle": "Yaklaşanlar",
+  "@uiHomeMemberUpcomingTitle": {
+    "description": "ui.home.member_upcoming_title"
+  },
+  "uiHomeMemberUpcomingEmpty": "Önümüzdeki 7 günde bir şey yok.",
+  "@uiHomeMemberUpcomingEmpty": {
+    "description": "ui.home.member_upcoming_empty"
+  },
+  "uiHomeMemberTagDue": "Son tarih",
+  "@uiHomeMemberTagDue": {
+    "description": "ui.home.member_tag_due"
+  },
   "uiIdentityLoginTitle": "Giriş yap",
   "@uiIdentityLoginTitle": {
     "description": "ui.identity.login_title"
@@ -7204,6 +7268,118 @@
   "uiTasksListUnassigned": "atanmamış görevler",
   "@uiTasksListUnassigned": {
     "description": "ui.tasks.list_unassigned"
+  },
+  "uiTasksViewReturned": "İade",
+  "@uiTasksViewReturned": {
+    "description": "ui.tasks.view_returned"
+  },
+  "uiTasksListReturned": "iade edilenler",
+  "@uiTasksListReturned": {
+    "description": "ui.tasks.list_returned"
+  },
+  "uiTasksCardAssignedBy": "Atayan",
+  "@uiTasksCardAssignedBy": {
+    "description": "ui.tasks.card_assigned_by"
+  },
+  "uiTasksMemberScopeHint": "yalnız sana atananlar",
+  "@uiTasksMemberScopeHint": {
+    "description": "ui.tasks.member_scope_hint"
+  },
+  "uiTasksMemberStatusDesc": "Bu görevde yalnız sana açık adımlar gösteriliyor.",
+  "@uiTasksMemberStatusDesc": {
+    "description": "ui.tasks.member_status_desc"
+  },
+  "uiTasksMemberNoTransitions": "Bu aşamada senin için yapılacak durum değişikliği yok; koordinatörün kararı bekleniyor.",
+  "@uiTasksMemberNoTransitions": {
+    "description": "ui.tasks.member_no_transitions"
+  },
+  "uiTasksSubmitOption": "Onaya sun",
+  "@uiTasksSubmitOption": {
+    "description": "ui.tasks.submit_option"
+  },
+  "uiTasksSubmitTitle": "Tamamlandı bildir",
+  "@uiTasksSubmitTitle": {
+    "description": "ui.tasks.submit_title"
+  },
+  "uiTasksSubmitDescHead": "Görev",
+  "@uiTasksSubmitDescHead": {
+    "description": "ui.tasks.submit_desc_head"
+  },
+  "uiTasksSubmitDescTail": "onayına gider. Onaylanmazsa iade edilir.",
+  "@uiTasksSubmitDescTail": {
+    "description": "ui.tasks.submit_desc_tail"
+  },
+  "uiTasksSubmitDescFallback": "koordinatörün",
+  "@uiTasksSubmitDescFallback": {
+    "description": "ui.tasks.submit_desc_fallback"
+  },
+  "uiTasksSubmitLateTail": "gün geç tamamlanıyor. Gecikme görevin kaydında kalır.",
+  "@uiTasksSubmitLateTail": {
+    "description": "ui.tasks.submit_late_tail"
+  },
+  "uiTasksSubmitNoteLabel": "Not (isteğe bağlı)",
+  "@uiTasksSubmitNoteLabel": {
+    "description": "ui.tasks.submit_note_label"
+  },
+  "uiTasksSubmitNoteHint": "Koordinatöre iletmek istediğin bir not",
+  "@uiTasksSubmitNoteHint": {
+    "description": "ui.tasks.submit_note_hint"
+  },
+  "uiTasksSubmitNoteHead": "Onaya sunma notu",
+  "@uiTasksSubmitNoteHead": {
+    "description": "ui.tasks.submit_note_head"
+  },
+  "uiTasksSubmitInfo": "Gönderilince görev “Onay bekliyor” olur.",
+  "@uiTasksSubmitInfo": {
+    "description": "ui.tasks.submit_info"
+  },
+  "uiTasksSubmitOk": "Onaya gönder",
+  "@uiTasksSubmitOk": {
+    "description": "ui.tasks.submit_ok"
+  },
+  "uiTasksSubmitNeedEvidence": "Onaya göndermek için en az 1 kanıt dosyası gerekir.",
+  "@uiTasksSubmitNeedEvidence": {
+    "description": "ui.tasks.submit_need_evidence"
+  },
+  "uiTasksTSubmittedTail": "onaya gönderildi.",
+  "@uiTasksTSubmittedTail": {
+    "description": "ui.tasks.t_submitted_tail"
+  },
+  "uiTasksTStartedTail": "başlatıldı.",
+  "@uiTasksTStartedTail": {
+    "description": "ui.tasks.t_started_tail"
+  },
+  "uiTasksStartLocked": "Ön görev bitmeden başlatılamaz.",
+  "@uiTasksStartLocked": {
+    "description": "ui.tasks.start_locked"
+  },
+  "uiTasksBandDoing": "Bitince kanıtı ekleyip onaya sun.",
+  "@uiTasksBandDoing": {
+    "description": "ui.tasks.band_doing"
+  },
+  "uiTasksBandEvidenceTail": "kanıt dosyası",
+  "@uiTasksBandEvidenceTail": {
+    "description": "ui.tasks.band_evidence_tail"
+  },
+  "uiTasksBandReturned": "İade edildi",
+  "@uiTasksBandReturned": {
+    "description": "ui.tasks.band_returned"
+  },
+  "uiTasksBandFix": "Düzeltmeye başla",
+  "@uiTasksBandFix": {
+    "description": "ui.tasks.band_fix"
+  },
+  "uiTasksBandReview": "Koordinatörün onayını bekliyor",
+  "@uiTasksBandReview": {
+    "description": "ui.tasks.band_review"
+  },
+  "uiTasksBandTodo": "Hazır olduğunda başla; görev “Devam ediyor” olur.",
+  "@uiTasksBandTodo": {
+    "description": "ui.tasks.band_todo"
+  },
+  "uiTasksBandStart": "Başla",
+  "@uiTasksBandStart": {
+    "description": "ui.tasks.band_start"
   },
   "uiTasksSortStatus": "Duruma göre",
   "@uiTasksSortStatus": {

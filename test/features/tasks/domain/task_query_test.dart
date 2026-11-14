@@ -1,6 +1,7 @@
 // Ortak görev araması (liste, telefon ve tablet zaman çizelgesi): başlık, görev kodu ve
 // atanan adı, koordinatörlük adı; Türkçe küçük harf.
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nizamio/core/domain/effective_role.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
 import 'package:nizamio/features/tasks/domain/task_catalog.dart';
 import 'package:nizamio/features/tasks/domain/task_query.dart';
@@ -63,4 +64,46 @@ void main() {
       NzTaskView.values.map((v) => v.name),
     );
   });
+
+  test(
+    'İade ayrı görünüm; üyede Devam iadeyi saymaz, diğer rollerde sayar',
+    () {
+      final returned = TaskItem(
+        code: 'w2',
+        title: 'İade',
+        coordinatorship: 'd1',
+        status: TaskStatus.returned,
+        priority: TaskPriority.medium,
+        start: DateTime(2026, 7, 2),
+        due: DateTime(2026, 9, 20),
+        assignees: const ['u1'],
+      );
+      expect(TaskView.returned.matches(returned), isTrue);
+      expect(TaskView.returned.matches(_task), isFalse);
+      expect(
+        TaskView.inProgress.matchesFor(returned, EffectiveRole.member),
+        isFalse,
+      );
+      expect(
+        TaskView.inProgress.matchesFor(_task, EffectiveRole.member),
+        isTrue,
+      );
+      expect(
+        TaskView.inProgress.matchesFor(returned, EffectiveRole.coordinator),
+        isTrue,
+      );
+      expect(TaskView.inProgress.matchesFor(returned, null), isTrue);
+      final r = queryTasks(
+        _catalog.withTasks([_task, returned]),
+        view: TaskView.inProgress,
+        sort: TaskSort.due,
+        descending: false,
+        filter: const TaskFilter(),
+        role: EffectiveRole.member,
+      );
+      expect(r.counts[TaskView.inProgress], 1);
+      expect(r.counts[TaskView.returned], 1);
+      expect([for (final t in r.tasks) t.code], ['w1']);
+    },
+  );
 }

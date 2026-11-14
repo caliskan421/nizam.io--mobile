@@ -12,7 +12,7 @@ import '../task_texts.dart';
 /// Görünüm noktası rengi (prototip `VD`).
 Color viewDot(TaskView v, NizamioColors c) => switch (v) {
   TaskView.all => c.textMuted,
-  TaskView.late => c.danger,
+  TaskView.late || TaskView.returned => c.danger,
   TaskView.inProgress => c.inProgress,
   TaskView.review || TaskView.dateRequest => c.warning,
   TaskView.notStarted => c.textFaint,
@@ -134,7 +134,7 @@ class _ViewTile extends StatelessWidget {
     final t = context.text;
     final l = context.l10n;
     final numColor = switch (view) {
-      TaskView.late => c.danger,
+      TaskView.late || TaskView.returned => c.danger,
       TaskView.dateRequest => c.warning,
       _ => c.text,
     };

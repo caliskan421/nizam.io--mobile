@@ -231,7 +231,7 @@ class HomeUpcomingMeetings extends ConsumerWidget {
         final now = DateTime.now();
         final next = [
           for (final m in b.visible)
-            if (_isLive(m) || !m.meetingDate.toLocal().isBefore(now)) m,
+            if (isLive(m) || !m.meetingDate.toLocal().isBefore(now)) m,
         ]..sort((a, z) => a.meetingDate.compareTo(z.meetingDate));
         return HomeSectionFrame(
           title: l.uiHomeMeetingsTitle,
@@ -240,10 +240,10 @@ class HomeUpcomingMeetings extends ConsumerWidget {
           empty: l.uiHomeMeetingsEmpty,
           children: [
             for (final m in next.take(HomeCoordinatorFeed.rowsPerSection))
-              _MeetingRow(
+              HomeMeetingRow(
                 meeting: m,
                 now: now,
-                live: _isLive(m),
+                live: isLive(m),
                 codes: [
                   for (final d in m.departments)
                     catalog?.coordinatorship(d.id)?.label ?? d.name,
@@ -256,14 +256,16 @@ class HomeUpcomingMeetings extends ConsumerWidget {
     );
   }
 
-  static bool _isLive(Meeting m) =>
+  /// Toplantıda canlı konferans var mı (üye yaklaşanlarıyla ortak).
+  static bool isLive(Meeting m) =>
       m.summary?.conferenceStatus == SummaryConferenceStatus.live;
 }
 
 /// Toplantı satırı: tarih kutusu (gün / mono saat; bugün vurgulu), başlık, koordinatörlük
 /// kodları (ilki kalın) + katılımcı sayısı (veride varsa), canlıysa "● Canlı" hapı.
-class _MeetingRow extends StatelessWidget {
-  const _MeetingRow({
+class HomeMeetingRow extends StatelessWidget {
+  const HomeMeetingRow({
+    super.key,
     required this.meeting,
     required this.now,
     required this.live,
@@ -294,33 +296,12 @@ class _MeetingRow extends StatelessWidget {
           padding: const EdgeInsets.all(NizamioSpacing.space4),
           child: Row(
             children: [
-              DecoratedBox(
-                decoration: BoxDecoration(
-                  color: today
-                      ? c.primary.withValues(alpha: 0.16)
-                      : c.surfaceOverlay,
-                  borderRadius: BorderRadius.circular(NizamioRadius.tile),
-                ),
-                child: SizedBox(
-                  width: NizamioSize.controlMd * 1.5,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: NizamioSpacing.space2,
-                    ),
-                    child: Column(
-                      children: [
-                        Text(
-                          today
-                              ? l.uiMeetingsGroupToday
-                              : DateFormat('EEE d', 'tr').format(at),
-                          maxLines: 1,
-                          style: t.bodyMd.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        Text(DateFormat.Hm('tr').format(at), style: t.mono),
-                      ],
-                    ),
-                  ),
-                ),
+              HomeDateBox(
+                top: today
+                    ? l.uiMeetingsGroupToday
+                    : DateFormat('EEE d', 'tr').format(at),
+                bottom: DateFormat.Hm('tr').format(at),
+                highlight: today,
               ),
               const Gap(NizamioSpacing.gapMd),
               Expanded(
@@ -363,6 +344,49 @@ class _MeetingRow extends StatelessWidget {
                 const Gap(NizamioSpacing.space2),
                 NzDotChip(color: c.success, label: l.uiMeetingsConfLive),
               ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Satır başı tarih kutusu: üstte gün ("Bugün" / "Per 14"), altta mono satır (saat ya da
+/// etiket); [highlight] bugünü vurgular.
+class HomeDateBox extends StatelessWidget {
+  const HomeDateBox({
+    super.key,
+    required this.top,
+    required this.bottom,
+    this.highlight = false,
+  });
+
+  final String top;
+  final String bottom;
+  final bool highlight;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final t = context.text;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: highlight ? c.primary.withValues(alpha: 0.16) : c.surfaceOverlay,
+        borderRadius: BorderRadius.circular(NizamioRadius.tile),
+      ),
+      child: SizedBox(
+        width: NizamioSize.controlMd * 1.5,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space2),
+          child: Column(
+            children: [
+              Text(
+                top,
+                maxLines: 1,
+                style: t.bodyMd.copyWith(fontWeight: FontWeight.w600),
+              ),
+              Text(bottom, maxLines: 1, style: t.mono),
             ],
           ),
         ),

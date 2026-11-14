@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:meta/meta.dart';
 
+import '../../../core/domain/effective_role.dart';
 import '../../../core/domain/turkish_collation.dart';
 import 'task_catalog.dart';
 
@@ -9,6 +10,9 @@ import 'task_catalog.dart';
 enum TaskView {
   all,
   late,
+
+  /// İade edilenler (üye kümesi; diğer rollerde "Devam" iadeyi de sayar).
+  returned,
   inProgress,
   review,
   dateRequest,
@@ -21,6 +25,7 @@ enum TaskView {
   bool matches(TaskItem t) => switch (this) {
     TaskView.all => true,
     TaskView.late => !t.isDone && t.isOverdue,
+    TaskView.returned => t.status == TaskStatus.returned,
     TaskView.inProgress =>
       t.status == TaskStatus.inProgress || t.status == TaskStatus.returned,
     TaskView.review => t.status == TaskStatus.review,
@@ -30,6 +35,13 @@ enum TaskView {
     TaskView.unassigned =>
       !t.isDone && t.status != TaskStatus.unknown && t.assignees.isEmpty,
   };
+
+  /// Etkin role göre eşleşme (tek yer): Üye görünümünde "İade" ayrı kutucuk olduğundan
+  /// "Devam" yalnız `devam_ediyor` sayar; diğer rollerde [matches].
+  bool matchesFor(TaskItem t, EffectiveRole? role) =>
+      this == TaskView.inProgress && role == EffectiveRole.member
+      ? t.status == TaskStatus.inProgress
+      : matches(t);
 }
 
 /// Duruma göre gruplu listenin grupları (koordinatör sırası): onay bekleyen, atanmamış, devam,
@@ -192,20 +204,23 @@ final class TaskQueryResult {
   final List<TaskGroup> groups;
 }
 
-/// Listeyi hesaplar (prototip `S_tasks.renderVals`).
+/// Listeyi hesaplar (prototip `S_tasks.renderVals`). [role] görünüm eşleşmesini seçer
+/// ([TaskView.matchesFor]).
 TaskQueryResult queryTasks(
   TaskCatalog c, {
   required TaskView view,
   required TaskSort sort,
   required bool descending,
   required TaskFilter filter,
+  EffectiveRole? role,
 }) {
   final base = [
     for (final t in c.tasks)
       if (filter.matches(t, c)) t,
   ];
   final counts = {
-    for (final v in TaskView.values) v: base.where(v.matches).length,
+    for (final v in TaskView.values)
+      v: base.where((t) => v.matchesFor(t, role)).length,
   };
   final k = descending ? -1 : 1;
   int doneLast(TaskItem a, TaskItem b) =>
@@ -231,7 +246,10 @@ TaskQueryResult queryTasks(
       () => a.due.compareTo(b.due),
     ),
   };
-  final list = _stableSort(base.where(view.matches).toList(), cmp);
+  final list = _stableSort(
+    base.where((t) => view.matchesFor(t, role)).toList(),
+    cmp,
+  );
   final groups = <TaskGroup>[];
   if (sort.grouped) {
     String key(TaskItem t) =>

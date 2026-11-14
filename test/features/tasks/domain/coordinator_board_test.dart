@@ -145,15 +145,27 @@ void main() {
     test(
       'koordinatörde Atanmamış var, Tarih talebi yok; diğerlerinde tersi',
       () {
-        final k = taskViewsFor(coordinator: true);
-        final o = taskViewsFor(coordinator: false);
+        final k = taskViewsFor(role: EffectiveRole.coordinator);
+        final o = taskViewsFor(role: EffectiveRole.admin);
         expect(k, contains(TaskView.unassigned));
         expect(k, isNot(contains(TaskView.dateRequest)));
         expect(o, contains(TaskView.dateRequest));
         expect(o, isNot(contains(TaskView.unassigned)));
         expect(k.first, TaskView.all);
+        expect(taskViewsFor(role: null), o);
       },
     );
+    test('üyede İade ayrı; Tarih talebi ve Atanmamış yok', () {
+      expect(taskViewsFor(role: EffectiveRole.member), [
+        TaskView.all,
+        TaskView.late,
+        TaskView.returned,
+        TaskView.inProgress,
+        TaskView.review,
+        TaskView.notStarted,
+        TaskView.done,
+      ]);
+    });
     test('koordinatör varsayılanı duruma göre; seçilen ölçüt korunur', () {
       expect(
         resolveTaskSort(TaskSort.due, picked: false, coordinator: true),

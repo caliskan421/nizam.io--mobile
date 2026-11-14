@@ -155,7 +155,8 @@ void main() {
           priority: TaskPriority.medium,
           start: DateTime(2026, 11),
           due: DateTime(2026, 11),
-          assignees: const [],
+          // Sunucu üyeye yalnız kendine atananları döndürür; üye sayımı bu kümeden (F3).
+          assignees: const ['me'],
           lateness: TaskLateness(isOverdue: late, daysOverdue: late ? 3 : 0),
           overdueDays: late ? 3 : 0,
         );

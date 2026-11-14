@@ -286,8 +286,10 @@ class TasksListController extends _$TasksListController {
 @riverpod
 TaskQueryResult? tasksListResult(Ref ref, TaskView view, String people) {
   final catalog = ref.watch(taskListScopedCatalogProvider);
-  final coordinator = ref.watch(
-    effectiveAccessProvider.select((a) => a.isCoordinatorView),
+  final (coordinator, role) = ref.watch(
+    effectiveAccessProvider.select(
+      (a) => (a.isCoordinatorView, a.known ? a.role : null),
+    ),
   );
   final q = ref.watch(
     tasksListControllerProvider(
@@ -302,6 +304,7 @@ TaskQueryResult? tasksListResult(Ref ref, TaskView view, String people) {
     sort: resolveTaskSort(q.$2, picked: q.$3, coordinator: coordinator),
     descending: q.$4,
     filter: q.$5,
+    role: role,
   );
 }
 

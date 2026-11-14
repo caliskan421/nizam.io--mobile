@@ -112,7 +112,8 @@ void main() {
       (true, null, true),
     );
     final g = inbox.chats.last;
-    expect((g.name, g.group, g.general), ('Genel', true, true));
+    expect((g.name, g.group, g.general, g.auto), ('Genel', true, true, true));
+    expect((c1.auto, c1.autoDepartmentId), (false, null));
   });
 
   test('geçmiş: imleç parametreleri ve mesaj eşlemesi', () async {

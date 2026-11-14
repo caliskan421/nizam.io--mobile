@@ -195,9 +195,18 @@ final class Chat {
     this.peerLastSeen,
     this.source = ChatSource.none,
     this.sourceDepartmentId,
+    this.auto = false,
+    this.autoDepartmentId,
   });
 
   final String id;
+
+  /// Kendiliğinden kurulan grup (`auto_kind` dolu: Genel ya da koordinatörlük grubu). Silinemez,
+  /// kaynağı değiştirilemez/kapatılamaz (409 `messaging.auto_group_protected`).
+  final bool auto;
+
+  /// Koordinatörlük grubunun departmanı (`auto_department_id`; "Mesaj" eylemi bununla eşlenir).
+  final String? autoDepartmentId;
 
   /// Grup adı ya da birebirde karşı tarafın adı.
   final String name;
@@ -230,6 +239,9 @@ final class Chat {
   bool get canManage =>
       group && (role == ChatMemberRole.admin || role == ChatMemberRole.founder);
 
+  /// Grubu silme: yönetici/kurucu ve kendiliğinden kurulmamış grup.
+  bool get canDelete => canManage && !auto;
+
   /// Sabitleme: birebirde iki taraf, grupta yönetici ya da kurucu (M-12).
   bool get canPin => !group || canManage;
 
@@ -249,6 +261,8 @@ final class Chat {
     peerLastSeen: peerLastSeen,
     source: source,
     sourceDepartmentId: sourceDepartmentId,
+    auto: auto,
+    autoDepartmentId: autoDepartmentId,
   );
 }
 
@@ -263,6 +277,10 @@ final class ChatInbox {
   final bool truncated;
 
   Chat? chat(String id) => chats.where((c) => c.id == id).firstOrNull;
+
+  /// [departmentId] koordinatörlüğünün kendiliğinden kurulan grubu (yoksa null).
+  Chat? departmentGroup(String departmentId) =>
+      chats.where((c) => c.autoDepartmentId == departmentId).firstOrNull;
 
   int get unreadChats => chats.where((c) => c.isUnread).length;
 

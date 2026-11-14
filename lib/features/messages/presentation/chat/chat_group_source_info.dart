@@ -115,7 +115,15 @@ class _ChatGroupSourceInfoState extends ConsumerState<ChatGroupSourceInfo> {
               ? '${l.uiMessagesGroupsDepartment} · ${department?.name ?? l.uiMessagesGroupsDepartmentUnavailable}'
               : groupSourceLabel(context, chat.source),
         ),
-        if (chat.canModerate)
+        // Kendiliğinden kurulan grup korunur: kaynak değişmez/kapanmaz, nedeni yazılır.
+        if (chat.auto)
+          Text(
+            errorText(l, ApiError('messaging.auto_group_protected')),
+            style: context.text.caption.copyWith(
+              color: context.colors.textMuted,
+            ),
+          )
+        else if (chat.canModerate)
           Semantics(
             enabled: !_busy,
             child: IgnorePointer(

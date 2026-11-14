@@ -3,9 +3,9 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
-import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
+import '../../messages/messages.dart';
 import '../../tasks/tasks.dart';
 import '../domain/coordinatorship_overview.dart';
 import 'coord_parts.dart';
@@ -117,7 +117,8 @@ class CoordHero extends StatelessWidget {
                   NzButton.secondary(
                     label: l.uiCoordMessage,
                     icon: NzIcons.messages,
-                    onPressed: context.appNav.openMessages,
+                    // Koordinatörlüğün kendiliğinden kurulan grubu (yoksa kutu).
+                    onPressed: () => openDepartmentChat(context, d.stats.code),
                   ),
                 ],
               ),

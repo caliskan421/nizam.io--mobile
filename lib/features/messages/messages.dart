@@ -16,4 +16,5 @@ export 'application/messages_providers.dart'
 export 'domain/chat.dart' show ChatProgramUnread, ChatInbox, Chat;
 export 'presentation/chat_page.dart' show ChatPage;
 export 'presentation/messages_page.dart' show MessagesPage;
+export 'presentation/open_department_chat.dart' show openDepartmentChat;
 export 'presentation/open_person_chat.dart' show openPersonChat;

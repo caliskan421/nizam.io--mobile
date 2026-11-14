@@ -13,11 +13,13 @@ final ganttScheduleProvider = FutureProvider.autoDispose((ref) async {
   final scope = ref.watch(scopeStateProvider);
   final catalog = await ref.watch(taskCatalogControllerProvider.future);
   final program = scope.programId;
-  final access = catalog.access;
+  final view = catalog.viewIn(scope);
+  // Etkin görünüme izdüşürülmüş erişim: Üye görünümündeki koordinatör üye ucunu okur.
+  final access = view.viewAccess;
   if (program == null || access == null) {
     return GanttSchedule(tasks: const [], links: const []);
   }
-  if (access.companyAdmin) {
+  if (view.isAdminView) {
     return ref
         .watch(ganttRepositoryProvider((program: program, department: '')))
         .admin();

@@ -22,7 +22,9 @@ final serverCoordinatorshipStatsProvider = FutureProvider((ref) async {
   ref.watch(scopeStateProvider);
   final catalog = await ref.watch(taskCatalogControllerProvider.future);
   final local = coordinatorshipStats(catalog);
-  if (catalog.access?.companyAdmin != true) return PageSlice(items: local);
+  if (!catalog.viewIn(ref.read(scopeStateProvider)).canAdminister) {
+    return PageSlice(items: local);
+  }
   final result = await ref.read(coordinatorshipStatsRepositoryProvider).load();
   return PageSlice(
     truncated: result.truncated,

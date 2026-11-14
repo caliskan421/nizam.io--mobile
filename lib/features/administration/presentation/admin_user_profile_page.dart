@@ -196,7 +196,8 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
     final catalog = catalogState.value;
     final scope = ref.watch(scopeStateProvider);
     final allowed =
-        catalog?.access?.companyAdmin == true && !catalogState.hasError;
+        ref.watch(effectiveAccessProvider).canAdminister &&
+        !catalogState.hasError;
     final AsyncValue<KnownUser?> displayed = !allowed
         ? catalogState.isLoading
               ? const AsyncLoading()

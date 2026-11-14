@@ -62,13 +62,12 @@ final class CoordinatorshipFormState {
   final bool frozen;
 }
 
-/// Şirket yöneticisi mi: koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
+/// Yönetici görünümü mü ([EffectiveAccess.canAdminister]): koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
 /// (`createDepartment`, `updateDepartment`, `linkDepartment`, `renameDepartmentLink` yalnız
 /// şirket yöneticisine açık). Gizleme güvenlik değildir; sunucu her istekte denetler.
 @riverpod
 bool canManageCoordinatorships(Ref ref) =>
-    ref.watch(taskCatalogControllerProvider).value?.access?.companyAdmin ??
-    false;
+    ref.watch(effectiveAccessProvider).canAdminister;
 
 /// Uçuştaki işlemin sahibi (yerel nesil, oturum nesli, program).
 typedef _Owner = ({int epoch, int session, String program, String? department});

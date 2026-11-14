@@ -28,7 +28,9 @@ class AdminUserAccountOperations extends ConsumerWidget {
     final catalog = ref.watch(taskCatalogControllerProvider);
     final access = catalog.value?.access;
     final admin =
-        !catalog.hasError && !catalog.isLoading && access?.companyAdmin == true;
+        !catalog.hasError &&
+        !catalog.isLoading &&
+        ref.watch(effectiveAccessProvider).canAdminister;
     final self = access?.accountId == user.accountId;
     final busy = ref.watch(adminCommandProvider);
     bool sameOwner(int session, String? program, String? department) {

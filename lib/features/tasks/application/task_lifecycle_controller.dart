@@ -7,6 +7,7 @@ import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
 import '../domain/work_item.dart';
 import '../domain/work_item_repository.dart';
+import 'effective_access.dart';
 import 'task_catalog_controller.dart';
 import 'task_details_controller.dart';
 
@@ -39,7 +40,7 @@ class DeletedTasksController extends AsyncNotifier<PageSlice<DeletedTask>> {
     ref.watch(sessionGenerationProvider);
     ref.watch(scopeStateProvider);
     final catalog = await ref.watch(taskCatalogControllerProvider.future);
-    if (catalog.access?.companyAdmin != true) {
+    if (!catalog.viewIn(ref.read(scopeStateProvider)).canAdminister) {
       throw ApiError('work.not_authorized');
     }
     return ref.watch(deletedTasksRepositoryProvider).list();

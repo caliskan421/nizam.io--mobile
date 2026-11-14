@@ -14,9 +14,7 @@ class ActivityLogCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final admin =
-        ref.watch(taskCatalogControllerProvider).value?.access?.companyAdmin ??
-        false;
+    final admin = ref.watch(effectiveAccessProvider).canAdminister;
     if (!admin) return const SizedBox.shrink();
     return NzCard.outlined(
       onTap: context.appNav.openHistory,

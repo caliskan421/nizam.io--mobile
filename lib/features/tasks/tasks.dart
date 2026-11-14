@@ -2,6 +2,12 @@
 /// import eder (sınır kuralı B3).
 library;
 
+export 'application/effective_access.dart'
+    show
+        EffectiveAccess,
+        TaskCatalogPermissions,
+        TaskCatalogView,
+        effectiveAccessProvider;
 export 'application/meeting_form_controller.dart' show MeetingSeed;
 export 'application/task_catalog_controller.dart'
     show

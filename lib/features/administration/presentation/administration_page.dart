@@ -85,12 +85,7 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
         builder: (context, ref, _) {
           if (scope != ref.watch(scopeStateProvider) ||
               session != ref.watch(sessionGenerationProvider) ||
-              ref
-                      .watch(taskCatalogControllerProvider)
-                      .value
-                      ?.access
-                      ?.companyAdmin !=
-                  true) {
+              !ref.watch(effectiveAccessProvider).canAdminister) {
             return const SizedBox.shrink();
           }
           return AbsorbPointer(
@@ -136,7 +131,7 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
     final catalogState = ref.watch(taskCatalogControllerProvider);
     final catalog = catalogState.value;
     final allowed =
-        catalog?.access?.companyAdmin == true &&
+        ref.watch(effectiveAccessProvider).canAdminister &&
         !catalogState.isReloading &&
         !catalogState.hasError;
     final busy = ref.watch(adminCommandProvider);

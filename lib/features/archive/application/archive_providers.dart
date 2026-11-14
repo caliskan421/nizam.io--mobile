@@ -1,4 +1,3 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
@@ -15,23 +14,21 @@ ArchiveRepository archiveRepository(Ref ref) => throw UnimplementedError(
   'archiveRepositoryProvider bileşim kökünde (lib/app/di) bağlanır',
 );
 
-/// Arşiv isteklerinin kapsamı: rol görev kataloğunun erişim bilgisinden (`/v1/me` +
-/// `/v1/me/departments`) okunur. Departman: programdaki ilk koordinatörlük, yoksa ilk ekip
-/// satırı; ekip satırı olmayan yöneticide programın ilk departmanı. Hiçbiri yoksa
-/// `client.scope_missing` (istek gönderilmez). Katalog yalnız bu iki değer değişince yeniden
-/// hesaplatır (görev yazmaları arşivi yeniden okutmaz).
+/// Arşiv isteklerinin kapsamı: etkin görünümden (`effectiveAccessProvider`; rol ve
+/// koordinatörlük seçimi, yoksa varsayılanı). Departman: Koordinatör/Üye görünümünde seçili
+/// koordinatörlük; yönetici görünümünde (tüm koordinatörlükler) programın ilk departmanı. Hiçbiri
+/// yoksa `client.scope_missing` (istek gönderilmez). Yalnız bu iki değer değişince yeniden
+/// hesaplanır (görev yazmaları arşivi yeniden okutmaz).
 @Riverpod(keepAlive: true)
 Future<ArchiveScope> archiveScope(Ref ref) async {
-  final program = ref.watch(scopeStateProvider.select((s) => s.programId));
+  final scope = ref.watch(scopeStateProvider);
   final pick = await ref.watch(
     taskCatalogControllerProvider.selectAsync((c) {
-      final access = c.access;
-      final admin = access?.companyAdmin ?? false;
-      final seat = program == null
-          ? null
-          : access?.primaryDepartmentIn(program);
+      final view = c.viewIn(scope);
+      final admin = view.isAdminView;
       return (
-        department: seat ?? (admin ? c.departments.firstOrNull?.id : null),
+        department:
+            view.departmentId ?? (admin ? c.departments.firstOrNull?.id : null),
         admin: admin,
       );
     }),

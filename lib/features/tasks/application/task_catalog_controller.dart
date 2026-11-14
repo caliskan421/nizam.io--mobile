@@ -10,6 +10,7 @@ import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
+import 'effective_access.dart';
 import 'tasks_providers.dart';
 
 part 'task_catalog_controller.g.dart';
@@ -31,7 +32,7 @@ part 'task_catalog_owner.dart';
 class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
   /// Son başarılı okumadan beri geçen süre (aynı sahipte yeniden kurulumlarda korunur).
   var _clock = StaleClock();
-  final _ownership = CacheOwnership();
+  final _ownership = CacheOwnership.programWide();
   CacheOwner? _owner;
 
   @override
@@ -213,14 +214,15 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
 }
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı): yönetici ya da programda en az bir
+/// kapısı; etkin görünüme izdüşürülmüş erişimle): yönetici ya da programda en az bir
 /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
 /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 @riverpod
 bool canCreateTask(Ref ref) {
   final catalog = ref.watch(taskCatalogControllerProvider).value;
   if (catalog == null) return false;
-  final access = catalog.access;
-  final program = ref.watch(scopeStateProvider).programId;
+  final scope = ref.watch(scopeStateProvider);
+  final access = EffectiveAccess.of(catalog.access, scope).viewAccess;
+  final program = scope.programId;
   return access != null && program != null && access.canCreateAnyIn(program);
 }

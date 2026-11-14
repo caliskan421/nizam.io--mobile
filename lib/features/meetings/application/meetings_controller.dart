@@ -93,7 +93,7 @@ class MeetingsBoardController extends _$MeetingsBoardController {
     final since = _generation;
     final repo = ref.read(meetingsRepositoryProvider);
     final catalog = await ref.read(taskCatalogControllerProvider.future);
-    final admin = catalog.access?.companyAdmin ?? false;
+    final admin = catalog.viewIn(ref.read(scopeStateProvider)).canAdminister;
     final (visible, truncated) = await _all(repo.listMeetings);
     final deleted = admin
         ? (await _all(repo.adminListDeletedMeetings)).$1

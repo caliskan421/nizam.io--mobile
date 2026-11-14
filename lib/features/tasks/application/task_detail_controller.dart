@@ -13,6 +13,7 @@ import '../domain/pending_subtask.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
 import '../domain/task_writes.dart';
+import 'effective_access.dart';
 import 'task_catalog_controller.dart';
 import 'task_details_controller.dart';
 import 'tasks_providers.dart';
@@ -93,15 +94,11 @@ class TaskDetailController extends _$TaskDetailController
   @override
   TaskWriteRepository get _writes => ref.read(taskWriteRepositoryProvider);
 
-  /// Görevdeki işlem bazlı yetkiler (sunum düğme görünürlüğünü buradan okur). Görev ya da
-  /// erişim bilinmiyorsa hiçbir eylem açık değil.
+  /// Görevdeki işlem bazlı yetkiler (sunum düğme görünürlüğünü buradan okur; etkin görünümle).
+  /// Görev ya da erişim bilinmiyorsa hiçbir eylem açık değil.
   @override
-  TaskPermissions get permissions {
-    final t = _task;
-    return t == null
-        ? const TaskPermissions.none()
-        : TaskPermissions.of(_catalog?.access, t);
-  }
+  TaskPermissions get permissions =>
+      _catalog.permissionsIn(ref.read(scopeStateProvider), _task);
 
   void selectTab(TaskDetailTab t) => state = state.copyWith(tab: t);
 

@@ -11,7 +11,8 @@ import '../../../core/ui/widgets/lists/lists.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../../tasks/tasks.dart' show taskCatalogControllerProvider;
+import '../../tasks/tasks.dart'
+    show effectiveAccessProvider, taskCatalogControllerProvider;
 import '../application/coordinatorship_detail_controller.dart';
 import '../domain/coordinatorship_board.dart';
 import 'coord_add_member_sheet.dart';
@@ -93,9 +94,7 @@ Future<void> showCoordPersonSheet(
 ) async {
   final l = context.l10n;
   final nav = context.appNav;
-  final admin =
-      ref.read(taskCatalogControllerProvider).value?.access?.companyAdmin ??
-      false;
+  final admin = ref.read(effectiveAccessProvider).canAdminister;
   if (admin) {
     nav.openUser(p.id);
     return;

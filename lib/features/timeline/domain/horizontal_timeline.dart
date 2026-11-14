@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 
 import '../../tasks/tasks.dart';
 import 'timeline.dart';
+import 'timeline_rules.dart';
 
 /// Yatay çizelgenin ölçeği: [week] günlük, [month] haftalık, [monthly] aylık. Gün
 /// başına piksel görünüm geometrisidir (presentation).
@@ -384,6 +385,7 @@ GanttView buildGanttView(
   GanttState s, {
   Set<String> dependent = const {},
   DayRange? Function(String code)? rangeOf,
+  bool byStatus = false,
 }) {
   final year = catalog.today.year;
   final today = seasonDay(catalog.today, year);
@@ -431,10 +433,25 @@ GanttView buildGanttView(
   final coords = catalog.coordinatorships;
   final numbers = taskNumbers(catalog.tasks);
   final rows = <GanttRow>[];
-  for (final c in coords) {
+  // Kilitli görünüm ([byStatus]: tek koordinatörlük) durum grupları: açık, tamamlanan.
+  final groups = byStatus
+      ? [
+          for (final code in [timelineOpenGroup, timelineDoneGroup])
+            CoordinatorshipRef(
+              code: code,
+              name: code,
+              leads: const [],
+              members: const [],
+            ),
+        ]
+      : coords;
+  bool inGroup(GanttTask t, String code) => byStatus
+      ? (t.status == TaskStatus.done) == (code == timelineDoneGroup)
+      : t.item.coordinatorship == code;
+  for (final c in groups) {
     final indexed = [
       for (final (i, t) in visible.indexed)
-        if (t.item.coordinatorship == c.code) (i, t),
+        if (inGroup(t, c.code)) (i, t),
     ];
     if (indexed.isEmpty) continue;
     // JS `sort` kararlıdır; eşit başlangıçta katalog sırası korunur.
@@ -462,7 +479,9 @@ GanttView buildGanttView(
           GanttTaskRow(
             task: t,
             selected: s.selected == t.code,
-            label: c.label,
+            label:
+                catalog.coordinatorship(t.item.coordinatorship)?.label ??
+                c.label,
             number: numbers[t.code]!,
           ),
         );

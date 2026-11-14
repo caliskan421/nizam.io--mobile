@@ -3426,6 +3426,32 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsAgendaEdit => 'Maddeyi düzenle';
 
   @override
+  String get uiMeetingsScopeUpcoming => 'yaklaşan';
+
+  @override
+  String get uiMeetingsScopePast => 'geçmiş';
+
+  @override
+  String get uiMeetingsScopeCoordNote =>
+      'koordinatör olarak birimlerinin dahil olduğu toplantıları görüyorsun';
+
+  @override
+  String get uiMeetingsScopeMemberNote =>
+      'üye olarak birimlerinin dahil olduğu toplantıları görüyorsun';
+
+  @override
+  String get uiMeetingsUnitLabel => 'Birim';
+
+  @override
+  String get uiMeetingsUnitAll => 'Tümü';
+
+  @override
+  String get uiMeetingsInstant => 'Anlık toplantı';
+
+  @override
+  String get uiMeetingsInstantTitle => 'Anlık toplantı';
+
+  @override
   String get uiMessagesTitle => 'Mesajlar';
 
   @override
@@ -6236,6 +6262,67 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTimelineGanttOpenTask => 'Görev ayrıntısını aç';
+
+  @override
+  String get uiTimelineTabsLabel => 'Görev kümesi';
+
+  @override
+  String get uiTimelineTabDepartment => 'Koordinatörlüğün görevleri';
+
+  @override
+  String get uiTimelineTabMine => 'Görevlerim';
+
+  @override
+  String get uiTimelineMyTitle => 'Zaman çizelgem';
+
+  @override
+  String get uiTimelineGroupOpen => 'Açık görevler';
+
+  @override
+  String get uiTimelineGroupDone => 'Tamamlanan';
+
+  @override
+  String get uiTimelineRuleDirect =>
+      'Bitişi en çok 7 gün ileri alırsın; hemen uygulanır, sorumlu üyeye bildirim gider.';
+
+  @override
+  String get uiTimelineRuleRequest =>
+      '7 günü aşan ya da başlangıcı değiştiren her değişiklik yönetici onayına gider; karar gelene kadar eski tarih geçerlidir.';
+
+  @override
+  String get uiTimelineExtendSeven => 'Süre uzat +7';
+
+  @override
+  String get uiTimelineExtendGo => 'Süre uzat ·';
+
+  @override
+  String get uiTimelineExtendDone => 'Süre uzatıldı · sorumluya bildirim gitti';
+
+  @override
+  String get uiTimelinePullToday => 'Bitişi bugüne çek';
+
+  @override
+  String get uiTimelinePulled => 'Bitiş bugüne çekildi · plan saklandı';
+
+  @override
+  String get uiTimelineRequestGo => 'Tarih talebi gönder';
+
+  @override
+  String get uiTimelineReasonLabel => 'Talep gerekçesi';
+
+  @override
+  String get uiTimelineReasonHint =>
+      'Yönetici bu gerekçeyi görür; karar gelene kadar eski tarih geçerli.';
+
+  @override
+  String get uiTimelineReasonNeeded =>
+      'Talep için gerekçe yaz (en az 3 karakter)';
+
+  @override
+  String get uiTimelinePendingHead => 'Tarih talebi bekliyor · yeni bitiş';
+
+  @override
+  String get uiTimelinePendingTail => 'yöneticide bekliyor';
 
   @override
   String get uiUserAccountFieldsHeading => 'hesap bilgileri';

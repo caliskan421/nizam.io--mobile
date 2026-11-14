@@ -10,6 +10,7 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
+import '../../tasks/tasks.dart' show effectiveAccessProvider;
 import '../application/tables_controller.dart';
 import '../domain/table_document.dart';
 import 'table_navigation_sheets.dart';
@@ -425,7 +426,13 @@ class TablesPage extends ConsumerWidget {
     final l = context.l10n;
     var name = '';
     final initial = ref.read(tablesControllerProvider);
-    var area = initial.unit == null ? TableArea.personal : TableArea.coord;
+    // Koordinatörlük tablosu (tablo projesi, `POST /v1/table-projects`) yönetici ve koordinatör
+    // yüzüdür; üye görünümünde yalnız kişisel tablo açılır. Erişim bilinmiyorsa kısıt yok.
+    final access = ref.read(effectiveAccessProvider);
+    final canProject = access.canCreateTask || !access.known;
+    var area = initial.unit == null || !canProject
+        ? TableArea.personal
+        : TableArea.coord;
     var template = initialTemplate;
     var share = false;
     var shareAccess = TableAccess.edit;
@@ -493,7 +500,10 @@ class TablesPage extends ConsumerWidget {
               label: l.uiTablesDestination,
               value: area,
               items: [
-                for (final a in [TableArea.personal, TableArea.coord])
+                for (final a in [
+                  TableArea.personal,
+                  if (canProject) TableArea.coord,
+                ])
                   NzSelectItem(value: a, label: l.tableArea(a)),
               ],
               onChanged: (v) {

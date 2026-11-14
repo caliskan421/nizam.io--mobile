@@ -2,17 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers.dart';
-import '../../../../core/telemetry/report_source.dart';
-import '../../../../core/telemetry/unexpected_error.dart';
-import '../../../../core/ui/extensions/context_ext.dart';
-import '../../../../core/ui/widgets/feedback/nz_toast.dart';
-import '../../../tasks/tasks.dart';
 import '../../application/gantt_provider.dart';
 import '../../application/timeline_controller.dart';
 import '../../domain/horizontal_timeline.dart';
 import '../../domain/timeline.dart';
-import '../timeline_texts.dart';
-import '../widgets/timeline_selection_card.dart';
+import '../widgets/timeline_selection_host.dart';
 
 /// Tablet çizelgesinin yalnız seçili görev yüzü. Çizelgenin süzgeç/ölçek durumuna
 /// dokunmadan telefonla aynı tarih taslağı ve sunucu komutlarını kullanır.
@@ -46,7 +40,6 @@ typedef _SelectionOwner = ({
 
 class _GanttSelectionCardState extends ConsumerState<GanttSelectionCard> {
   static const _scope = timelineAllCoordinatorships;
-  bool _busy = false;
   bool _needsSelection = true;
   int _operation = 0;
 
@@ -65,7 +58,6 @@ class _GanttSelectionCardState extends ConsumerState<GanttSelectionCard> {
 
   void _resync() {
     _operation++;
-    _busy = false;
     _needsSelection = true;
     _selectAfterFrame();
   }
@@ -143,44 +135,6 @@ class _GanttSelectionCardState extends ConsumerState<GanttSelectionCard> {
     start ? ctrl.setDraftStart(picked) : ctrl.setDraftEnd(picked);
   }
 
-  Future<void> _save() async {
-    if (_busy) return;
-    final owner = _owner();
-    setState(() => _busy = true);
-    try {
-      final saved = await _ctrl.save();
-      if (saved && _current(owner)) {
-        widget.onClose();
-      }
-    } on Object catch (e, st) {
-      final api = toReportedApiError(e, st, source: ReportSource.timeline);
-      if (mounted && _current(owner)) NzToast.error(context, api);
-    } finally {
-      if (_current(owner)) setState(() => _busy = false);
-    }
-  }
-
-  Future<void> _request() async {
-    if (_busy) return;
-    final owner = _owner();
-    setState(() => _busy = true);
-    try {
-      final result = await _ctrl.requestDates();
-      if (!mounted || !_current(owner)) return;
-      final l = context.l10n;
-      NzToast.show(context, switch (result) {
-        TimelineRequestPending() => l.uiTimelineRequestPending,
-        TimelineRequestNoChange() => l.uiTimelineRequestNoChange,
-        TimelineRequestSent(:final end) => l.requestSentText(end),
-      });
-    } on Object catch (e, st) {
-      final api = toReportedApiError(e, st, source: ReportSource.timeline);
-      if (mounted && _current(owner)) NzToast.error(context, api);
-    } finally {
-      if (_current(owner)) setState(() => _busy = false);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.listen(sessionGenerationProvider, (_, _) => _resync());
@@ -201,31 +155,17 @@ class _GanttSelectionCardState extends ConsumerState<GanttSelectionCard> {
         view == null) {
       return const SizedBox.shrink();
     }
-    final catalog = ref.watch(timelineCatalogProvider).value;
-    final permissions = TaskPermissions.of(
-      catalog?.access,
-      selection.task.item,
-    );
-    return TimelineSelectionCard(
+    return TimelineSelectionHost(
+      scope: _scope,
       selection: selection,
       year: view.year,
       bottomInset: 0,
       maxHeight: MediaQuery.sizeOf(context).height * .8,
       onOpen: widget.onOpen,
       onClose: _close,
-      onNudgeStart: _ctrl.nudgeStart,
-      onNudgeEnd: _ctrl.nudgeEnd,
       onPickStart: () => _pick(view, start: true),
       onPickEnd: () => _pick(view, start: false),
-      onShift: _ctrl.shiftDraft,
-      onReset: _ctrl.resetDraft,
-      onSave: _save,
-      onRequest: _request,
-      onRemind: null,
-      canEditDates: permissions.canManageTask || permissions.canRequestDate,
-      canSave: permissions.canManageTask,
-      canRequest: permissions.canRequestDate,
-      busy: _busy,
+      onSaved: widget.onClose,
     );
   }
 }

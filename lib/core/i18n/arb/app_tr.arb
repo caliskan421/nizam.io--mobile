@@ -4309,6 +4309,38 @@
   "@uiMeetingsAgendaEdit": {
     "description": "ui.meetings.agenda_edit"
   },
+  "uiMeetingsScopeUpcoming": "yaklaşan",
+  "@uiMeetingsScopeUpcoming": {
+    "description": "ui.meetings.scope_upcoming"
+  },
+  "uiMeetingsScopePast": "geçmiş",
+  "@uiMeetingsScopePast": {
+    "description": "ui.meetings.scope_past"
+  },
+  "uiMeetingsScopeCoordNote": "koordinatör olarak birimlerinin dahil olduğu toplantıları görüyorsun",
+  "@uiMeetingsScopeCoordNote": {
+    "description": "ui.meetings.scope_coord_note"
+  },
+  "uiMeetingsScopeMemberNote": "üye olarak birimlerinin dahil olduğu toplantıları görüyorsun",
+  "@uiMeetingsScopeMemberNote": {
+    "description": "ui.meetings.scope_member_note"
+  },
+  "uiMeetingsUnitLabel": "Birim",
+  "@uiMeetingsUnitLabel": {
+    "description": "ui.meetings.unit_label"
+  },
+  "uiMeetingsUnitAll": "Tümü",
+  "@uiMeetingsUnitAll": {
+    "description": "ui.meetings.unit_all"
+  },
+  "uiMeetingsInstant": "Anlık toplantı",
+  "@uiMeetingsInstant": {
+    "description": "ui.meetings.instant"
+  },
+  "uiMeetingsInstantTitle": "Anlık toplantı",
+  "@uiMeetingsInstantTitle": {
+    "description": "ui.meetings.instant_title"
+  },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {
     "description": "ui.messages.title"
@@ -7924,6 +7956,82 @@
   "uiTimelineGanttOpenTask": "Görev ayrıntısını aç",
   "@uiTimelineGanttOpenTask": {
     "description": "ui.timeline.gantt_open_task"
+  },
+  "uiTimelineTabsLabel": "Görev kümesi",
+  "@uiTimelineTabsLabel": {
+    "description": "ui.timeline.tabs_label"
+  },
+  "uiTimelineTabDepartment": "Koordinatörlüğün görevleri",
+  "@uiTimelineTabDepartment": {
+    "description": "ui.timeline.tab_department"
+  },
+  "uiTimelineTabMine": "Görevlerim",
+  "@uiTimelineTabMine": {
+    "description": "ui.timeline.tab_mine"
+  },
+  "uiTimelineMyTitle": "Zaman çizelgem",
+  "@uiTimelineMyTitle": {
+    "description": "ui.timeline.my_title"
+  },
+  "uiTimelineGroupOpen": "Açık görevler",
+  "@uiTimelineGroupOpen": {
+    "description": "ui.timeline.group_open"
+  },
+  "uiTimelineGroupDone": "Tamamlanan",
+  "@uiTimelineGroupDone": {
+    "description": "ui.timeline.group_done"
+  },
+  "uiTimelineRuleDirect": "Bitişi en çok 7 gün ileri alırsın; hemen uygulanır, sorumlu üyeye bildirim gider.",
+  "@uiTimelineRuleDirect": {
+    "description": "ui.timeline.rule_direct"
+  },
+  "uiTimelineRuleRequest": "7 günü aşan ya da başlangıcı değiştiren her değişiklik yönetici onayına gider; karar gelene kadar eski tarih geçerlidir.",
+  "@uiTimelineRuleRequest": {
+    "description": "ui.timeline.rule_request"
+  },
+  "uiTimelineExtendSeven": "Süre uzat +7",
+  "@uiTimelineExtendSeven": {
+    "description": "ui.timeline.extend_seven"
+  },
+  "uiTimelineExtendGo": "Süre uzat ·",
+  "@uiTimelineExtendGo": {
+    "description": "ui.timeline.extend_go"
+  },
+  "uiTimelineExtendDone": "Süre uzatıldı · sorumluya bildirim gitti",
+  "@uiTimelineExtendDone": {
+    "description": "ui.timeline.extend_done"
+  },
+  "uiTimelinePullToday": "Bitişi bugüne çek",
+  "@uiTimelinePullToday": {
+    "description": "ui.timeline.pull_today"
+  },
+  "uiTimelinePulled": "Bitiş bugüne çekildi · plan saklandı",
+  "@uiTimelinePulled": {
+    "description": "ui.timeline.pulled"
+  },
+  "uiTimelineRequestGo": "Tarih talebi gönder",
+  "@uiTimelineRequestGo": {
+    "description": "ui.timeline.request_go"
+  },
+  "uiTimelineReasonLabel": "Talep gerekçesi",
+  "@uiTimelineReasonLabel": {
+    "description": "ui.timeline.reason_label"
+  },
+  "uiTimelineReasonHint": "Yönetici bu gerekçeyi görür; karar gelene kadar eski tarih geçerli.",
+  "@uiTimelineReasonHint": {
+    "description": "ui.timeline.reason_hint"
+  },
+  "uiTimelineReasonNeeded": "Talep için gerekçe yaz (en az 3 karakter)",
+  "@uiTimelineReasonNeeded": {
+    "description": "ui.timeline.reason_needed"
+  },
+  "uiTimelinePendingHead": "Tarih talebi bekliyor · yeni bitiş",
+  "@uiTimelinePendingHead": {
+    "description": "ui.timeline.pending_head"
+  },
+  "uiTimelinePendingTail": "yöneticide bekliyor",
+  "@uiTimelinePendingTail": {
+    "description": "ui.timeline.pending_tail"
   },
   "uiUserAccountFieldsHeading": "hesap bilgileri",
   "@uiUserAccountFieldsHeading": {

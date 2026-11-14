@@ -11,6 +11,7 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import '../../domain/timeline.dart';
 import '../timeline_texts.dart';
+import 'timeline_rule_panel.dart';
 import 'timeline_selection_dates.dart';
 import 'timeline_selection_subtasks.dart';
 
@@ -34,6 +35,9 @@ class TimelineSelectionCard extends StatelessWidget {
     required this.onRequest,
     required this.onRemind,
     required this.onReset,
+    required this.onExtendDraft,
+    this.onPull,
+    this.directRule = false,
     this.canEditDates = false,
     this.canSave = false,
     this.canRequest = false,
@@ -52,7 +56,18 @@ class TimelineSelectionCard extends StatelessWidget {
   final VoidCallback onPickEnd;
   final ValueChanged<int> onShift;
   final VoidCallback onSave;
-  final VoidCallback onRequest;
+
+  /// Tarih talebi; argüman gerekçe (koordinatör formunda zorunlu).
+  final ValueChanged<String> onRequest;
+
+  /// "Süre uzat +7": taslağı 7 gün ileri alır.
+  final VoidCallback onExtendDraft;
+
+  /// "Bitişi bugüne çek"; koşul yoksa null.
+  final VoidCallback? onPull;
+
+  /// 7 gün kuralı (Koordinatör görünümü; [TimelineRulePanel]).
+  final bool directRule;
   final VoidCallback? onRemind;
   final VoidCallback onReset;
   final bool canEditDates;
@@ -195,28 +210,17 @@ class TimelineSelectionCard extends StatelessWidget {
                   onPickEnd: onPickEnd,
                 ),
                 TimelineSelectionSubtasks(task: task.item),
-                const Gap(14),
-                Row(
-                  spacing: NizamioSpacing.space2,
-                  children: [
-                    Expanded(
-                      child: NzButton.secondary(
-                        label: l.uiTimelineSendRequest,
-                        expand: true,
-                        onPressed: canRequest && !busy ? onRequest : null,
-                      ),
-                    ),
-                    Expanded(
-                      child: NzButton.primary(
-                        label: l.uiTimelineSave,
-                        expand: true,
-                        loading: busy,
-                        onPressed: canSave && s.changed && !busy
-                            ? onSave
-                            : null,
-                      ),
-                    ),
-                  ],
+                TimelineRulePanel(
+                  selection: s,
+                  year: year,
+                  directRule: directRule,
+                  canSave: canSave,
+                  canRequest: canRequest,
+                  busy: busy,
+                  onSave: onSave,
+                  onRequest: onRequest,
+                  onExtendDraft: onExtendDraft,
+                  onPull: onPull,
                 ),
               ],
             ),

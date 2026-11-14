@@ -6,7 +6,10 @@ import 'package:gap/gap.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
+import '../../../tasks/tasks.dart' show TaskDependency;
 import '../../domain/timeline.dart';
+import '../../domain/timeline_rules.dart';
+import '../chart/timeline_links_painter.dart';
 import '../timeline_texts.dart';
 import 'mobile_timeline_layout.dart';
 import 'mobile_timeline_painters.dart';
@@ -24,6 +27,7 @@ class MobileTimelineChart extends StatefulWidget {
     required this.onBlankTap,
     required this.bottomInset,
     this.canDrag = false,
+    this.links = const [],
   });
   final TimelineView view;
   final ValueChanged<String> onSelect;
@@ -32,6 +36,9 @@ class MobileTimelineChart extends StatefulWidget {
   final VoidCallback onBlankTap;
   final double bottomInset;
   final bool canDrag;
+
+  /// Gantt bağımlılıkları; iki ucu da çizelgede olanlar ok olarak çizilir.
+  final List<TaskDependency> links;
   static const horizontalKey = ValueKey('mobile-timeline-scroll-x');
   static const verticalKey = ValueKey('mobile-timeline-scroll-y');
   static ValueKey<String> barKey(String code) =>
@@ -157,6 +164,20 @@ class _MobileTimelineChartState extends State<MobileTimelineChart> {
                                           box.maxHeight -
                                           MobileTimelineLayout.axisHeight,
                                       viewport: box.maxWidth,
+                                    ),
+                                  ),
+                                ),
+                                Positioned.fill(
+                                  child: IgnorePointer(
+                                    child: CustomPaint(
+                                      painter: TimelineLinksPainter(
+                                        links: timelineLinkEnds(
+                                          widget.links,
+                                          (code) => l.barOf(code)?.rect,
+                                        ),
+                                        color: context.colors.textMuted,
+                                        crossColor: context.colors.textFaint,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -315,7 +336,7 @@ class _GroupLabel extends StatelessWidget {
     return Semantics(
       button: true,
       expanded: open,
-      label: group.name,
+      label: context.l10n.groupTitle(group.code, group.name),
       onTap: onTap,
       excludeSemantics: true,
       child: Material(
@@ -336,16 +357,18 @@ class _GroupLabel extends StatelessWidget {
                   ),
                 ),
                 const Gap(6),
-                Text(
-                  coord?.label ?? group.code,
-                  style: context.text.monoSm.copyWith(
-                    color: context.colors.textFaint,
+                if (!isTimelineStatusGroup(group.code)) ...[
+                  Text(
+                    coord?.label ?? group.code,
+                    style: context.text.monoSm.copyWith(
+                      color: context.colors.textFaint,
+                    ),
                   ),
-                ),
-                const Gap(8),
+                  const Gap(8),
+                ],
                 Expanded(
                   child: Text(
-                    group.name,
+                    context.l10n.groupTitle(group.code, group.name),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: context.text.labelMd,

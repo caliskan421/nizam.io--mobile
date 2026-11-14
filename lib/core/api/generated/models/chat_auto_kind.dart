@@ -4,7 +4,7 @@
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-/// Kendiliğinden kurulan grubun türü; elle kurulan sohbette `null`.
+/// Kendiliğinden kurulan grubun türü; elle kurulan sohbette `null`. Kendiliğinden grup silinemez ve kaynağı değiştirilemez (409 `messaging.auto_group_protected`).
 @JsonEnum()
 enum ChatAutoKind {
   @JsonValue('department')

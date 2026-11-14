@@ -11,10 +11,16 @@ _MeetingList _$MeetingListFromJson(Map<String, dynamic> json) => _MeetingList(
       .map((e) => Meeting.fromJson(e as Map<String, dynamic>))
       .toList(),
   nextCursor: json['next_cursor'] as String,
+  total: (json['total'] as num?)?.toInt(),
+  tabCounts: json['tab_counts'] == null
+      ? null
+      : MeetingTabCounts.fromJson(json['tab_counts'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$MeetingListToJson(_MeetingList instance) =>
     <String, dynamic>{
       'items': instance.items.map((e) => e.toJson()).toList(),
       'next_cursor': instance.nextCursor,
+      'total': ?instance.total,
+      'tab_counts': ?instance.tabCounts?.toJson(),
     };

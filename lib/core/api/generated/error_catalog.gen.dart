@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.15.0-api (b8f6479a7971fa7056823acada47a7db4d9052de) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.19.0-api (7092e4f4a38eb9fd212de5cb65c5e7b277eacd16) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 
@@ -56,6 +56,21 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [500],
     fields: [],
     messageKey: 'errors.audit.entry_rejected',
+  ),
+  'audit.input_invalid': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['audit.input_invalid'],
+    messageKey: 'errors.audit.input_invalid',
+  ),
+  'audit.invalid_cursor': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['audit.invalid_cursor'],
+    messageKey: 'errors.audit.invalid_cursor',
+  ),
+  'audit.not_authorized': ErrorCatalogEntry(
+    statuses: [403],
+    fields: [],
+    messageKey: 'errors.audit.not_authorized',
   ),
   'collaboration.agenda_item_not_found': ErrorCatalogEntry(
     statuses: [404],
@@ -275,6 +290,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [503],
     fields: [],
     messageKey: 'errors.identity.unavailable',
+  ),
+  'messaging.auto_group_protected': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.messaging.auto_group_protected',
   ),
   'messaging.chat_deleted': ErrorCatalogEntry(
     statuses: [409],
@@ -844,6 +864,125 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     fields: [],
     messageKey: 'errors.storage.transient',
   ),
+  'tables.attachment_limit_reached': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.attachment_limit_reached',
+  ),
+  'tables.attachment_rejected': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['tables.attachment_rejected'],
+    messageKey: 'errors.tables.attachment_rejected',
+  ),
+  'tables.attachment_too_large': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['tables.attachment_too_large'],
+    messageKey: 'errors.tables.attachment_too_large',
+  ),
+  'tables.cell_conflict': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.cell_conflict',
+  ),
+  'tables.conversion_lossy': ErrorCatalogEntry(
+    statuses: [409],
+    fields: ['tables.conversion_lossy'],
+    messageKey: 'errors.tables.conversion_lossy',
+  ),
+  'tables.cursor_stale': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.cursor_stale',
+  ),
+  'tables.forbidden': ErrorCatalogEntry(
+    statuses: [403],
+    fields: [],
+    messageKey: 'errors.tables.forbidden',
+  ),
+  'tables.idempotency_key_reused': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.idempotency_key_reused',
+  ),
+  'tables.input_invalid': ErrorCatalogEntry(
+    statuses: [422],
+    fields: [
+      'tables.input_invalid',
+      'tables.request_key_invalid',
+      'tables.request_key_required',
+    ],
+    messageKey: 'errors.tables.input_invalid',
+  ),
+  'tables.limit_reached': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.limit_reached',
+  ),
+  'tables.not_found': ErrorCatalogEntry(
+    statuses: [404],
+    fields: [],
+    messageKey: 'errors.tables.not_found',
+  ),
+  'tables.presence_throttled': ErrorCatalogEntry(
+    statuses: [429],
+    fields: [],
+    messageKey: 'errors.tables.presence_throttled',
+  ),
+  'tables.proposal_decided': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.proposal_decided',
+  ),
+  'tables.proposal_pending': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.proposal_pending',
+  ),
+  'tables.proposal_stale': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.proposal_stale',
+  ),
+  'tables.query_too_broad': ErrorCatalogEntry(
+    statuses: [422],
+    fields: [],
+    messageKey: 'errors.tables.query_too_broad',
+  ),
+  'tables.reference_unavailable': ErrorCatalogEntry(
+    statuses: [422],
+    fields: [],
+    messageKey: 'errors.tables.reference_unavailable',
+  ),
+  'tables.replay_expired': ErrorCatalogEntry(
+    statuses: [409],
+    fields: ['tables.replay_expired'],
+    messageKey: 'errors.tables.replay_expired',
+  ),
+  'tables.schema_conflict': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.schema_conflict',
+  ),
+  'tables.source_changed': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.source_changed',
+  ),
+  'tables.stream_unavailable': ErrorCatalogEntry(
+    statuses: [503],
+    fields: [],
+    messageKey: 'errors.tables.stream_unavailable',
+  ),
+  'tables.undo_conflict': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.tables.undo_conflict',
+  ),
+  'tables.undo_expired': ErrorCatalogEntry(
+    statuses: [409],
+    fields: ['tables.undo_expired'],
+    messageKey: 'errors.tables.undo_expired',
+  ),
   'work.assignee_not_member': ErrorCatalogEntry(
     statuses: [422],
     fields: ['work.assignee_not_member'],
@@ -1011,6 +1150,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [422],
     fields: ['work.subtask_assignee_not_assigned'],
     messageKey: 'errors.work.subtask_assignee_not_assigned',
+  ),
+  'work.subtask_attachment_required': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['work.subtask_attachment_required'],
+    messageKey: 'errors.work.subtask_attachment_required',
   ),
   'work.subtask_limit_reached': ErrorCatalogEntry(
     statuses: [409],

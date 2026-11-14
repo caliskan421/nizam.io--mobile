@@ -17,7 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$ReviewRequest {
 
 /// `approved` ya da `rejected`.
- ReviewRequestDecision get decision;
+ ReviewRequestDecision get decision;/// İsteğe bağlı karar gerekçesi; kırpılır, en çok 500 karakter. Talep listelerinde `review_reason` olarak döner.
+ String? get reason;
 /// Create a copy of ReviewRequest
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +32,20 @@ $ReviewRequestCopyWith<ReviewRequest> get copyWith => _$ReviewRequestCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as ReviewRequest;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReviewRequest&&(identical(other.decision, _this.decision) || other.decision == _this.decision));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReviewRequest&&(identical(other.decision, _this.decision) || other.decision == _this.decision)&&(identical(other.reason, _this.reason) || other.reason == _this.reason));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ReviewRequest;
-  return Object.hash(runtimeType,_this.decision);
+  return Object.hash(runtimeType,_this.decision,_this.reason);
 }
 
 @override
 String toString() {
   final _this = this as ReviewRequest;
-  return 'ReviewRequest(decision: ${_this.decision})';
+  return 'ReviewRequest(decision: ${_this.decision}, reason: ${_this.reason})';
 }
 
 
@@ -55,7 +56,7 @@ abstract mixin class $ReviewRequestCopyWith<$Res>  {
   factory $ReviewRequestCopyWith(ReviewRequest value, $Res Function(ReviewRequest) _then) = _$ReviewRequestCopyWithImpl;
 @useResult
 $Res call({
- ReviewRequestDecision decision
+ ReviewRequestDecision decision, String? reason
 });
 
 
@@ -72,10 +73,11 @@ class _$ReviewRequestCopyWithImpl<$Res>
 
 /// Create a copy of ReviewRequest
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? decision = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? decision = null,Object? reason = freezed,}) {
   return _then(ReviewRequest(
 decision: null == decision ? _self.decision : decision // ignore: cast_nullable_to_non_nullable
-as ReviewRequestDecision,
+as ReviewRequestDecision,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -160,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ReviewRequestDecision decision)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ReviewRequestDecision decision,  String? reason)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReviewRequest() when $default != null:
-return $default(_that.decision);case _:
+return $default(_that.decision,_that.reason);case _:
   return orElse();
 
 }
@@ -181,10 +183,10 @@ return $default(_that.decision);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ReviewRequestDecision decision)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ReviewRequestDecision decision,  String? reason)  $default,) {final _that = this;
 switch (_that) {
 case _ReviewRequest():
-return $default(_that.decision);case _:
+return $default(_that.decision,_that.reason);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +203,10 @@ return $default(_that.decision);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ReviewRequestDecision decision)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ReviewRequestDecision decision,  String? reason)?  $default,) {final _that = this;
 switch (_that) {
 case _ReviewRequest() when $default != null:
-return $default(_that.decision);case _:
+return $default(_that.decision,_that.reason);case _:
   return null;
 
 }
@@ -216,11 +218,13 @@ return $default(_that.decision);case _:
 @JsonSerializable()
 
 class _ReviewRequest implements ReviewRequest {
-  const _ReviewRequest({required this.decision});
+  const _ReviewRequest({required this.decision, this.reason});
   factory _ReviewRequest.fromJson(Map<String, dynamic> json) => _$ReviewRequestFromJson(json);
 
 /// `approved` ya da `rejected`.
 @override final  ReviewRequestDecision decision;
+/// İsteğe bağlı karar gerekçesi; kırpılır, en çok 500 karakter. Talep listelerinde `review_reason` olarak döner.
+@override final  String? reason;
 
 /// Create a copy of ReviewRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -235,18 +239,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReviewRequest&&(identical(other.decision, decision) || other.decision == decision));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReviewRequest&&(identical(other.decision, decision) || other.decision == decision)&&(identical(other.reason, reason) || other.reason == reason));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,decision);
+    return Object.hash(runtimeType,decision,reason);
 }
 
 @override
 String toString() {
-    return 'ReviewRequest(decision: $decision)';
+    return 'ReviewRequest(decision: $decision, reason: $reason)';
 }
 
 
@@ -257,7 +261,7 @@ abstract mixin class _$ReviewRequestCopyWith<$Res> implements $ReviewRequestCopy
   factory _$ReviewRequestCopyWith(_ReviewRequest value, $Res Function(_ReviewRequest) _then) = __$ReviewRequestCopyWithImpl;
 @override @useResult
 $Res call({
- ReviewRequestDecision decision
+ ReviewRequestDecision decision, String? reason
 });
 
 
@@ -274,10 +278,11 @@ class __$ReviewRequestCopyWithImpl<$Res>
 
 /// Create a copy of ReviewRequest
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? decision = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? decision = null,Object? reason = freezed,}) {
   return _then(_ReviewRequest(
 decision: null == decision ? _self.decision : decision // ignore: cast_nullable_to_non_nullable
-as ReviewRequestDecision,
+as ReviewRequestDecision,reason: freezed == reason ? _self.reason : reason // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

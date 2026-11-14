@@ -23,7 +23,7 @@ abstract class Chat with _$Chat {
     required ChatSource source,
     @JsonKey(name: 'source_department_id') required String? sourceDepartmentId,
 
-    /// Kendiliğinden kurulan grubun türü; elle kurulan sohbette `null`.
+    /// Kendiliğinden kurulan grubun türü; elle kurulan sohbette `null`. Kendiliğinden grup silinemez ve kaynağı değiştirilemez (409 `messaging.auto_group_protected`).
     @JsonKey(name: 'auto_kind') required ChatAutoKind? autoKind,
     @JsonKey(name: 'created_by_account_id') required String? createdByAccountId,
     @JsonKey(name: 'counterpart_account_id')
@@ -32,6 +32,9 @@ abstract class Chat with _$Chat {
     @JsonKey(name: 'last_seq') required int lastSeq,
     @JsonKey(name: 'last_message_at') required DateTime? lastMessageAt,
     @JsonKey(name: 'created_at') required DateTime createdAt,
+
+    /// Koordinatörlük grubunun (`auto_kind=department`) departmanı; diğer sohbetlerde `null`. İstemci departmanın "Mesaj" eylemini bununla eşler.
+    @JsonKey(name: 'auto_department_id') String? autoDepartmentId,
 
     /// Çağıranın gruptaki rolü (birebirde `member`); sohbet listesinde yoktur.
     ChatRole? role,

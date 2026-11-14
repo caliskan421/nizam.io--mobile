@@ -154,6 +154,24 @@ abstract class AppLocalizations {
   /// **'İşlem kaydı yazılamadığı için istek tamamlanamadı.'**
   String get errAuditEntryRejected;
 
+  /// audit.input_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem geçmişi süzgeci geçersiz.'**
+  String get errAuditInputInvalid;
+
+  /// audit.invalid_cursor
+  ///
+  /// In tr, this message translates to:
+  /// **'Liste konumu geçersiz. Listeyi yenileyin.'**
+  String get errAuditInvalidCursor;
+
+  /// audit.not_authorized
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem geçmişini görmeye yetkiniz yok.'**
+  String get errAuditNotAuthorized;
+
   /// collaboration.agenda_item_not_found
   ///
   /// In tr, this message translates to:
@@ -465,6 +483,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Parola yeterince güçlü değil.'**
   String get errIdentityWeakPassword;
+
+  /// messaging.auto_group_protected
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu grup departmanla otomatik yönetilir; silinemez veya kapatılamaz.'**
+  String get errMessagingAutoGroupProtected;
 
   /// messaging.chat_deleted
   ///
@@ -1270,6 +1294,156 @@ abstract class AppLocalizations {
   /// **'Dosya deposuna geçici olarak erişilemiyor; yeniden deneyin.'**
   String get errStorageTransient;
 
+  /// tables.attachment_limit_reached
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hücreye daha fazla dosya eklenemez.'**
+  String get errTablesAttachmentLimitReached;
+
+  /// tables.attachment_rejected
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya kabul edilmedi.'**
+  String get errTablesAttachmentRejected;
+
+  /// tables.attachment_too_large
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya çok büyük.'**
+  String get errTablesAttachmentTooLarge;
+
+  /// tables.cell_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Hücre başka biri tarafından değiştirildi. Yenileyip yeniden deneyin.'**
+  String get errTablesCellConflict;
+
+  /// tables.conversion_lossy
+  ///
+  /// In tr, this message translates to:
+  /// **'Sütun türü değişirse bazı değerler kaybolur.'**
+  String get errTablesConversionLossy;
+
+  /// tables.cursor_stale
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo değişti. Listeyi yenileyin.'**
+  String get errTablesCursorStale;
+
+  /// tables.forbidden
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu tabloda bu işlem için yetkiniz yok.'**
+  String get errTablesForbidden;
+
+  /// tables.idempotency_key_reused
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.'**
+  String get errTablesIdempotencyKeyReused;
+
+  /// tables.input_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo bilgileri geçersiz.'**
+  String get errTablesInputInvalid;
+
+  /// tables.limit_reached
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo sınırına ulaşıldı.'**
+  String get errTablesLimitReached;
+
+  /// tables.not_found
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo bulunamadı.'**
+  String get errTablesNotFound;
+
+  /// tables.presence_throttled
+  ///
+  /// In tr, this message translates to:
+  /// **'Çok sık güncelleme gönderildi. Biraz bekleyin.'**
+  String get errTablesPresenceThrottled;
+
+  /// tables.proposal_decided
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu öneri zaten sonuçlandırılmış.'**
+  String get errTablesProposalDecided;
+
+  /// tables.proposal_pending
+  ///
+  /// In tr, this message translates to:
+  /// **'Bekleyen bir öneri var.'**
+  String get errTablesProposalPending;
+
+  /// tables.proposal_stale
+  ///
+  /// In tr, this message translates to:
+  /// **'Öneri güncelliğini yitirdi. Yenileyip yeniden deneyin.'**
+  String get errTablesProposalStale;
+
+  /// tables.query_too_broad
+  ///
+  /// In tr, this message translates to:
+  /// **'Sorgu çok geniş. Süzgeci daraltın.'**
+  String get errTablesQueryTooBroad;
+
+  /// tables.reference_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantılı kayıt artık kullanılamıyor.'**
+  String get errTablesReferenceUnavailable;
+
+  /// tables.replay_expired
+  ///
+  /// In tr, this message translates to:
+  /// **'Değişiklik geçmişi süresi doldu. Tabloyu yenileyin.'**
+  String get errTablesReplayExpired;
+
+  /// tables.request_key_invalid
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı geçersiz.'**
+  String get errTablesRequestKeyInvalid;
+
+  /// tables.request_key_required
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem anahtarı gerekli.'**
+  String get errTablesRequestKeyRequired;
+
+  /// tables.schema_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Tablo yapısı değişti. Yenileyip yeniden deneyin.'**
+  String get errTablesSchemaConflict;
+
+  /// tables.source_changed
+  ///
+  /// In tr, this message translates to:
+  /// **'Kaynak veri değişti. Yenileyip yeniden deneyin.'**
+  String get errTablesSourceChanged;
+
+  /// tables.stream_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Canlı güncelleme şu an kullanılamıyor.'**
+  String get errTablesStreamUnavailable;
+
+  /// tables.undo_conflict
+  ///
+  /// In tr, this message translates to:
+  /// **'Değişiklik geri alınamadı; tablo sonradan değişmiş.'**
+  String get errTablesUndoConflict;
+
+  /// tables.undo_expired
+  ///
+  /// In tr, this message translates to:
+  /// **'Geri alma süresi doldu.'**
+  String get errTablesUndoExpired;
+
   /// work.assignee_not_member
   ///
   /// In tr, this message translates to:
@@ -1527,6 +1701,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Alt görevin sorumlusu görevin atanmış kişilerinden biri olmalı.'**
   String get errWorkSubtaskAssigneeNotAssigned;
+
+  /// work.subtask_attachment_required
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu alt görev kanıt dosyası olmadan kapatılamaz.'**
+  String get errWorkSubtaskAttachmentRequired;
 
   /// work.subtask_limit_reached
   ///

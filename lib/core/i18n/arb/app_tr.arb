@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.15.0-api (b8f6479a7971fa7056823acada47a7db4d9052de); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
+  "@@x-generated": "BU DOSYA ÜRETİLMİŞTİR (make gen). Sunucu kodları: caliskan421/nizam.io--frontend commit a8e79dd1ae07e19a32d81b69a5cea60546d61039 src/shared/i18n/tr/errors.ts (katalog: nizam.io--backend etiket v0.19.0-api (7092e4f4a38eb9fd212de5cb65c5e7b277eacd16); eksikler i18n/server_errors_ek.tr.json); istemci kodları: i18n/client_errors.tr.json; UI metinleri: i18n/ui/*.tr.json",
   "errAssistantBusy": "Asistan şu anda meşgul; biraz sonra yeniden deneyin.",
   "@errAssistantBusy": {
     "description": "assistant.busy"
@@ -40,6 +40,18 @@
   "errAuditEntryRejected": "İşlem kaydı yazılamadığı için istek tamamlanamadı.",
   "@errAuditEntryRejected": {
     "description": "audit.entry_rejected"
+  },
+  "errAuditInputInvalid": "İşlem geçmişi süzgeci geçersiz.",
+  "@errAuditInputInvalid": {
+    "description": "audit.input_invalid"
+  },
+  "errAuditInvalidCursor": "Liste konumu geçersiz. Listeyi yenileyin.",
+  "@errAuditInvalidCursor": {
+    "description": "audit.invalid_cursor"
+  },
+  "errAuditNotAuthorized": "İşlem geçmişini görmeye yetkiniz yok.",
+  "@errAuditNotAuthorized": {
+    "description": "audit.not_authorized"
   },
   "errCollaborationAgendaItemNotFound": "Gündem maddesi bulunamadı.",
   "@errCollaborationAgendaItemNotFound": {
@@ -248,6 +260,10 @@
   "errIdentityWeakPassword": "Parola yeterince güçlü değil.",
   "@errIdentityWeakPassword": {
     "description": "identity.weak_password"
+  },
+  "errMessagingAutoGroupProtected": "Bu grup departmanla otomatik yönetilir; silinemez veya kapatılamaz.",
+  "@errMessagingAutoGroupProtected": {
+    "description": "messaging.auto_group_protected"
   },
   "errMessagingChatDeleted": "Sohbet silinmiş; işlem yapılamaz.",
   "@errMessagingChatDeleted": {
@@ -785,6 +801,106 @@
   "@errStorageTransient": {
     "description": "storage.transient"
   },
+  "errTablesAttachmentLimitReached": "Bu hücreye daha fazla dosya eklenemez.",
+  "@errTablesAttachmentLimitReached": {
+    "description": "tables.attachment_limit_reached"
+  },
+  "errTablesAttachmentRejected": "Dosya kabul edilmedi.",
+  "@errTablesAttachmentRejected": {
+    "description": "tables.attachment_rejected"
+  },
+  "errTablesAttachmentTooLarge": "Dosya çok büyük.",
+  "@errTablesAttachmentTooLarge": {
+    "description": "tables.attachment_too_large"
+  },
+  "errTablesCellConflict": "Hücre başka biri tarafından değiştirildi. Yenileyip yeniden deneyin.",
+  "@errTablesCellConflict": {
+    "description": "tables.cell_conflict"
+  },
+  "errTablesConversionLossy": "Sütun türü değişirse bazı değerler kaybolur.",
+  "@errTablesConversionLossy": {
+    "description": "tables.conversion_lossy"
+  },
+  "errTablesCursorStale": "Tablo değişti. Listeyi yenileyin.",
+  "@errTablesCursorStale": {
+    "description": "tables.cursor_stale"
+  },
+  "errTablesForbidden": "Bu tabloda bu işlem için yetkiniz yok.",
+  "@errTablesForbidden": {
+    "description": "tables.forbidden"
+  },
+  "errTablesIdempotencyKeyReused": "Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.",
+  "@errTablesIdempotencyKeyReused": {
+    "description": "tables.idempotency_key_reused"
+  },
+  "errTablesInputInvalid": "Tablo bilgileri geçersiz.",
+  "@errTablesInputInvalid": {
+    "description": "tables.input_invalid"
+  },
+  "errTablesLimitReached": "Tablo sınırına ulaşıldı.",
+  "@errTablesLimitReached": {
+    "description": "tables.limit_reached"
+  },
+  "errTablesNotFound": "Tablo bulunamadı.",
+  "@errTablesNotFound": {
+    "description": "tables.not_found"
+  },
+  "errTablesPresenceThrottled": "Çok sık güncelleme gönderildi. Biraz bekleyin.",
+  "@errTablesPresenceThrottled": {
+    "description": "tables.presence_throttled"
+  },
+  "errTablesProposalDecided": "Bu öneri zaten sonuçlandırılmış.",
+  "@errTablesProposalDecided": {
+    "description": "tables.proposal_decided"
+  },
+  "errTablesProposalPending": "Bekleyen bir öneri var.",
+  "@errTablesProposalPending": {
+    "description": "tables.proposal_pending"
+  },
+  "errTablesProposalStale": "Öneri güncelliğini yitirdi. Yenileyip yeniden deneyin.",
+  "@errTablesProposalStale": {
+    "description": "tables.proposal_stale"
+  },
+  "errTablesQueryTooBroad": "Sorgu çok geniş. Süzgeci daraltın.",
+  "@errTablesQueryTooBroad": {
+    "description": "tables.query_too_broad"
+  },
+  "errTablesReferenceUnavailable": "Bağlantılı kayıt artık kullanılamıyor.",
+  "@errTablesReferenceUnavailable": {
+    "description": "tables.reference_unavailable"
+  },
+  "errTablesReplayExpired": "Değişiklik geçmişi süresi doldu. Tabloyu yenileyin.",
+  "@errTablesReplayExpired": {
+    "description": "tables.replay_expired"
+  },
+  "errTablesRequestKeyInvalid": "İşlem anahtarı geçersiz.",
+  "@errTablesRequestKeyInvalid": {
+    "description": "tables.request_key_invalid"
+  },
+  "errTablesRequestKeyRequired": "İşlem anahtarı gerekli.",
+  "@errTablesRequestKeyRequired": {
+    "description": "tables.request_key_required"
+  },
+  "errTablesSchemaConflict": "Tablo yapısı değişti. Yenileyip yeniden deneyin.",
+  "@errTablesSchemaConflict": {
+    "description": "tables.schema_conflict"
+  },
+  "errTablesSourceChanged": "Kaynak veri değişti. Yenileyip yeniden deneyin.",
+  "@errTablesSourceChanged": {
+    "description": "tables.source_changed"
+  },
+  "errTablesStreamUnavailable": "Canlı güncelleme şu an kullanılamıyor.",
+  "@errTablesStreamUnavailable": {
+    "description": "tables.stream_unavailable"
+  },
+  "errTablesUndoConflict": "Değişiklik geri alınamadı; tablo sonradan değişmiş.",
+  "@errTablesUndoConflict": {
+    "description": "tables.undo_conflict"
+  },
+  "errTablesUndoExpired": "Geri alma süresi doldu.",
+  "@errTablesUndoExpired": {
+    "description": "tables.undo_expired"
+  },
   "errWorkAssigneeNotMember": "Atanan kişi bu departmanın üyesi değil.",
   "@errWorkAssigneeNotMember": {
     "description": "work.assignee_not_member"
@@ -956,6 +1072,10 @@
   "errWorkSubtaskAssigneeNotAssigned": "Alt görevin sorumlusu görevin atanmış kişilerinden biri olmalı.",
   "@errWorkSubtaskAssigneeNotAssigned": {
     "description": "work.subtask_assignee_not_assigned"
+  },
+  "errWorkSubtaskAttachmentRequired": "Bu alt görev kanıt dosyası olmadan kapatılamaz.",
+  "@errWorkSubtaskAttachmentRequired": {
+    "description": "work.subtask_attachment_required"
   },
   "errWorkSubtaskLimitReached": "Alt görev sınırına ulaşıldı.",
   "@errWorkSubtaskLimitReached": {

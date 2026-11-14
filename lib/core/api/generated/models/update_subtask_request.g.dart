@@ -14,6 +14,7 @@ _UpdateSubtaskRequest _$UpdateSubtaskRequestFromJson(
   startOn: json['start_on'] as String?,
   endOn: json['end_on'] as String?,
   done: json['done'] as bool?,
+  evidenceRequired: json['evidence_required'] as bool?,
   expectedRevision: (json['expected_revision'] as num?)?.toInt(),
 );
 
@@ -25,5 +26,6 @@ Map<String, dynamic> _$UpdateSubtaskRequestToJson(
   'start_on': ?instance.startOn,
   'end_on': ?instance.endOn,
   'done': ?instance.done,
+  'evidence_required': ?instance.evidenceRequired,
   'expected_revision': ?instance.expectedRevision,
 };

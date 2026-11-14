@@ -44,6 +44,16 @@ class AppLocalizationsTr extends AppLocalizations {
       'İşlem kaydı yazılamadığı için istek tamamlanamadı.';
 
   @override
+  String get errAuditInputInvalid => 'İşlem geçmişi süzgeci geçersiz.';
+
+  @override
+  String get errAuditInvalidCursor =>
+      'Liste konumu geçersiz. Listeyi yenileyin.';
+
+  @override
+  String get errAuditNotAuthorized => 'İşlem geçmişini görmeye yetkiniz yok.';
+
+  @override
   String get errCollaborationAgendaItemNotFound => 'Gündem maddesi bulunamadı.';
 
   @override
@@ -226,6 +236,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errIdentityWeakPassword => 'Parola yeterince güçlü değil.';
+
+  @override
+  String get errMessagingAutoGroupProtected =>
+      'Bu grup departmanla otomatik yönetilir; silinemez veya kapatılamaz.';
 
   @override
   String get errMessagingChatDeleted => 'Sohbet silinmiş; işlem yapılamaz.';
@@ -683,6 +697,93 @@ class AppLocalizationsTr extends AppLocalizations {
       'Dosya deposuna geçici olarak erişilemiyor; yeniden deneyin.';
 
   @override
+  String get errTablesAttachmentLimitReached =>
+      'Bu hücreye daha fazla dosya eklenemez.';
+
+  @override
+  String get errTablesAttachmentRejected => 'Dosya kabul edilmedi.';
+
+  @override
+  String get errTablesAttachmentTooLarge => 'Dosya çok büyük.';
+
+  @override
+  String get errTablesCellConflict =>
+      'Hücre başka biri tarafından değiştirildi. Yenileyip yeniden deneyin.';
+
+  @override
+  String get errTablesConversionLossy =>
+      'Sütun türü değişirse bazı değerler kaybolur.';
+
+  @override
+  String get errTablesCursorStale => 'Tablo değişti. Listeyi yenileyin.';
+
+  @override
+  String get errTablesForbidden => 'Bu tabloda bu işlem için yetkiniz yok.';
+
+  @override
+  String get errTablesIdempotencyKeyReused =>
+      'Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.';
+
+  @override
+  String get errTablesInputInvalid => 'Tablo bilgileri geçersiz.';
+
+  @override
+  String get errTablesLimitReached => 'Tablo sınırına ulaşıldı.';
+
+  @override
+  String get errTablesNotFound => 'Tablo bulunamadı.';
+
+  @override
+  String get errTablesPresenceThrottled =>
+      'Çok sık güncelleme gönderildi. Biraz bekleyin.';
+
+  @override
+  String get errTablesProposalDecided => 'Bu öneri zaten sonuçlandırılmış.';
+
+  @override
+  String get errTablesProposalPending => 'Bekleyen bir öneri var.';
+
+  @override
+  String get errTablesProposalStale =>
+      'Öneri güncelliğini yitirdi. Yenileyip yeniden deneyin.';
+
+  @override
+  String get errTablesQueryTooBroad => 'Sorgu çok geniş. Süzgeci daraltın.';
+
+  @override
+  String get errTablesReferenceUnavailable =>
+      'Bağlantılı kayıt artık kullanılamıyor.';
+
+  @override
+  String get errTablesReplayExpired =>
+      'Değişiklik geçmişi süresi doldu. Tabloyu yenileyin.';
+
+  @override
+  String get errTablesRequestKeyInvalid => 'İşlem anahtarı geçersiz.';
+
+  @override
+  String get errTablesRequestKeyRequired => 'İşlem anahtarı gerekli.';
+
+  @override
+  String get errTablesSchemaConflict =>
+      'Tablo yapısı değişti. Yenileyip yeniden deneyin.';
+
+  @override
+  String get errTablesSourceChanged =>
+      'Kaynak veri değişti. Yenileyip yeniden deneyin.';
+
+  @override
+  String get errTablesStreamUnavailable =>
+      'Canlı güncelleme şu an kullanılamıyor.';
+
+  @override
+  String get errTablesUndoConflict =>
+      'Değişiklik geri alınamadı; tablo sonradan değişmiş.';
+
+  @override
+  String get errTablesUndoExpired => 'Geri alma süresi doldu.';
+
+  @override
   String get errWorkAssigneeNotMember =>
       'Atanan kişi bu departmanın üyesi değil.';
 
@@ -829,6 +930,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errWorkSubtaskAssigneeNotAssigned =>
       'Alt görevin sorumlusu görevin atanmış kişilerinden biri olmalı.';
+
+  @override
+  String get errWorkSubtaskAttachmentRequired =>
+      'Bu alt görev kanıt dosyası olmadan kapatılamaz.';
 
   @override
   String get errWorkSubtaskLimitReached => 'Alt görev sınırına ulaşıldı.';

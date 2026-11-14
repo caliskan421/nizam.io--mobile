@@ -16,12 +16,14 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CreateMeetingRequest {
 
+/// Başlık. Sunucu düz metne indirir ve kırpar; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 255 karakterdir (Unicode kod noktası, düz metne indirildikten sonra ölçülür); aksi 422 `collaboration.input_invalid` (alan `title`) (COLLABORATION-K17).
  String get title;/// Tarih-saat; saat dilimi yoksa kurulum saat diliminde yorumlanır. Kurulum saat dilimindeki bugünden önceki bir gün olamaz (422 `collaboration.input_invalid`).
 @JsonKey(name: 'meeting_date') String get meetingDate;/// En az bir departman; ilki sahip departmandır. Hepsi seçili programa katılmış olmalıdır. `person` kipinde tam bir eleman (aksi 422 `collaboration.input_invalid`, alan `department_ids`).
 @JsonKey(name: 'department_ids') List<String> get departmentIds;/// Davet kipi (COLLABORATION-K73); sonradan değişmez. `person` kipinde koordinatör mesajı gönderilmez.
-@JsonKey(name: 'invite_mode') CreateMeetingRequestInviteMode get inviteMode;/// İsteğe bağlı yer (COLLABORATION-K76): düz metne indirilir ve kırpılır; boş sonuç yer yok demektir. Kontrol karakteri ya da 200 karakterden uzun değer 422 `collaboration.input_invalid` (alan `place`).
+@JsonKey(name: 'invite_mode') CreateMeetingRequestInviteMode get inviteMode;/// İsteğe bağlı yer (COLLABORATION-K76): düz metne indirilir ve kırpılır; boş sonuç yer yok demektir. Kontrol karakteri ya da 200 karakterden (Unicode kod noktası, düz metne indirildikten sonra) uzun değer 422 `collaboration.input_invalid` (alan `place`).
  String? get place;@JsonKey(name: 'participant_ids') List<String>? get participantIds;/// `person` kipinde `true` 422 `collaboration.input_invalid` (alan `members_included`).
-@JsonKey(name: 'members_included') bool? get membersIncluded;@JsonKey(name: 'agenda_items') List<String>? get agendaItems;/// `true` ise koordinatörlere toplantı mesajı gönderilmez.
+@JsonKey(name: 'members_included') bool? get membersIncluded;/// İlk gündem; gönderildiği sırayla yazılır, toplantıyla aynı transaction'dadır. Yalnız boşluktan oluşan satırlar elenir; her madde 1–300 karakterdir (Unicode kod noktası, düz metne indirildikten sonra; aksi 422 `collaboration.input_invalid`); en çok 50 madde (aşım 422 `collaboration.agenda_limit_reached`) (COLLABORATION-K24).
+@JsonKey(name: 'agenda_items') List<String>? get agendaItems;/// `true` ise koordinatörlere toplantı mesajı gönderilmez.
 @JsonKey(name: 'is_instant') bool? get isInstant;
 /// Create a copy of CreateMeetingRequest
 /// with the given fields replaced by the non-null parameter values.
@@ -232,6 +234,7 @@ class _CreateMeetingRequest implements CreateMeetingRequest {
   const _CreateMeetingRequest({required this.title, @JsonKey(name: 'meeting_date') required this.meetingDate, @JsonKey(name: 'department_ids') required  List<String> departmentIds, @JsonKey(name: 'invite_mode') this.inviteMode = CreateMeetingRequestInviteMode.coordinatorship, this.place, @JsonKey(name: 'participant_ids')  List<String>? participantIds, @JsonKey(name: 'members_included') this.membersIncluded, @JsonKey(name: 'agenda_items')  List<String>? agendaItems, @JsonKey(name: 'is_instant') this.isInstant}): _departmentIds = departmentIds,_participantIds = participantIds,_agendaItems = agendaItems;
   factory _CreateMeetingRequest.fromJson(Map<String, dynamic> json) => _$CreateMeetingRequestFromJson(json);
 
+/// Başlık. Sunucu düz metne indirir ve kırpar; sonuç boş olamaz, kontrol karakteri taşıyamaz ve en çok 255 karakterdir (Unicode kod noktası, düz metne indirildikten sonra ölçülür); aksi 422 `collaboration.input_invalid` (alan `title`) (COLLABORATION-K17).
 @override final  String title;
 /// Tarih-saat; saat dilimi yoksa kurulum saat diliminde yorumlanır. Kurulum saat dilimindeki bugünden önceki bir gün olamaz (422 `collaboration.input_invalid`).
 @override@JsonKey(name: 'meeting_date') final  String meetingDate;
@@ -246,7 +249,7 @@ class _CreateMeetingRequest implements CreateMeetingRequest {
 
 /// Davet kipi (COLLABORATION-K73); sonradan değişmez. `person` kipinde koordinatör mesajı gönderilmez.
 @override@JsonKey(name: 'invite_mode') final  CreateMeetingRequestInviteMode inviteMode;
-/// İsteğe bağlı yer (COLLABORATION-K76): düz metne indirilir ve kırpılır; boş sonuç yer yok demektir. Kontrol karakteri ya da 200 karakterden uzun değer 422 `collaboration.input_invalid` (alan `place`).
+/// İsteğe bağlı yer (COLLABORATION-K76): düz metne indirilir ve kırpılır; boş sonuç yer yok demektir. Kontrol karakteri ya da 200 karakterden (Unicode kod noktası, düz metne indirildikten sonra) uzun değer 422 `collaboration.input_invalid` (alan `place`).
 @override final  String? place;
  final  List<String>? _participantIds;
 @override@JsonKey(name: 'participant_ids') List<String>? get participantIds {
@@ -259,7 +262,9 @@ class _CreateMeetingRequest implements CreateMeetingRequest {
 
 /// `person` kipinde `true` 422 `collaboration.input_invalid` (alan `members_included`).
 @override@JsonKey(name: 'members_included') final  bool? membersIncluded;
+/// İlk gündem; gönderildiği sırayla yazılır, toplantıyla aynı transaction'dadır. Yalnız boşluktan oluşan satırlar elenir; her madde 1–300 karakterdir (Unicode kod noktası, düz metne indirildikten sonra; aksi 422 `collaboration.input_invalid`); en çok 50 madde (aşım 422 `collaboration.agenda_limit_reached`) (COLLABORATION-K24).
  final  List<String>? _agendaItems;
+/// İlk gündem; gönderildiği sırayla yazılır, toplantıyla aynı transaction'dadır. Yalnız boşluktan oluşan satırlar elenir; her madde 1–300 karakterdir (Unicode kod noktası, düz metne indirildikten sonra; aksi 422 `collaboration.input_invalid`); en çok 50 madde (aşım 422 `collaboration.agenda_limit_reached`) (COLLABORATION-K24).
 @override@JsonKey(name: 'agenda_items') List<String>? get agendaItems {
   final value = _agendaItems;
   if (value == null) return null;

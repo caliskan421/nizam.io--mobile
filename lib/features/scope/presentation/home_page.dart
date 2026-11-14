@@ -288,8 +288,8 @@ class _Feed extends ConsumerWidget {
             ],
           );
         }
-        // Tablet: genel durum + 2×2 hızlı işlemler (aynı yükseklik); tamamlanma, devam, onay,
-        // başlamadı; ekip rolleri + gecikme ve tarih talebi (üst satırın 3. ve 4. sütunu).
+        // Tablet: genel durum + 2×2 hızlı işlemler (aynı yükseklik); özet kutuları telefondaki
+        // sırayla (gecikme, tarih talebi, başlamadı, onay; tamamlanma ve devam ekibin solunda).
         final quickCard = actions.isEmpty
             ? null
             : HomeQuickActionsBar(
@@ -297,44 +297,48 @@ class _Feed extends ConsumerWidget {
                 actions: actions,
                 title: context.l10n.uiHomeQuickActionsTitle,
                 columns: 2,
-                tileAspect: 1.65,
+                tileAspect: null,
               );
         final wideTeam = team(wide: true);
+        // Telefondaki sıra: ilk dördü üst satır, kalanı ekibin yanında.
+        final kpiOrder = homeKpisNarrow(taskTotals);
         final lower = LayoutBuilder(
           builder: (context, box) {
             const g = NizamioSpacing.gapMd;
             final col = (box.maxWidth - 3 * g) / 4;
-            final left = 2 * col + g;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (wideTeam != null) ...[
+            final right = 2 * col + g;
+            // Görev kutuları solda (1. ve 2. sütun), ekip sağda; görev kutuları "Ekip" başlığı +
+            // rol kutularının toplam yüksekliğinde.
+            final tasks = kpiOrder.skip(4).toList();
+            return IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  for (var i = 0; i < 2; i++) ...[
+                    if (i > 0) const Gap(g),
+                    SizedBox(
+                      width: col,
+                      child: i < tasks.length
+                          ? homeKpiTile(context, tasks[i], taskTotals, openView)
+                          : null,
+                    ),
+                  ],
+                  const Gap(g),
                   SizedBox(
-                    width: left,
-                    child: NzKicker(context.l10n.uiHomeTeam),
+                    width: right,
+                    child: wideTeam == null
+                        ? null
+                        : Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              NzKicker(context.l10n.uiHomeTeam),
+                              const Gap(NizamioSpacing.gapMd),
+                              Expanded(child: wideTeam),
+                            ],
+                          ),
                   ),
-                  const Gap(NizamioSpacing.gapMd),
                 ],
-                IntrinsicHeight(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(width: left, child: wideTeam),
-                      for (final k in [
-                        HomeKpi.late,
-                        if (taskTotals.dateRequests != null)
-                          HomeKpi.dateRequest,
-                      ]) ...[
-                        const Gap(g),
-                        SizedBox(
-                          width: col,
-                          child: homeKpiTile(context, k, taskTotals, openView),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
+              ),
             );
           },
         );
@@ -362,12 +366,7 @@ class _Feed extends ConsumerWidget {
             const Gap(NizamioSpacing.gapXl),
             HomeKpiGrid(
               tasks: taskTotals,
-              kpis: const [
-                HomeKpi.done,
-                HomeKpi.inProgress,
-                HomeKpi.review,
-                HomeKpi.notStarted,
-              ],
+              kpis: kpiOrder.take(4).toList(),
               columns: 4,
               onOpen: openView,
             ),

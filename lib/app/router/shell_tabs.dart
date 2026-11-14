@@ -121,7 +121,12 @@ List<NzShellTab> shellTabsFor(
       icon: NzIcons.home,
       selectedIcon: NzIcons.homeFilled,
       label: inHistory ? l.uiRouterTabHistory : l.uiRouterTabHome,
-      caption: inHistory ? historyCaption : l.uiRouterTabHomeCaption,
+      // Ana sayfa alt yazısı etkin rol ("Yönetici", "Koordinatör", "Üye"); rol bilinmezken "bugün".
+      caption: inHistory
+          ? historyCaption
+          : role == null
+          ? l.uiRouterTabHomeCaption
+          : l.effectiveRoleLabel(role),
     ),
     NzShellTab(
       icon: NzIcons.tasks,

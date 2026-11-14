@@ -40,8 +40,9 @@ class HomeQuickActionsBar extends StatelessWidget {
   /// 0 → tek satırda eşit bölmeler; >0 → o kadar sütunlu ızgara (koordinatör: 2×2, kareye yakın).
   final int columns;
 
-  /// Izgara dokunacının en/boy oranı (1 = kare; yönetici tableti daha yatık).
-  final double tileAspect;
+  /// Izgara dokunacının en/boy oranı (1 = kare); null → içerik yüksekliğinde (ikon ve etiket
+  /// alt alta, dar aralıkla; yönetici tableti).
+  final double? tileAspect;
 
   /// [homeQuickActions] sonucu.
   final List<HomeQuickAction> actions;
@@ -64,6 +65,17 @@ class HomeQuickActionsBar extends StatelessWidget {
               )
             : const SizedBox.shrink(),
       );
+      Widget row(int i, {bool stretch = false}) => Row(
+        crossAxisAlignment: stretch
+            ? CrossAxisAlignment.stretch
+            : CrossAxisAlignment.center,
+        children: [
+          for (var j = i; j < i + columns; j++) ...[
+            if (j > i) const Gap(NizamioSpacing.space2),
+            cell(j),
+          ],
+        ],
+      );
       return NzCard.outlined(
         padding: const EdgeInsets.all(NizamioSpacing.space3),
         child: Column(
@@ -71,24 +83,28 @@ class HomeQuickActionsBar extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (title != null) ...[
-              Text(
-                title,
-                style: context.text.titleSm.copyWith(
-                  fontWeight: FontWeight.w700,
+              // "Genel durum" başlığıyla aynı biçim ve üst hiza.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                child: Text(
+                  title,
+                  style: context.text.bodyMd.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: c.text,
+                  ),
                 ),
               ),
-              const Gap(NizamioSpacing.space3),
+              const Gap(14),
             ],
             for (var i = 0; i < actions.length; i += columns) ...[
               if (i > 0) const Gap(NizamioSpacing.space2),
-              Row(
-                children: [
-                  for (var j = i; j < i + columns; j++) ...[
-                    if (j > i) const Gap(NizamioSpacing.space2),
-                    cell(j),
-                  ],
-                ],
-              ),
+              if (tileAspect == null)
+                // İçerik yüksekliğindeki dokunaçlar çiftin yüksekliğini satırlara eşit böler
+                // (yalnız sınırlı yükseklikte: satırın `IntrinsicHeight`'ı).
+                Expanded(child: row(i, stretch: true))
+              else
+                row(i),
             ],
           ],
         ),
@@ -139,7 +155,7 @@ class _QuickTile extends StatelessWidget {
   });
 
   final NzGlyph glyph;
-  final double aspect;
+  final double? aspect;
   final String label;
   final VoidCallback onPressed;
 
@@ -147,6 +163,43 @@ class _QuickTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     final radius = BorderRadius.circular(NizamioRadius.tile);
+    final fill = aspect != null;
+    final tile = Material(
+      color: c.surfaceOverlay,
+      shape: RoundedRectangleBorder(
+        borderRadius: radius,
+        side: BorderSide(color: c.border, width: NizamioSize.borderWidth),
+      ),
+      // Basma vurgusu yok; geri bildirim [NzPressable] küçülmesidir.
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(NizamioSpacing.space3),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: fill ? MainAxisSize.max : MainAxisSize.min,
+            mainAxisAlignment: fill
+                ? MainAxisAlignment.spaceBetween
+                : MainAxisAlignment.start,
+            children: [
+              NzGlyphIcon(
+                glyph,
+                size: NizamioSize.iconSize,
+                color: c.textMuted,
+              ),
+              if (!fill) const Gap(NizamioSpacing.space2),
+              Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.list.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
     return Semantics(
       container: true,
       button: true,
@@ -154,43 +207,10 @@ class _QuickTile extends StatelessWidget {
       onTap: onPressed,
       excludeSemantics: true,
       child: NzPressable(
-        child: AspectRatio(
-          aspectRatio: aspect,
-          child: Material(
-            color: c.surfaceOverlay,
-            shape: RoundedRectangleBorder(
-              borderRadius: radius,
-              side: BorderSide(color: c.border, width: NizamioSize.borderWidth),
-            ),
-            child: InkWell(
-              onTap: onPressed,
-              borderRadius: radius,
-              splashFactory: NoSplash.splashFactory,
-              child: Padding(
-                padding: const EdgeInsets.all(NizamioSpacing.space3),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    NzGlyphIcon(
-                      glyph,
-                      size: NizamioSize.iconSize,
-                      color: c.textMuted,
-                    ),
-                    Text(
-                      label,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: context.text.list.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+        child: switch (aspect) {
+          final a? => AspectRatio(aspectRatio: a, child: tile),
+          null => tile,
+        },
       ),
     );
   }
@@ -222,10 +242,10 @@ class _QuickAction extends StatelessWidget {
       child: NzPressable(
         child: Material(
           type: MaterialType.transparency,
-          child: InkWell(
+          // Basma vurgusu yok; geri bildirim [NzPressable] küçülmesidir.
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: onPressed,
-            borderRadius: radius,
-            splashFactory: NoSplash.splashFactory,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: NizamioSpacing.space3,

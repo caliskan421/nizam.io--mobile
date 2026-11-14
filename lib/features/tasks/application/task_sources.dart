@@ -98,12 +98,14 @@ final class TaskWriteSource implements TaskWriteRepository {
     TaskStatus to, {
     String? reason,
     bool closeSubtasks = false,
+    bool pullEndDate = false,
   }) async => _s.changeStatus(
     task,
     via,
     to,
     reason: reason,
     closeSubtasks: closeSubtasks,
+    pullEndDate: pullEndDate,
   );
 
   @override
@@ -213,6 +215,19 @@ final class TaskWriteSource implements TaskWriteRepository {
   @override
   Future<void> deleteDateChange(String requestId) async =>
       _s.deleteDateChange(requestId);
+
+  @override
+  Future<List<DateChangeRequest>> listMyDateRequests(
+    String programId,
+    String departmentId,
+  ) async => _s.listMyDateRequests(programId, departmentId);
+
+  @override
+  Future<void> extend(
+    TaskItem task,
+    int days, {
+    required String requestKey,
+  }) async => _s.extend(task, days, requestKey: requestKey);
 
   @override
   Future<void> attachFile(

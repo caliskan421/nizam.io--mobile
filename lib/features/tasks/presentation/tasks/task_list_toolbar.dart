@@ -7,6 +7,7 @@ import '../../../../core/ui/widgets/buttons/nz_split_button.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../application/tasks_list_controller.dart';
+import '../../domain/task_query.dart';
 import '../task_texts.dart';
 
 /// Görev listelerinde ortak filtre ve sıralama araç satırı.
@@ -16,8 +17,16 @@ class TaskListToolbar extends StatelessWidget {
     required this.state,
     required this.onFilter,
     required this.controller,
+    required this.sort,
+    this.coordinator = false,
   });
+
+  /// Koordinatör görünümü (sıralama seçenekleri ve varsayılanı).
+  final bool coordinator;
   final TasksListState state;
+
+  /// Geçerli ölçüt (etkin rolün varsayılanıyla çözülmüş).
+  final TaskSort sort;
   final VoidCallback onFilter;
   final TasksListController controller;
 
@@ -104,15 +113,15 @@ class TaskListToolbar extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: NzSplitButton(
               flexibleLabel: true,
-              label: l.sortLabel(state.sort),
-              semanticLabel:
-                  '${l.uiHomeSortChange}: ${l.sortLabel(state.sort)}',
-              onPressed: controller.cycleSort,
+              label: l.sortLabel(sort),
+              semanticLabel: '${l.uiHomeSortChange}: ${l.sortLabel(sort)}',
+              onPressed: () => controller.cycleSort(coordinator: coordinator),
               icon: NzIcons.chevronDown,
               iconTurns: state.descending ? 0 : 0.5,
               iconSemanticLabel:
                   '${l.uiHomeSortFlip}: ${state.descending ? l.uiHomeSortDescending : l.uiHomeSortAscending}',
-              onIconPressed: controller.flipDirection,
+              onIconPressed: () =>
+                  controller.flipDirection(coordinator: coordinator),
             ),
           ),
         ),

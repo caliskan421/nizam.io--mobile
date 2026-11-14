@@ -21,6 +21,7 @@ import '../application/home_dashboard_controller.dart';
 import '../application/home_team_people.dart';
 import '../application/scope_selection_controller.dart';
 import '../domain/home_dashboard.dart';
+import 'home/home_coordinator.dart';
 import 'home/home_coordinatorships.dart';
 import 'home/home_menus.dart';
 import 'home/home_overview.dart';
@@ -59,7 +60,7 @@ class HomePage extends ConsumerWidget {
         showHomeShortcuts(
           context,
           onQuickAction: (a) => _quickAction(context, a),
-          isAdmin: dashboard.greetingRole == TeamRole.admin,
+          isAdmin: ref.read(effectiveAccessProvider).canAdminister,
         );
       });
     final programState = ref.watch(currentProgramControllerProvider);
@@ -136,6 +137,9 @@ class _Feed extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final d = dashboard;
     final pending = ref.watch(homePendingProvider);
+    // Bölümler etkin görünümden seçilir (yönetici kuyrukları, koordinatör bölümleri).
+    final access = ref.watch(effectiveAccessProvider);
+    final isAdmin = access.canAdminister;
     final nav = context.appNav;
     // Tarih satırı görev kataloğunun "bugün"üdür. Katalog yokken cihaz saati.
     final now =
@@ -179,10 +183,7 @@ class _Feed extends ConsumerWidget {
       builder: (context, box) {
         final wide = box.maxWidth >= homeWideMinWidth;
         final counts = d.tasks;
-        final taskTotals =
-            d.greetingRole == TeamRole.admin &&
-                !pending.isLoading &&
-                !pending.hasError
+        final taskTotals = isAdmin && !pending.isLoading && !pending.hasError
             ? TaskTotals(
                 total: counts.total,
                 done: counts.done,
@@ -203,6 +204,22 @@ class _Feed extends ConsumerWidget {
           wide: wide,
           onOpen: nav.openCoordinatorship,
         );
+        if (access.isCoordinatorView) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              greeting,
+              const Gap(NizamioSpacing.space2),
+              HomeViewLine(view: access),
+              const Gap(NizamioSpacing.gapXl),
+              HomeCoordinatorFeed(wide: wide),
+              const Gap(NizamioSpacing.gapXl),
+              HomeQuickActions(onAction: onQuickAction, isAdmin: isAdmin),
+              const Gap(NizamioSpacing.gapXl),
+              footer,
+            ],
+          );
+        }
         if (!wide) {
           final narrowTeam = team(wide: false);
           return Column(
@@ -215,10 +232,7 @@ class _Feed extends ConsumerWidget {
               kpis,
               ...truncated,
               const Gap(NizamioSpacing.gapXl),
-              HomeQuickActions(
-                onAction: onQuickAction,
-                isAdmin: d.greetingRole == TeamRole.admin,
-              ),
+              HomeQuickActions(onAction: onQuickAction, isAdmin: isAdmin),
               const Gap(NizamioSpacing.gapXl),
               if (narrowTeam != null) ...[
                 narrowTeam,
@@ -233,7 +247,7 @@ class _Feed extends ConsumerWidget {
         final wideTeam = team(wide: true);
         final actions = HomeQuickActionsBar(
           onAction: onQuickAction,
-          isAdmin: d.greetingRole == TeamRole.admin,
+          isAdmin: isAdmin,
         );
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -9,6 +9,7 @@ import '../../../core/server/write_compat.dart';
 import '../../../core/telemetry/error_report.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
+import '../domain/coordinator_board.dart';
 import '../domain/pending_subtask.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_permissions.dart';
@@ -23,6 +24,7 @@ part 'task_detail_controller.g.dart';
 part 'task_detail_state.dart';
 part 'task_detail_upload.dart';
 part 'task_detail_date_request.dart';
+part 'task_detail_decision.dart';
 part 'task_detail_edit_draft.dart';
 part 'task_detail_remind.dart';
 
@@ -49,7 +51,6 @@ bool _isForbidden(ApiError e) =>
     e.status == 403 ||
     const {'work.not_authorized', 'work.not_assigned'}.contains(e.code);
 
-/// Hata sonrası yeniden okuma gerekir mi (çakışma ya da yetki reddi).
 bool _rereadAfter(ApiError e) => _isConflict(e) || _isForbidden(e);
 
 // İşlem anahtarı eylem adları ([TaskDetailState.keys]).
@@ -57,8 +58,7 @@ const _note = 'note';
 const _subtask = 'subtask';
 const _upload = 'upload';
 
-/// Bayat düzenleme sürümü (ADR-0027).
-const _editConflict = 'work.edit_conflict';
+const _editConflict = 'work.edit_conflict'; // bayat sürüm (ADR-0027)
 
 /// Yerel ön denetimin hatası: istek gönderilmez, metin yine koddan (sunucu kataloğundaki kod).
 WriteOutcome _rejected(String code) =>
@@ -71,13 +71,16 @@ WriteOutcome _rejected(String code) =>
 /// katalog — durum, `subtask_counts` — ve ayrıntı; yalnız not ise ayrıntı). Uçuştaki yazma
 /// varken yeni yazma istek göndermez ([TaskDetailState.busy]). 409'da yeniden okunur, sonuç
 /// [WriteKind.failed]/[WriteKind.subtasksOpen] döner; otomatik tekrar yok. Eylem
-/// görünürlüğü [permissions]'tan (işlem bazlı olgular).
-///
-/// P3: öncelik/düzenle/kopyala/sil, atama ve üstlen/bırak, tarih talebi aç/karar/sil,
-/// dosya yükle/adlandır/sil/indir de aynı kapıdan gider.
+/// görünürlüğü [permissions]'tan. P3 yazmaları (öncelik, düzenle, atama, üstlen, tarih talebi,
+/// dosya) ve koordinatör kararları (onay, iade, süre uzatma) da aynı kapıdan gider.
 @riverpod
 class TaskDetailController extends _$TaskDetailController
-    with _UploadFlow, _DateRequestFlow, _EditDraftFlow, _RemindFlow {
+    with
+        _UploadFlow,
+        _DateRequestFlow,
+        _EditDraftFlow,
+        _RemindFlow,
+        _DecisionFlow {
   @override
   TaskDetailState build(String code) {
     ref.watch(sessionGenerationProvider);

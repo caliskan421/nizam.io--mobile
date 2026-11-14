@@ -17,6 +17,7 @@ Color viewDot(TaskView v, NizamioColors c) => switch (v) {
   TaskView.review || TaskView.dateRequest => c.warning,
   TaskView.notStarted => c.textFaint,
   TaskView.done => c.taskDone,
+  TaskView.unassigned => c.info,
 };
 
 /// Görünüm kutucukları: dar alanda 4×2 ("Tümü" iki sütun), geniş alanda (tablette tam
@@ -28,7 +29,22 @@ class TaskViewGrid extends StatelessWidget {
     required this.selected,
     required this.onSelected,
     this.truncated = false,
+    this.views,
   });
+
+  /// Kutucuk sırası (etkin role göre, `taskViewsFor`): ilk satır ilk üçü ("Tümü" iki sütun),
+  /// ikinci satır kalanlar.
+  final List<TaskView>? views;
+
+  static const _defaultViews = [
+    TaskView.all,
+    TaskView.late,
+    TaskView.inProgress,
+    TaskView.review,
+    TaskView.dateRequest,
+    TaskView.notStarted,
+    TaskView.done,
+  ];
 
   final Map<TaskView, int> counts;
   final TaskView selected;
@@ -39,18 +55,6 @@ class TaskViewGrid extends StatelessWidget {
   static const singleRowMinWidth = 720.0;
 
   static const _gap = NizamioSpacing.space2;
-
-  static const _first = [
-    (TaskView.all, 2),
-    (TaskView.late, 1),
-    (TaskView.inProgress, 1),
-  ];
-  static const _second = [
-    (TaskView.review, 1),
-    (TaskView.dateRequest, 1),
-    (TaskView.notStarted, 1),
-    (TaskView.done, 1),
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -73,6 +77,11 @@ class TaskViewGrid extends StatelessWidget {
         ],
       ),
     );
+    final views = this.views ?? _defaultViews;
+    final first = [
+      for (final (i, v) in views.take(3).indexed) (v, i == 0 ? 2 : 1),
+    ];
+    final second = [for (final v in views.skip(3)) (v, 1)];
     return Semantics(
       container: true,
       label: context.l10n.uiTasksViews,
@@ -85,9 +94,9 @@ class TaskViewGrid extends StatelessWidget {
             spacing: _gap,
             children: single
                 ? [
-                    row([..._first, ..._second], col),
+                    row([...first, ...second], col),
                   ]
-                : [row(_first, col), row(_second, col)],
+                : [row(first, col), row(second, col)],
           );
         },
       ),

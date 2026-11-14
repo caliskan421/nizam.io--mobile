@@ -2742,6 +2742,72 @@ class AppLocalizationsTr extends AppLocalizations {
       'Yönetici tüm koordinatörlükleri görür. Bir koordinatörlüğün gözünden bakmak için rolünü değiştir.';
 
   @override
+  String get uiHomeCoordDoneTail => 'görev bitti';
+
+  @override
+  String get uiHomeChipLate => 'geciken';
+
+  @override
+  String get uiHomeChipReview => 'onayında';
+
+  @override
+  String get uiHomeChipReturned => 'iade';
+
+  @override
+  String get uiHomeChipUnassigned => 'atanmamış';
+
+  @override
+  String get uiHomeChipRequests => 'tarih talebi yöneticide';
+
+  @override
+  String get uiHomeQueueTitle => 'Onay bekleyenler';
+
+  @override
+  String get uiHomeSeeAll => 'Tümü';
+
+  @override
+  String get uiHomeQueueEmpty => 'Onay bekleyen iş yok.';
+
+  @override
+  String get uiHomeUnassignedTitle => 'Atanmamış';
+
+  @override
+  String get uiHomeLoadTitle => 'Ekip yükü';
+
+  @override
+  String get uiHomeLoadOpenTail => 'açık';
+
+  @override
+  String get uiHomeLoadLateTail => 'geç';
+
+  @override
+  String get uiHomeLoadDoing => 'devam';
+
+  @override
+  String get uiHomeLoadReview => 'onayda';
+
+  @override
+  String get uiHomeLoadLate => 'geciken';
+
+  @override
+  String get uiHomeLoadReturned => 'iade';
+
+  @override
+  String get uiHomeLoadEmpty => 'Ekipte açık görev yok.';
+
+  @override
+  String get uiHomeMeetingsTitle => 'Yaklaşan toplantılar';
+
+  @override
+  String get uiHomeMeetingsEmpty => 'Yaklaşan toplantın yok.';
+
+  @override
+  String get uiHomeRequestsTitle => 'Tarih taleplerim';
+
+  @override
+  String get uiHomeRequestsEmpty => 'Tarih talebin yok.';
+
+  @override
   String get uiIdentityLoginTitle => 'Giriş yap';
 
   @override
@@ -5547,6 +5613,270 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksTReminded => 'Hatırlatma gönderildi';
+
+  @override
+  String get uiTasksViewUnassigned => 'Atanmamış';
+
+  @override
+  String get uiTasksListUnassigned => 'atanmamış görevler';
+
+  @override
+  String get uiTasksSortStatus => 'Duruma göre';
+
+  @override
+  String get uiTasksSortStatusShort => 'Durum';
+
+  @override
+  String get uiTasksGroupReview => 'Onay bekleyen';
+
+  @override
+  String get uiTasksGroupReviewSub => 'incele ve karar ver';
+
+  @override
+  String get uiTasksGroupUnassigned => 'Atanmamış';
+
+  @override
+  String get uiTasksGroupUnassignedSub => 'sorumlu bekliyor';
+
+  @override
+  String get uiTasksGroupDoing => 'Devam ediyor';
+
+  @override
+  String get uiTasksGroupReturned => 'İade edildi';
+
+  @override
+  String get uiTasksGroupReturnedSub => 'atanan yeniden gönderecek';
+
+  @override
+  String get uiTasksGroupTodo => 'Başlamadı';
+
+  @override
+  String get uiTasksGroupDone => 'Tamamlandı';
+
+  @override
+  String get uiTasksGroupOther => 'Diğer';
+
+  @override
+  String get uiTasksScopeOpenLc => 'açık';
+
+  @override
+  String get uiTasksScopeOnlyHead => 'yalnız';
+
+  @override
+  String get uiTasksScopeOnlyTail => 'görevlerini görüyorsun';
+
+  @override
+  String get uiTasksQueueTitle => 'Onay bekleyenler';
+
+  @override
+  String get uiTasksQueueBandTail => 'görev onayını bekliyor';
+
+  @override
+  String get uiTasksQueueReview => 'İncele';
+
+  @override
+  String get uiTasksQueueEmpty => 'Onay bekleyen görev kalmadı.';
+
+  @override
+  String get uiTasksRequestsTitle => 'Tarih talepleri';
+
+  @override
+  String get uiTasksRequestsActiveLc => 'aktif';
+
+  @override
+  String get uiTasksRequestsTotalLc => 'talep';
+
+  @override
+  String get uiTasksRequestsTabActive => 'Aktif';
+
+  @override
+  String get uiTasksRequestsTabApproved => 'Kabul edildi';
+
+  @override
+  String get uiTasksRequestsTabRejected => 'Reddedildi';
+
+  @override
+  String get uiTasksRequestsEmptyActive => 'Aktif tarih talebin yok.';
+
+  @override
+  String get uiTasksRequestsEmptyApproved => 'Kabul edilen tarih talebin yok.';
+
+  @override
+  String get uiTasksRequestsEmptyRejected => 'Reddedilen tarih talebin yok.';
+
+  @override
+  String get uiTasksRequestStatePending => 'Bekliyor';
+
+  @override
+  String get uiTasksRequestWaitingAdmin => 'Yöneticide bekliyor';
+
+  @override
+  String get uiTasksRequestWaitingNote =>
+      'Karar gelene kadar mevcut tarihler geçerli.';
+
+  @override
+  String get uiTasksRequestGoesAdmin =>
+      'Talep yöneticiye gider; sebep zorunludur.';
+
+  @override
+  String get uiTasksErrReasonRequired => 'Sebep gerekli.';
+
+  @override
+  String get uiTasksUnassignedWaiting => 'Sorumlu bekliyor';
+
+  @override
+  String get uiTasksUnassignedRule =>
+      'Atanmamış görevler sorumlu atanana kadar başlatılamaz.';
+
+  @override
+  String get uiTasksAssign => 'Ata';
+
+  @override
+  String get uiTasksAssignTitle => 'Sorumlu ata';
+
+  @override
+  String get uiTasksAssignNote =>
+      'Havuz bu koordinatörlüğün ekibidir; atanan kişiye bildirim gider.';
+
+  @override
+  String get uiTasksAssignEmpty => 'Atanabilecek kişi yok.';
+
+  @override
+  String get uiTasksTAssignedTail => 'kişisine atandı';
+
+  @override
+  String get uiTasksDecisionKicker => 'Karar bekliyor';
+
+  @override
+  String get uiTasksDecisionSubmitted => 'Onaya sunuldu';
+
+  @override
+  String get uiTasksDecisionFilesTail => 'kanıt dosyası';
+
+  @override
+  String get uiTasksDecisionSubsHead => 'alt görevler';
+
+  @override
+  String get uiTasksDecisionNoEvidence =>
+      'Kanıt dosyası yüklenmemiş. Onaylamadan önce ekipten kanıt iste ya da iade et.';
+
+  @override
+  String get uiTasksDecisionFoot =>
+      'Onaylanınca atananlar bilgilendirilir. İade için sebep yazman gerekir.';
+
+  @override
+  String get uiTasksReturn => 'İade et';
+
+  @override
+  String get uiTasksReturnReasonLabel => 'İade sebebi · zorunlu';
+
+  @override
+  String get uiTasksReturnReasonHint =>
+      'Neyin eksik olduğunu ve nasıl düzeltileceğini yaz…';
+
+  @override
+  String get uiTasksReturnInfo =>
+      'Atananlar düzeltip yeniden gönderir. Sebep görevde not olarak görünür.';
+
+  @override
+  String get uiTasksReturnNoteHead => 'İade sebebi';
+
+  @override
+  String get uiTasksApproveNoteLabel => 'Onay notu · isteğe bağlı';
+
+  @override
+  String get uiTasksApproveNoteHint => 'Ekibe iletmek istediğin bir not…';
+
+  @override
+  String get uiTasksApproveNoteHead => 'Onay notu';
+
+  @override
+  String get uiTasksApproveNoEvidence =>
+      'Kanıt dosyası yok; onaylarsan görev kanıtsız kapanır.';
+
+  @override
+  String get uiTasksApproveInfo =>
+      'Onay görevi tamamlar; geri almak gerekçe ister.';
+
+  @override
+  String get uiTasksApprovePull => 'Bitiş tarihini bugüne çek';
+
+  @override
+  String get uiTasksApprovePullDesc =>
+      'Görev erken bitti: bitiş bugüne çekilir, plan bitişi saklanır.';
+
+  @override
+  String get uiTasksCmpPlan => 'Plan';
+
+  @override
+  String get uiTasksCmpEnd => 'Bitiş';
+
+  @override
+  String get uiTasksCmpNow => 'Şu an';
+
+  @override
+  String get uiTasksCmpNewEnd => 'Yeni bitiş';
+
+  @override
+  String get uiTasksCmpResult => 'Sonuç';
+
+  @override
+  String get uiTasksResultOnTime => 'Zamanında';
+
+  @override
+  String get uiTasksResultLateTail => 'gün geç';
+
+  @override
+  String get uiTasksResultEarlyTail => 'gün erken';
+
+  @override
+  String get uiTasksInfoAssignees => 'Sorumlu';
+
+  @override
+  String get uiTasksInfoEvidence => 'Kanıt';
+
+  @override
+  String get uiTasksInfoSubtasks => 'Alt görevler';
+
+  @override
+  String get uiTasksFilesLc => 'dosya';
+
+  @override
+  String get uiTasksTApprovedTail => 'onaylandı';
+
+  @override
+  String get uiTasksTReturnedTail => 'iade edildi';
+
+  @override
+  String get uiTasksExtend => 'Süre uzat';
+
+  @override
+  String get uiTasksExtendCaption => '7 güne kadar · onay gerekmez';
+
+  @override
+  String get uiTasksExtendInfo =>
+      'Onay gerekmez; atananlar ve yönetici bilgilendirilir. Bir seferde en çok 7 gün uzatabilirsin.';
+
+  @override
+  String get uiTasksExtendMore => 'Daha fazlası için tarih talebi gönder';
+
+  @override
+  String get uiTasksExtendOk => 'Uzat';
+
+  @override
+  String get uiTasksTExtended => 'Bitiş uzatıldı';
+
+  @override
+  String get uiTasksLockTitle => 'Bağımlılık bekleniyor';
+
+  @override
+  String get uiTasksLockTail => 'bitmeden bu görev başlatılamaz.';
+
+  @override
+  String get uiTasksLockBadge => 'Kilitli';
+
+  @override
+  String get uiTasksDaysLeftTail => 'gün kaldı';
 
   @override
   String get uiTimelineTitle => 'Zaman çizelgesi';

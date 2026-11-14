@@ -237,8 +237,8 @@ class _PendingRowTile extends StatelessWidget {
 /// Ekip yükü (sabit boy; ekip büyüdükçe uzamaz): üstte tek satır toplamlar ("3 kişi 6 açık
 /// 4 geç"); altında en yoğun üç kişi: ad, sağda "5 açık · 4 geç" (gecikmede kırmızı) ve
 /// kişinin görev dağılımı ayrık parçalı şeritte (tamamlanan, devam, onayda, iade, başlamadı,
-/// geciken; geciken durumundan bağımsız). Kalanlar "+N kişi daha · Ekibim" bağlantısıyla; satır
-/// kişinin görevlerini açar. Backend koordinatöre yük ucu açmaz; sayım görünen görevlerden
+/// geciken; geciken durumundan bağımsız). Sağ üst köşede "Ekibim ›"; kalan kişi sayısı altta
+/// ("+N kişi daha"). Satır kişinin görevlerini açar. Backend koordinatöre yük ucu açmaz; sayım görünen görevlerden
 /// ([CoordinatorBoard.load], [CoordinatorBoard.tasks]).
 class HomeTeamLoad extends ConsumerWidget {
   const HomeTeamLoad({super.key, required this.board, this.fill = false});
@@ -373,57 +373,67 @@ class HomeTeamLoad extends ConsumerWidget {
 
     final top = loaded.take(shown).toList();
     final rest = loaded.length - top.length;
-    final body = loaded.isEmpty
-        ? Text(l.uiHomeLoadEmpty, style: t.bodyMd.copyWith(color: c.textMuted))
-        : Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Wrap(
-                spacing: NizamioSpacing.space5,
-                runSpacing: NizamioSpacing.space1,
-                children: [
-                  stat(loaded.length, l.uiHomeLoadPeople),
-                  stat(open, l.uiHomeLoadOpenTail),
-                  stat(late, l.uiHomeLoadLateTail, danger: late > 0),
-                ],
-              ),
-              const Gap(NizamioSpacing.space3),
-              for (final p in top) person(p),
-            ],
-          );
+    // Sağ üst köşede "Ekibim ›" (ekip sayfası).
     final link = Semantics(
       button: true,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: nav.openUsers,
-        child: Padding(
-          padding: const EdgeInsets.only(top: NizamioSpacing.space2),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  rest > 0 ? '+$rest ${l.uiHomeLoadMorePeople}' : '',
-                  style: t.caption.copyWith(color: c.textMuted),
-                ),
-              ),
-              Text(
-                l.uiHomeModuleTeam,
-                style: t.bodyMd.copyWith(color: c.textMuted),
-              ),
-              NzIcon(
-                NzIcons.chevronRight,
-                size: NizamioSize.iconSizeSm,
-                color: c.textMuted,
-              ),
-            ],
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              l.uiHomeModuleTeam,
+              style: t.bodyMd.copyWith(color: c.textMuted),
+            ),
+            NzIcon(
+              NzIcons.chevronRight,
+              size: NizamioSize.iconSizeSm,
+              color: c.textMuted,
+            ),
+          ],
         ),
       ),
+    );
+    final header = Row(
+      children: [
+        Expanded(
+          child: loaded.isEmpty
+              ? Text(
+                  l.uiHomeLoadEmpty,
+                  style: t.bodyMd.copyWith(color: c.textMuted),
+                )
+              : Wrap(
+                  spacing: NizamioSpacing.space5,
+                  runSpacing: NizamioSpacing.space1,
+                  children: [
+                    stat(loaded.length, l.uiHomeLoadPeople),
+                    stat(open, l.uiHomeLoadOpenTail),
+                    stat(late, l.uiHomeLoadLateTail, danger: late > 0),
+                  ],
+                ),
+        ),
+        const Gap(NizamioSpacing.space2),
+        link,
+      ],
     );
     final card = NzCard.outlined(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [body, if (fill) const Spacer(), link],
+        children: [
+          header,
+          if (top.isNotEmpty) const Gap(NizamioSpacing.space3),
+          for (final p in top) person(p),
+          if (fill) const Spacer(),
+          if (rest > 0)
+            Padding(
+              padding: const EdgeInsets.only(top: NizamioSpacing.space2),
+              child: Text(
+                '+$rest ${l.uiHomeLoadMorePeople}',
+                style: t.caption.copyWith(color: c.textMuted),
+              ),
+            ),
+        ],
       ),
     );
     return Column(

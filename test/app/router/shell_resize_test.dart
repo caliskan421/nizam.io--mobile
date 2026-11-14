@@ -83,7 +83,9 @@ void main() {
       await settle(tester);
       final view = harness.read(archiveControllerProvider);
       expect(view.query, 'k');
-      final caption = inPage(find.textContaining(_l.uiArchiveCoordinatorshipsLc));
+      final caption = inPage(
+        find.textContaining(_l.uiArchiveCoordinatorshipsLc),
+      );
       final captionText = tester.widget<Text>(caption).data;
 
       final state = tester.state(page);

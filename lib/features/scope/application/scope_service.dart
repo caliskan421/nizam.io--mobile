@@ -6,6 +6,8 @@ import '../../../core/scope/scope_store.dart';
 import '../../../core/server/server_binding.dart';
 import '../../../core/session/session_controller.dart';
 import '../../../core/session/session_state.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../data/program_repository.dart';
 import '../domain/program.dart';
 
@@ -76,7 +78,8 @@ class ScopeService {
     try {
       final slice = await programs();
       if (!slice.items.any((p) => p.id == id)) scope.clear();
-    } on Object {
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.scope);
       if (session.generation == generation) scope.suspend();
     }
   }

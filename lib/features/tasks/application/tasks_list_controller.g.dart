@@ -134,7 +134,7 @@ final class TasksListControllerProvider
 }
 
 String _$tasksListControllerHash() =>
-    r'41e0b673e1db86fb96543a5914c4b30445042690';
+    r'c3c53699957cd9ad1198da935f3695d7344e5804';
 
 /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
 /// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama
@@ -283,7 +283,7 @@ final class TasksListResultProvider
   }
 }
 
-String _$tasksListResultHash() => r'96feb52e6be99f5a574971756eee1f3fac9fc1a7';
+String _$tasksListResultHash() => r'b2aa0432aa96ee08892418951a03644f1003967e';
 
 /// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
 /// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır

@@ -7,7 +7,11 @@ import '../../../../core/ui/widgets/feedback/feedback_test_support.dart';
 void main() {
   setUpFonts();
 
-  Future<int> drag(WidgetTester tester, double dx, {bool enabled = true}) async {
+  Future<int> drag(
+    WidgetTester tester,
+    double dx, {
+    bool enabled = true,
+  }) async {
     var replies = 0;
     await tester.pumpWidget(
       testApp(

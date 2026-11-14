@@ -63,6 +63,55 @@ void main() {
     },
   );
 
+  testWidgets('tablet rol menüsü overlay boyutuyla sağ kenarda açılır', (
+    t,
+  ) async {
+    t.view.devicePixelRatio = 1;
+    t.view.physicalSize = const Size(1376, 1032);
+    addTearDown(t.view.reset);
+    var selected = false;
+    await t.pumpWidget(
+      MediaQuery(
+        // Navigator'ın miras aldığı boyut ile gerçek yerleşim farklı olabilir.
+        data: const MediaQueryData(size: Size(800, 1032)),
+        child: testApp(
+          Align(
+            alignment: Alignment.topRight,
+            child: Builder(
+              builder: (context) => TextButton(
+                onPressed: () {
+                  final box = context.findRenderObject()! as RenderBox;
+                  NzFlyoutMenu.show(
+                    context,
+                    semanticLabel: 'Rol seç',
+                    anchor: box.localToGlobal(Offset.zero) & box.size,
+                    below: true,
+                    alignEnd: true,
+                    entries: [
+                      NzFlyoutItem(
+                        label: 'Üye',
+                        onSelected: () => selected = true,
+                      ),
+                    ],
+                  );
+                },
+                child: const Text('Rol kartı'),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await t.tap(find.text('Rol kartı'));
+    await t.pumpAndSettle();
+    expect(t.takeException(), isNull);
+    expect(find.text('Üye'), findsOneWidget);
+    await t.tap(find.text('Üye'));
+    await t.pumpAndSettle();
+    expect(selected, isTrue);
+    expect(find.text('Üye'), findsNothing);
+  });
+
   testWidgets('sayaç sağda; seçili satır okuyucuda seçili ve vurgulu', (
     t,
   ) async {

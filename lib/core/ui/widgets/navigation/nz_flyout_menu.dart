@@ -71,7 +71,21 @@ abstract final class NzFlyoutMenu {
     final navigator = Navigator.of(context, rootNavigator: true);
     // Kök Navigator bağlamı: kabuğun `extendBody` dolgusu (menü yüksekliği) burada yoktur;
     // yalnız cihazın alt güvenli alanı vardır.
-    final screen = MediaQuery.sizeOf(navigator.context);
+    final overlay = navigator.overlay!.context.findRenderObject()! as RenderBox;
+    final screen = overlay.size;
+    // Kart genel koordinat taşır; menü kök overlay'in yerel alanında çizilir.
+    if (anchor != null) {
+      anchor = Rect.fromPoints(
+        overlay.globalToLocal(anchor.topLeft),
+        overlay.globalToLocal(anchor.bottomRight),
+      );
+      anchor = Rect.fromLTRB(
+        anchor.left.clamp(0.0, screen.width),
+        anchor.top.clamp(0.0, screen.height),
+        anchor.right.clamp(0.0, screen.width),
+        anchor.bottom.clamp(0.0, screen.height),
+      );
+    }
     final down = below && anchor != null;
     final reserved = anchor == null
         ? NzFloatingNav.reservedHeight(navigator.context)
@@ -86,7 +100,9 @@ abstract final class NzFlyoutMenu {
     };
     // Bağlantıda yatay kenar bağlantının kenarıdır.
     final left = anchor == null || alignEnd ? null : anchor.left;
-    final right = anchor == null || !alignEnd ? null : screen.width - anchor.right;
+    final right = anchor == null || !alignEnd
+        ? null
+        : screen.width - anchor.right;
     final top = down ? anchor.bottom + NizamioSpacing.space2 : null;
     return navigator.push(
       PageRouteBuilder<void>(

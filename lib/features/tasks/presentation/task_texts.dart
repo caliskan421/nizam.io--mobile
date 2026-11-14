@@ -142,14 +142,6 @@ extension TaskTexts on AppLocalizations {
   String inviteExisting(String name) =>
       '$uiTasksIvExisting $name. $uiTasksIvExistingTail';
 
-  /// "76 görev" ya da "8 / 76 görev".
-  String countLine(int shown, int total) => shown == total
-      ? '$total $uiTasksTasksLc'
-      : '$shown / $total $uiTasksTasksLc';
-
-  String groupedCountLine(int tasks, int groups) =>
-      '$tasks $uiTasksTasksLc · $groups $uiTasksCoordsLc';
-
   String lateBadge(int days) => '$days $uiTasksLateTail';
 
   String subtaskLine(int done, int total) =>

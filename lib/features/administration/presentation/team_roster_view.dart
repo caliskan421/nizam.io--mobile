@@ -13,6 +13,7 @@ import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/nz_kicker.dart';
+import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../coordinatorships/coordinatorships.dart';
 import '../../messages/messages.dart';
 import '../../scope/scope.dart';
@@ -44,6 +45,7 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
   final _search = TextEditingController();
   final _searchFocus = FocusNode();
   bool _showAll = false;
+  bool _searchOpen = false;
   String _query = '';
   AdminUserRoleFilter _role = AdminUserRoleFilter.all;
 
@@ -58,6 +60,14 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
     _search.clear();
     _searchFocus.unfocus();
     setState(() => _query = '');
+  }
+
+  /// Görevler sayfasındaki gibi: simge alanı açar (odak açılış hareketi bitince), kapanınca
+  /// sorgu temizlenir.
+  void _toggleSearch() {
+    final opening = !_searchOpen;
+    setState(() => _searchOpen = opening);
+    if (!opening) _clearSearch();
   }
 
   void _retry() {
@@ -122,6 +132,15 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
                 ],
               ),
             ),
+            const Gap(NizamioSpacing.space1),
+            Semantics(
+              selected: _searchOpen,
+              child: NzIconButton.circle(
+                icon: NzIcons.search,
+                semanticLabel: l.uiUsersSearch,
+                onPressed: _toggleSearch,
+              ),
+            ),
             if (source.canAddMembers && department != null) ...[
               const Gap(NizamioSpacing.space1),
               NzIconButton.circleAccent(
@@ -132,15 +151,23 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
             ],
           ],
         ),
-        const Gap(NizamioSpacing.space5),
-        NzSearchField(
-          controller: _search,
-          focusNode: _searchFocus,
-          onDismiss: _clearSearch,
-          label: l.uiUsersSearch,
-          hint: l.uiUsersTeamSearchHint,
-          onChanged: (text) => setState(() => _query = text),
-          onClear: () => setState(() => _query = ''),
+        NzReveal(
+          open: _searchOpen,
+          onOpened: _searchFocus.requestFocus,
+          child: Padding(
+            padding: const EdgeInsets.only(top: NizamioSpacing.space5),
+            child: NzSearchField(
+              controller: _search,
+              focusNode: _searchFocus,
+              onDismiss: () {
+                if (_searchOpen) _toggleSearch();
+              },
+              label: l.uiUsersSearch,
+              hint: l.uiUsersTeamSearchHint,
+              onChanged: (text) => setState(() => _query = text),
+              onClear: () => setState(() => _query = ''),
+            ),
+          ),
         ),
         const Gap(NizamioSpacing.gapLg),
         NzPillTabs(

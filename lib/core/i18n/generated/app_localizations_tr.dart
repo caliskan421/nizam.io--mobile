@@ -5807,9 +5807,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksCardAssignedBy => 'Atayan';
 
   @override
-  String get uiTasksMemberScopeHint => 'yalnız sana atananlar';
-
-  @override
   String get uiTasksMemberStatusDesc =>
       'Bu görevde yalnız sana açık adımlar gösteriliyor.';
 

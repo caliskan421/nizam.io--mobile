@@ -359,7 +359,6 @@
     "ui.tasks.view_returned": "İade",
     "ui.tasks.list_returned": "iade edilenler",
     "ui.tasks.card_assigned_by": "Atayan",
-    "ui.tasks.member_scope_hint": "yalnız sana atananlar",
     "ui.tasks.member_status_desc": "Bu görevde yalnız sana açık adımlar gösteriliyor.",
     "ui.tasks.member_no_transitions": "Bu aşamada senin için yapılacak durum değişikliği yok; koordinatörün kararı bekleniyor.",
     "ui.tasks.submit_option": "Onaya sun",

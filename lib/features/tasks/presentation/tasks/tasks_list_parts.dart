@@ -213,21 +213,6 @@ List<Widget> tasksListChildren(
         style: t.caption.copyWith(color: c.textMuted),
       ),
     ],
-    Text(
-      [
-        if (sort == TaskSort.coordinatorship)
-          l.groupedCountLine(list.length, r.groups.length)
-        else
-          l.countLine(
-            state.limit < list.length ? state.limit : list.length,
-            list.length,
-          ),
-        // Üye listesi yalnız kendine atananlardır (sunucu kümesi).
-        if (member) l.uiTasksMemberScopeHint,
-      ].join(' · '),
-      textAlign: TextAlign.center,
-      style: t.caption.copyWith(color: c.textMuted),
-    ),
   ];
 }
 

@@ -11146,12 +11146,6 @@ abstract class AppLocalizations {
   /// **'Atayan'**
   String get uiTasksCardAssignedBy;
 
-  /// ui.tasks.member_scope_hint
-  ///
-  /// In tr, this message translates to:
-  /// **'yalnız sana atananlar'**
-  String get uiTasksMemberScopeHint;
-
   /// ui.tasks.member_status_desc
   ///
   /// In tr, this message translates to:

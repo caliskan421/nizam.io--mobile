@@ -7369,10 +7369,6 @@
   "@uiTasksCardAssignedBy": {
     "description": "ui.tasks.card_assigned_by"
   },
-  "uiTasksMemberScopeHint": "yalnız sana atananlar",
-  "@uiTasksMemberScopeHint": {
-    "description": "ui.tasks.member_scope_hint"
-  },
   "uiTasksMemberStatusDesc": "Bu görevde yalnız sana açık adımlar gösteriliyor.",
   "@uiTasksMemberStatusDesc": {
     "description": "ui.tasks.member_status_desc"

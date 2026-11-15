@@ -188,9 +188,7 @@ void main() {
     expect(t.getSize(find.byKey(GanttChart.labelsKey)).width, 300);
     await t.tap(find.text('Aylık'));
     await t.pumpAndSettle();
-    final monthly = t
-        .widget<GanttChart>(find.byKey(HorizontalTimelinePage.chartKey))
-        .layout;
+    final monthly = t.widget<GanttChart>(find.byType(GanttChart)).layout;
     expect(monthly.view.state.zoom, GanttZoom.monthly);
     expect(monthly.ticks, hasLength(12));
     expect(

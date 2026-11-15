@@ -90,7 +90,9 @@ class _GanttSelectionCardState extends ConsumerState<GanttSelectionCard> {
         return;
       }
       _needsSelection = false;
-      _ctrl.select(owner.code);
+      if (ref.read(timelineControllerProvider(_scope)).selected != owner.code) {
+        _ctrl.select(owner.code);
+      }
     });
   }
 

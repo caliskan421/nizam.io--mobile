@@ -94,10 +94,10 @@ class GanttChart extends StatefulWidget {
   static ValueKey<String> barKey(String code) => ValueKey('gantt-bar-$code');
 
   @override
-  State<GanttChart> createState() => _GanttChartState();
+  State<GanttChart> createState() => GanttChartState();
 }
 
-class _GanttChartState extends State<GanttChart> {
+class GanttChartState extends State<GanttChart> {
   late final ScrollController _h =
       widget.horizontalController ?? ScrollController();
   final _v = ScrollController();
@@ -109,9 +109,9 @@ class _GanttChartState extends State<GanttChart> {
   }
 
   @override
-  void didUpdateWidget(GanttChart old) {
-    super.didUpdateWidget(old);
-    if (old.center.serial != widget.center.serial) {
+  void didUpdateWidget(GanttChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.center.serial != widget.center.serial) {
       _schedule(smooth: widget.center.smooth);
     }
   }
@@ -121,6 +121,30 @@ class _GanttChartState extends State<GanttChart> {
     if (widget.horizontalController == null) _h.dispose();
     _v.dispose();
     super.dispose();
+  }
+
+  /// Yapışkan görev etiketi ya da çubuk; kart dışındaki genel koordinat içindir.
+  String? taskAt(Offset globalPosition) {
+    final box = context.findRenderObject()! as RenderBox;
+    final point = box.globalToLocal(globalPosition);
+    if (!(Offset.zero & box.size).contains(point) ||
+        point.dy < GanttGeometry.stickyHeader) {
+      return null;
+    }
+    final y =
+        point.dy - GanttGeometry.stickyHeader + (_v.hasClients ? _v.offset : 0);
+    final layout = widget.layout;
+    if (point.dx < layout.labelWidth) {
+      final index = y ~/ GanttGeometry.row;
+      if (index < 0 || index >= layout.rows.length) return null;
+      return switch (layout.rows[index].row) {
+        GanttTaskRow(:final task) => task.code,
+        _ => null,
+      };
+    }
+    return layout.barAt(
+      Offset(point.dx + (_h.hasClients ? _h.offset : 0) - layout.labelWidth, y),
+    );
   }
 
   /// Yerleşimden sonra (yeni genişlik ve kaydırma sınırı belliyken) ortalar.
@@ -171,7 +195,9 @@ class _GanttChartState extends State<GanttChart> {
         return SingleChildScrollView(
           key: GanttChart.horizontalKey,
           controller: _h,
-          physics: const ClampingScrollPhysics(),
+          physics: l.view.state.selected == null
+              ? const ClampingScrollPhysics()
+              : const NeverScrollableScrollPhysics(),
           scrollDirection: Axis.horizontal,
           child: SizedBox(
             width: l.totalWidth,
@@ -193,7 +219,9 @@ class _GanttChartState extends State<GanttChart> {
                   child: Scrollable(
                     key: GanttChart.verticalKey,
                     controller: _v,
-                    physics: const ClampingScrollPhysics(),
+                    physics: l.view.state.selected == null
+                        ? const ClampingScrollPhysics()
+                        : const NeverScrollableScrollPhysics(),
                     viewportBuilder: (context, offset) => Stack(
                       fit: StackFit.expand,
                       children: [
@@ -254,7 +282,7 @@ class _GanttChartState extends State<GanttChart> {
 
 /// Gövdeyi dikey kaydırma ofsetiyle gösteren görünüm. Etiket sütunu ([_Labels]) aynı ofseti
 /// kendi görünümünde paylaşır; ikisi de aynı kaydırma sınırını bildirir (içerik boyu
-/// [_GanttChartState] `height`; satırlar görünür alandan kısaysa ikisinde de sınır 0).
+/// [GanttChartState] `height`; satırlar görünür alandan kısaysa ikisinde de sınır 0).
 Widget _scrolled(ViewportOffset offset, Widget child) => Viewport(
   offset: offset,
   slivers: [SliverToBoxAdapter(child: child)],

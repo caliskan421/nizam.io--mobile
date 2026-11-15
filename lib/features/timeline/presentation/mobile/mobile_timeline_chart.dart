@@ -46,10 +46,10 @@ class MobileTimelineChart extends StatefulWidget {
   static ValueKey<String> groupKey(String code) =>
       ValueKey('mobile-timeline-group-$code');
   @override
-  State<MobileTimelineChart> createState() => _MobileTimelineChartState();
+  State<MobileTimelineChart> createState() => MobileTimelineChartState();
 }
 
-class _MobileTimelineChartState extends State<MobileTimelineChart> {
+class MobileTimelineChartState extends State<MobileTimelineChart> {
   final _h = ScrollController();
   final _v = ScrollController();
   late MobileTimelineLayout _layout = MobileTimelineLayout(widget.view);
@@ -61,11 +61,11 @@ class _MobileTimelineChartState extends State<MobileTimelineChart> {
   }
 
   @override
-  void didUpdateWidget(MobileTimelineChart old) {
-    super.didUpdateWidget(old);
+  void didUpdateWidget(MobileTimelineChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
     final previous = _layout;
     _layout = MobileTimelineLayout(widget.view);
-    if (old.view.state.scale != widget.view.state.scale) {
+    if (oldWidget.view.state.scale != widget.view.state.scale) {
       final offset = _h.hasClients ? _h.offset : 0.0;
       final today = previous.todayX - offset;
       final anchor = today > 0 && today < _viewport ? today : _viewport / 2;
@@ -74,7 +74,7 @@ class _MobileTimelineChartState extends State<MobileTimelineChart> {
       WidgetsBinding.instance.addPostFrameCallback(
         (_) => _jump(_layout.x(day) - anchor),
       );
-    } else if (old.view.state.selected != widget.view.state.selected &&
+    } else if (oldWidget.view.state.selected == null &&
         widget.view.state.selected != null) {
       final bar = _layout.barOf(widget.view.state.selected!);
       if (bar != null) {
@@ -86,6 +86,34 @@ class _MobileTimelineChartState extends State<MobileTimelineChart> {
         });
       }
     }
+  }
+
+  /// Genel dokunma noktasını, mevcut kaydırma ofsetindeki görev çubuğuna çevirir.
+  String? taskAt(Offset globalPosition) {
+    final box = context.findRenderObject()! as RenderBox;
+    final point = box.globalToLocal(globalPosition);
+    if (!(Offset.zero & box.size).contains(point) ||
+        point.dy < MobileTimelineLayout.axisHeight) {
+      return null;
+    }
+    final content = Offset(
+      point.dx + (_h.hasClients ? _h.offset : 0),
+      point.dy -
+          MobileTimelineLayout.axisHeight +
+          (_v.hasClients ? _v.offset : 0),
+    );
+    for (final bar in _layout.bars) {
+      final rect = bar.rect.expandToInclude(
+        Rect.fromLTWH(
+          bar.rect.right,
+          bar.rect.top,
+          bar.requestWidth,
+          bar.rect.height,
+        ),
+      );
+      if (rect.contains(content)) return bar.task.code;
+    }
+    return null;
   }
 
   void _jump(double offset) {
@@ -119,7 +147,9 @@ class _MobileTimelineChartState extends State<MobileTimelineChart> {
               key: MobileTimelineChart.horizontalKey,
               controller: _h,
               scrollDirection: Axis.horizontal,
-              physics: const ClampingScrollPhysics(),
+              physics: selected == null
+                  ? const ClampingScrollPhysics()
+                  : const NeverScrollableScrollPhysics(),
               child: SizedBox(
                 width: math.max(l.width, box.maxWidth),
                 height: box.maxHeight,
@@ -141,7 +171,9 @@ class _MobileTimelineChartState extends State<MobileTimelineChart> {
                       child: SingleChildScrollView(
                         key: MobileTimelineChart.verticalKey,
                         controller: _v,
-                        physics: const ClampingScrollPhysics(),
+                        physics: selected == null
+                            ? const ClampingScrollPhysics()
+                            : const NeverScrollableScrollPhysics(),
                         child: SizedBox(
                           width: l.width,
                           height: height,

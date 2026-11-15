@@ -32,6 +32,7 @@ import 'mobile/mobile_timeline_chart.dart';
 import 'timeline_texts.dart';
 import 'widgets/timeline_feedback.dart';
 import 'widgets/timeline_header.dart';
+import 'widgets/timeline_selection_backdrop.dart';
 import 'widgets/timeline_selection_host.dart';
 import 'widgets/timeline_sheets.dart';
 import 'widgets/timeline_tabs.dart';
@@ -57,6 +58,7 @@ class TimelinePage extends ConsumerStatefulWidget {
 class _TimelinePageState extends ConsumerState<TimelinePage> {
   /// Telefonda boş çizelge alanına dokunmak başlıkları gizler/gösterir.
   /// Tablette ana çizelge kendi sayfasında korunur.
+  final _chartKey = GlobalKey<MobileTimelineChartState>();
   bool _full = false;
   bool _started = false;
   bool _searchOpen = false;
@@ -403,6 +405,7 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                               : 0,
                           child: ClipRect(
                             child: MobileTimelineChart(
+                              key: _chartKey,
                               view: v,
                               onBlankTap: _toggleFull,
                               bottomInset: bottom,
@@ -500,6 +503,15 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                     ),
                   ),
                 ),
+              ),
+            ),
+          if (sel != null)
+            Positioned.fill(
+              child: TimelineSelectionBackdrop(
+                selected: sel.task.code,
+                taskAt: (point) => _chartKey.currentState?.taskAt(point),
+                onSelect: ctrl.select,
+                onClose: ctrl.closeSelection,
               ),
             ),
           if (sel != null)

@@ -112,7 +112,8 @@ abstract final class NzFlyoutMenu {
         barrierColor: context.colors.scrimSoft,
         transitionDuration: NzMotion.of(context, NizamioMotion.durSheet),
         reverseTransitionDuration: NzMotion.of(context, NizamioMotion.durExit),
-        pageBuilder: (routeContext, _, _) => _FlyoutPanel(
+        pageBuilder: (routeContext, animation, _) => _FlyoutPanel(
+          animation: animation,
           semanticLabel: semanticLabel,
           entries: entries,
           bottom: reserved + NizamioSpacing.space3,
@@ -122,22 +123,13 @@ abstract final class NzFlyoutMenu {
           top: top,
         ),
         transitionsBuilder: (_, animation, _, child) {
-          final curved = CurvedAnimation(
-            parent: animation,
-            curve: NizamioMotion.easeSpring,
-            reverseCurve: NzMotion.exitReverse,
-          );
           return FadeTransition(
             opacity: CurvedAnimation(
               parent: animation,
               curve: NizamioMotion.easeOut,
               reverseCurve: NzMotion.exitReverse,
             ),
-            child: ScaleTransition(
-              scale: Tween<double>(begin: 0.6, end: 1).animate(curved),
-              alignment: corner,
-              child: child,
-            ),
+            child: child,
           );
         },
       ),
@@ -147,6 +139,7 @@ abstract final class NzFlyoutMenu {
 
 class _FlyoutPanel extends StatelessWidget {
   const _FlyoutPanel({
+    required this.animation,
     required this.semanticLabel,
     required this.entries,
     required this.bottom,
@@ -156,6 +149,7 @@ class _FlyoutPanel extends StatelessWidget {
     this.top,
   });
 
+  final Animation<double> animation;
   final String semanticLabel;
   final List<NzFlyoutEntry> entries;
   final double bottom;
@@ -177,32 +171,45 @@ class _FlyoutPanel extends StatelessWidget {
       ),
       child: Align(
         alignment: alignment,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: NizamioSize.flyoutWidth),
-          child: Semantics(
-            scopesRoute: true,
-            namesRoute: true,
-            explicitChildNodes: true,
-            label: semanticLabel,
-            child: NzGlass(
-              tone: NzGlassTone.menu,
-              borderRadius: BorderRadius.circular(NizamioRadius.flyout),
-              shadow: context.shadows.menu,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(NizamioSpacing.space2),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var i = 0; i < entries.length; i++)
-                      switch (entries[i]) {
-                        final NzFlyoutSection s => _Section(
-                          label: s.label,
-                          divided: i > 0,
-                        ),
-                        final NzFlyoutItem item => _Row(item: item),
-                      },
-                  ],
+        // Dış dolgu ölçeklenmez; büyüme menünün karta bağlı köşesinde kalır.
+        child: ScaleTransition(
+          alignment: alignment,
+          scale: Tween<double>(begin: 0.6, end: 1).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: NizamioMotion.easeSpring,
+              reverseCurve: NzMotion.exitReverse,
+            ),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: NizamioSize.flyoutWidth,
+            ),
+            child: Semantics(
+              scopesRoute: true,
+              namesRoute: true,
+              explicitChildNodes: true,
+              label: semanticLabel,
+              child: NzGlass(
+                tone: NzGlassTone.menu,
+                borderRadius: BorderRadius.circular(NizamioRadius.flyout),
+                shadow: context.shadows.menu,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(NizamioSpacing.space2),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < entries.length; i++)
+                        switch (entries[i]) {
+                          final NzFlyoutSection s => _Section(
+                            label: s.label,
+                            divided: i > 0,
+                          ),
+                          final NzFlyoutItem item => _Row(item: item),
+                        },
+                    ],
+                  ),
                 ),
               ),
             ),

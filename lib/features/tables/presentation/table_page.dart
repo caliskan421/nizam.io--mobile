@@ -19,6 +19,7 @@ import '../application/tables_controller.dart';
 import '../domain/table_document.dart';
 import 'table_cell_value.dart';
 import 'table_navigation_sheets.dart';
+import 'table_server_preview.dart';
 import 'table_sheet_host.dart';
 import 'table_sheets.dart';
 import 'table_texts.dart';
@@ -66,7 +67,9 @@ class _TablePageState extends ConsumerState<TablePage> {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final d = ref.watch(tablesControllerProvider).document(widget.id);
+    final tables = ref.watch(tablesControllerProvider);
+    if (tables.remote) return TableServerPreview(id: widget.id);
+    final d = tables.document(widget.id);
     if (d == null) {
       return NzPage(
         title: l.uiTablesTitle,

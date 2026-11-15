@@ -82,6 +82,17 @@ Dev prototipi login ekranında açılır. Alanlar boşken **Giriş yap** örnek 
 açar; kimlik doğrulama isteği göndermez ve oturum oluşturmaz. Prod giriş doğrulaması korunur.
 iOS simülatörü: `flutter run -d <simulator-id> --flavor dev -t lib/main_dev.dart`.
 
+Tablolar listeleme/oluşturma, sütun kurulumu ve paylaşım için pinli backend uçlarını kullanır.
+Yeni tablo varsayılan yalnız sahibine açıktır. Kişi başına görüntüleme/düzenleme ve tek
+koordinatörlük ekibi için yetki seçilir; konum paylaşım seçiminden türetilir. Hedefin
+koordinatörü/yöneticisi doğrudan ekip erişimini açar; diğer üyeler kişisel tablo oluşturup
+`propose_move` ile onay ister. Onay gereken ekip paylaşımı ayrıca kişi seçimi taşımaz.
+Kişiler mevcut yetkili görev/ekip kataloğuyla sınırlıdır; herkese açık genel kişi seçici ucu yoktur.
+Oluşturma, sütun ve paylaşım ayrı isteklerdir: form aynı oturumda kapanıp açılsa da kalan
+adımlar aynı işlem anahtarlarıyla sürer. Hesap/kapsam değişimi taslağı siler. Canlı listede
+örnek veri yoktur; hata demo veriye düşmez. Tablo detayı bu aşamada sunucudan ilk 200 satırlık
+salt okunur önizlemedir; prototip düzenleme/paylaşım/kopyalama komutları canlı tabloda çalışmaz.
+
 ## Uygulama kimliği ve imzalama
 
 Ürün sahibi 2026-11-11'de reverse-domain kimliğini kabul etti: Android `applicationId` ve

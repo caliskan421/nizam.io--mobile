@@ -1,14 +1,23 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
+import '../../tasks/tasks.dart' show taskCatalogControllerProvider;
 import '../domain/table_document.dart';
+import '../domain/tables_repository.dart';
+import 'table_create_job.dart';
+import 'tables_server.dart';
 
 final tablesControllerProvider =
     NotifierProvider<TablesController, TablesState>(TablesController.new);
 
-/// Prototip verisi yalnız bellektedir. Hesap/oturum/kapsam değişimi bütün taslakları siler.
+/// Canlı liste sunucudan okunur; prototip yalnız açık test geçersiz kılmasındadır.
+/// Hesap/oturum/kapsam değişimi bütün veri ve bekleyen kayıtları siler.
 class TablesController extends Notifier<TablesState> {
   int _serial = 0;
+  int _serverLoad = 0;
+  TableCreateJob? pendingCreateJob;
   late bool _demoExtended = false;
   late bool _referenceSampleReady = false;
   Object _lease = Object();
@@ -21,6 +30,16 @@ class TablesController extends Notifier<TablesState> {
     _demoExtended = false;
     _referenceSampleReady = false;
     _lease = Object();
+    pendingCreateJob = null;
+    if (ref.watch(tablesRepositoryProvider) != null) {
+      Future.microtask(reloadServer);
+      return TablesState(
+        documents: const [],
+        area: TableArea.personal,
+        remote: true,
+        loading: true,
+      );
+    }
     return TablesState(
       documents: [
         TableDocument(
@@ -130,6 +149,7 @@ class TablesController extends Notifier<TablesState> {
 
   /// Genişletilmiş örnek seti mevcut oturumdaki düzenlemeleri silmeden ekler.
   void ensureDemoFixtures() {
+    if (ref.read(tablesRepositoryProvider) != null) return;
     _ensureReferenceSample();
     if (_demoExtended) return;
     _demoExtended = true;
@@ -315,17 +335,71 @@ class TablesController extends Notifier<TablesState> {
     if (d != null && d.editable) _put(change(d));
   }
 
+  Future<void> reloadServer({bool refreshChoices = false}) async {
+    final repository = ref.read(tablesRepositoryProvider);
+    if (repository == null) return;
+    final lease = _lease;
+    final load = ++_serverLoad;
+    if (refreshChoices) {
+      ref.invalidate(taskCatalogControllerProvider);
+      ref.invalidate(tableSharingChoicesProvider);
+    }
+    final program = ref.read(scopeStateProvider).programId ?? '';
+    bool current() =>
+        ref.mounted && identical(lease, _lease) && load == _serverLoad;
+    state = state.copyWith(documents: [], loading: true, error: () => null);
+    try {
+      final choices = await ref.read(tableSharingChoicesProvider.future);
+      if (!current()) return;
+      final documents = <TableDocument>[];
+      for (final location in [
+        TableLocation(program),
+        for (final department in choices.departments.keys)
+          TableLocation(program, department.value),
+      ]) {
+        if (!current()) return;
+        documents.addAll(await repository.list(location, choices.accountId));
+      }
+      if (!current()) return;
+      state = state.copyWith(
+        documents: documents,
+        loading: false,
+        departmentNames: choices.departments,
+        error: () => null,
+      );
+    } on Object catch (e, st) {
+      final error = toReportedApiError(e, st, source: ReportSource.provider);
+      if (current()) {
+        state = state.copyWith(
+          documents: [],
+          loading: false,
+          error: () => error,
+        );
+      }
+    }
+  }
+
   String? create({
     required String title,
-    required TableArea area,
+    TableArea area = TableArea.personal,
     required List<TableField> fields,
     String unit = 'DEMO-A',
+    TableAccess teamAccess = TableAccess.off,
     Object? expectedLease,
     Map<TablePersonId, TableAccess> people = const {},
   }) {
+    if (ref.read(tablesRepositoryProvider) != null) return null;
     if ((expectedLease != null && !identical(expectedLease, _lease)) ||
         area == TableArea.shared ||
         title.trim().isEmpty ||
+        title.trim().runes.length > 200 ||
+        (teamAccess != TableAccess.off &&
+            (area != TableArea.coord ||
+                !tableDemoUnits.contains(unit) ||
+                ![TableAccess.view, TableAccess.edit].contains(teamAccess))) ||
+        people.values.any(
+          (v) => ![TableAccess.view, TableAccess.edit].contains(v),
+        ) ||
         fields.isEmpty) {
       return null;
     }
@@ -339,6 +413,7 @@ class TablesController extends Notifier<TablesState> {
           unit: unit,
           fields: fields,
           people: people,
+          teamAccess: teamAccess,
         ),
         ...state.documents,
       ],
@@ -368,7 +443,7 @@ class TablesController extends Notifier<TablesState> {
     String? unit,
   }) {
     final d = state.document(id);
-    if (d == null || area == TableArea.shared) return null;
+    if (d == null || d.remote || area == TableArea.shared) return null;
     final copy = d.copyWith(
       id: _id('copy'),
       area: area ?? (d.area == TableArea.shared ? TableArea.personal : d.area),
@@ -379,6 +454,7 @@ class TablesController extends Notifier<TablesState> {
       people: {},
       programAccess: TableAccess.off,
       sharedUnits: [],
+      teamAccess: TableAccess.off,
     );
     state = state.copyWith(documents: [copy, ...state.documents]);
     return copy.id;

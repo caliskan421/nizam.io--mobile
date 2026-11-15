@@ -23,7 +23,9 @@ Future<void> showRecentTables(
   ref,
   context,
   title: context.l10n.uiTablesRecentAction,
-  description: 'En son düzenlenen tablolar',
+  description: ref.read(tablesControllerProvider).remote
+      ? 'Erişebildiğin tablolar'
+      : 'En son düzenlenen tablolar',
   builder: (sheet) => Consumer(
     builder: (context, ref, _) {
       final state = ref.watch(tablesControllerProvider);
@@ -71,7 +73,9 @@ Future<void> showRecentTables(
                             ),
                             const Gap(2),
                             Text(
-                              '${l.tableArea(d.area)}${d.area == TableArea.coord ? ' · ${l.tableUnit(d.unit)}' : ''} · ${d.rows.length} ${l.uiTablesRow}',
+                              d.remote
+                                  ? '${l.tableArea(d.area)}${d.unit.isNotEmpty ? ' · ${state.departmentNames[TableDepartmentId(d.unit)] ?? 'Koordinatörlük'}' : ''}'
+                                  : '${l.tableArea(d.area)}${d.area == TableArea.coord ? ' · ${l.tableUnit(d.unit)}' : ''} · ${d.rows.length} ${l.uiTablesRow}',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: context.text.caption.copyWith(

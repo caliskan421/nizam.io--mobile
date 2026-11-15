@@ -11,6 +11,7 @@ Future<void> showTableSheet(
   required String title,
   required WidgetBuilder builder,
   bool expandable = false,
+  ValueNotifier<bool>? expansion,
   String? description,
   NzSheetActionsBuilder? actions,
 }) {
@@ -20,6 +21,7 @@ Future<void> showTableSheet(
     title: title,
     description: description,
     expandable: expandable,
+    expansion: expansion,
     actions: actions == null
         ? null
         : (sheet) => [

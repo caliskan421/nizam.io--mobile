@@ -1,8 +1,14 @@
+import '../../../core/errors/api_error.dart';
+
 extension type const TableFieldId(String value) {}
 
 extension type const TablePersonId(String value) {}
 
-/// Oturumluk tablo alanları; hiçbir API/gerçek kişi verisi taşımaz.
+extension type const TableDepartmentId(String value) {}
+
+extension type const TableStepId(String value) {}
+
+/// Görünüme ait tablo alanları; üretilmiş API tipleri veri katmanında eşlenir.
 enum TableFieldType {
   text,
   number,
@@ -83,14 +89,23 @@ class TableDocument {
     List<TableRecord> rows = const [],
     this.access = TableAccess.owner,
     this.programAccess = TableAccess.off,
+    this.teamAccess = TableAccess.off,
     List<String> sharedUnits = const [],
     Map<TablePersonId, TableAccess> people = const {},
     this.unit = 'DEMO',
+    this.remote = false,
+    this.programId = '',
+    this.ownerId = '',
+    this.previewHasMore = false,
   }) : fields = List.unmodifiable(fields),
        rows = List.unmodifiable(rows),
        people = Map.unmodifiable(people),
        sharedUnits = List.unmodifiable(sharedUnits);
   final String id;
+  final bool remote;
+  final String programId;
+  final String ownerId;
+  final bool previewHasMore;
   final String title;
   final TableArea area;
   final String unit;
@@ -98,11 +113,14 @@ class TableDocument {
   final List<TableRecord> rows;
   final TableAccess access;
   final TableAccess programAccess;
+
+  /// Seçili koordinatörlüğün dinamik ekip erişimi; kişisel tabloda kapalıdır.
+  final TableAccess teamAccess;
   final List<String> sharedUnits;
   final Map<TablePersonId, TableAccess> people;
   bool get editable =>
-      access == TableAccess.owner || access == TableAccess.edit;
-  bool get canShare => access == TableAccess.owner;
+      !remote && (access == TableAccess.owner || access == TableAccess.edit);
+  bool get canShare => !remote && access == TableAccess.owner;
   TableDocument copyWith({
     String? id,
     String? title,
@@ -112,10 +130,16 @@ class TableDocument {
     List<TableRecord>? rows,
     TableAccess? access,
     TableAccess? programAccess,
+    TableAccess? teamAccess,
     List<String>? sharedUnits,
     Map<TablePersonId, TableAccess>? people,
+    bool? previewHasMore,
   }) => TableDocument(
     id: id ?? this.id,
+    remote: remote,
+    programId: programId,
+    ownerId: ownerId,
+    previewHasMore: previewHasMore ?? this.previewHasMore,
     title: title ?? this.title,
     area: area ?? this.area,
     unit: unit ?? this.unit,
@@ -123,6 +147,7 @@ class TableDocument {
     rows: rows ?? this.rows,
     access: access ?? this.access,
     programAccess: programAccess ?? this.programAccess,
+    teamAccess: teamAccess ?? this.teamAccess,
     sharedUnits: sharedUnits ?? this.sharedUnits,
     people: people ?? this.people,
   );
@@ -134,9 +159,17 @@ class TablesState {
     this.area = TableArea.coord,
     this.query = '',
     this.unit,
+    this.remote = false,
+    this.loading = false,
+    this.error,
+    this.departmentNames = const {},
   }) : documents = List.unmodifiable(documents);
   final List<TableDocument> documents;
   final TableArea area;
+  final bool remote;
+  final bool loading;
+  final ApiError? error;
+  final Map<TableDepartmentId, String> departmentNames;
   final String query;
   final String? unit;
   List<TableDocument> get visible => documents
@@ -159,8 +192,15 @@ class TablesState {
     TableArea? area,
     String? query,
     String? Function()? unit,
+    bool? loading,
+    ApiError? Function()? error,
+    Map<TableDepartmentId, String>? departmentNames,
   }) => TablesState(
     documents: documents ?? this.documents,
+    remote: remote,
+    loading: loading ?? this.loading,
+    error: error == null ? this.error : error(),
+    departmentNames: departmentNames ?? this.departmentNames,
     area: area ?? this.area,
     query: query ?? this.query,
     unit: unit == null ? this.unit : unit(),

@@ -2,6 +2,7 @@
 // Türkçe yerelleştirme, geniş yüzey. Sayfalar kendi sağlayıcılarını ister (NzPage).
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:nizamio/app/router/app_nav.dart';
@@ -11,6 +12,8 @@ import 'package:nizamio/core/i18n/generated/app_localizations.dart';
 import 'package:nizamio/core/network/connectivity_monitor.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_app_nav.dart';
+import 'package:nizamio/features/tables/application/tables_controller.dart';
+import 'package:nizamio/features/tables/application/tables_server.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
 import '../../support/harness.dart';
@@ -21,13 +24,20 @@ Future<GoRouter> pumpRouter(
   ValueNotifier<AppPhase> phase, {
   double width = 800,
   double height = 1200,
+  List<Override> overrides = const [],
+  bool tablePrototype = true,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = Size(width, height);
   addTearDown(tester.view.reset);
   final router = createRouter(phase);
   addTearDown(router.dispose);
-  await pumpRouterWidget(tester, router);
+  await pumpRouterWidget(
+    tester,
+    router,
+    overrides: overrides,
+    tablePrototype: tablePrototype,
+  );
   return router;
 }
 
@@ -37,6 +47,8 @@ Future<void> pumpRouterWidget(
   WidgetTester tester,
   GoRouter router, {
   Harness? harness,
+  List<Override> overrides = const [],
+  bool tablePrototype = true,
 }) async {
   // Kapı rotaları gerçek feature sayfalarıdır (sunucu, giriş, kapsam…): sayfalar gerçek bileşim
   // kökünün portlarını okur. Sahte ağ her isteğe 404 verir; faz ValueNotifier'ı testin
@@ -52,6 +64,9 @@ Future<void> pumpRouterWidget(
         retry: (_, _) => null,
         overrides: [
           connectivityStateProvider.overrideWithValue(ConnectivityState.online),
+          if (tablePrototype) tablesRepositoryProvider.overrideWithValue(null),
+          tablesControllerProvider.overrideWith(TablesController.new),
+          ...overrides,
         ],
         child: Consumer(
           builder: (context, ref, _) => MaterialApp.router(

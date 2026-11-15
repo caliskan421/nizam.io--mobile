@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
+import 'package:nizamio/features/tables/application/tables_server.dart';
 import 'package:nizamio/features/tables/tables.dart';
 
 final _generationProvider = NotifierProvider<_Generation, int>(_Generation.new);
@@ -23,6 +24,7 @@ class _Program extends Notifier<String> {
 ProviderContainer openTables() {
   final c = ProviderContainer(
     overrides: [
+      tablesRepositoryProvider.overrideWithValue(null),
       sessionGenerationProvider.overrideWith(
         (ref) => ref.watch(_generationProvider),
       ),
@@ -37,6 +39,62 @@ ProviderContainer openTables() {
 }
 
 void main() {
+  test('yeni tablo varsayılan özel; ekip ve kişi yetkileri ayrı saklanır', () {
+    final c = openTables();
+    final controller = c.read(tablesControllerProvider.notifier);
+    const fields = [TableField(id: 'name', name: 'Ad')];
+    final privateId = controller.create(title: 'Özel', fields: fields)!;
+    final private = c.read(tablesControllerProvider).document(privateId)!;
+    expect(private.area, TableArea.personal);
+    expect(private.access, TableAccess.owner);
+    expect(private.people, isEmpty);
+    expect(private.teamAccess, TableAccess.off);
+    expect(private.programAccess, TableAccess.off);
+    final sharedId = controller.create(
+      title: 'Paylaşılan',
+      fields: fields,
+      area: TableArea.coord,
+      unit: 'DEMO-B',
+      teamAccess: TableAccess.view,
+      people: {const TablePersonId('demo-1'): TableAccess.edit},
+    )!;
+    final shared = c.read(tablesControllerProvider).document(sharedId)!;
+    expect(shared.unit, 'DEMO-B');
+    expect(shared.teamAccess, TableAccess.view);
+    expect(shared.people[const TablePersonId('demo-1')], TableAccess.edit);
+    final copyId = controller.duplicate(
+      sharedId,
+      empty: false,
+      suffix: 'kopya',
+    )!;
+    expect(
+      c.read(tablesControllerProvider).document(copyId)!.teamAccess,
+      TableAccess.off,
+    );
+    expect(c.read(tablesControllerProvider).document(copyId)!.people, isEmpty);
+  });
+  test('kişisel alanda ekip paylaşımı ve sahip yetkisi ataması reddedilir', () {
+    final c = openTables();
+    final controller = c.read(tablesControllerProvider.notifier);
+    const fields = [TableField(id: 'name', name: 'Ad')];
+    expect(
+      controller.create(
+        title: 'Yanlış',
+        fields: fields,
+        teamAccess: TableAccess.view,
+      ),
+      isNull,
+    );
+    expect(
+      controller.create(
+        title: 'Yanlış',
+        fields: fields,
+        people: {const TablePersonId('demo-1'): TableAccess.owner},
+      ),
+      isNull,
+    );
+  });
+
   test(
     'salt okunur tablo hücre, satır, sütun ve paylaşım komutlarını reddeder',
     () {

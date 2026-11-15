@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/errors/error_text.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/page/nz_page.dart';
-import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
-import '../../tasks/tasks.dart' show effectiveAccessProvider;
 import '../application/tables_controller.dart';
 import '../domain/table_document.dart';
+import 'table_create_sheet.dart';
 import 'table_navigation_sheets.dart';
-import 'table_sheet_host.dart';
 import 'table_sheets.dart';
 import 'table_texts.dart';
 import 'tables_header.dart';
@@ -28,6 +27,8 @@ class TablesPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
     final state = ref.watch(tablesControllerProvider);
+    String unitName(String id) =>
+        state.departmentNames[TableDepartmentId(id)] ?? l.tableUnit(id);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (context.mounted) {
         ref.read(tablesControllerProvider.notifier).ensureDemoFixtures();
@@ -62,16 +63,40 @@ class TablesPage extends ConsumerWidget {
                 .setArea(TableArea.values[i]),
           ),
         const Gap(NizamioSpacing.space4),
-        Text(
-          l.uiTablesDemoNotice,
-          style: context.text.caption.copyWith(color: context.colors.textMuted),
-        ),
+        if (!state.remote)
+          Text(
+            l.uiTablesDemoNotice,
+            style: context.text.caption.copyWith(
+              color: context.colors.textMuted,
+            ),
+          ),
         const Gap(NizamioSpacing.space4),
+        if (state.loading) const Center(child: CircularProgressIndicator()),
+        if (state.error case final error?) ...[
+          Text(errorText(l, error)),
+          TextButton(
+            onPressed: () => ref
+                .read(tablesControllerProvider.notifier)
+                .reloadServer(refreshChoices: true),
+            child: const Text('Yeniden dene'),
+          ),
+        ],
+        if (state.remote && !state.loading && state.error == null)
+          Align(
+            alignment: Alignment.centerRight,
+            child: TextButton(
+              onPressed: () => ref
+                  .read(tablesControllerProvider.notifier)
+                  .reloadServer(refreshChoices: true),
+              child: const Text('Yenile'),
+            ),
+          ),
         if (state.area == TableArea.coord && state.unit == null)
           LayoutBuilder(
             builder: (context, constraints) {
               final units = <String>{
-                ...tableDemoUnits,
+                if (!state.remote) ...tableDemoUnits,
+                ...state.departmentNames.keys.map((id) => id.value),
                 ...state.documents
                     .where((d) => d.area == TableArea.coord)
                     .map((d) => d.unit),
@@ -93,7 +118,7 @@ class TablesPage extends ConsumerWidget {
                       SizedBox(
                         width: width,
                         child: TablesUnitTile(
-                          name: l.tableUnit(unit),
+                          name: unitName(unit),
                           count: state.documents
                               .where(
                                 (d) =>
@@ -142,7 +167,7 @@ class TablesPage extends ConsumerWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Text(
-                  l.tableUnitCode(state.unit!),
+                  state.remote ? '▦' : l.tableUnitCode(state.unit!),
                   style: context.text.monoSm.copyWith(
                     color: context.colors.accentText,
                   ),
@@ -153,10 +178,10 @@ class TablesPage extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(l.tableUnit(state.unit!), style: context.text.titleSm),
+                    Text(unitName(state.unit!), style: context.text.titleSm),
                     const Gap(2),
                     Text(
-                      '${state.documents.where((d) => d.area == TableArea.coord && d.unit == state.unit).length} tablo · örnek çalışma alanı',
+                      '${state.documents.where((d) => d.area == TableArea.coord && d.unit == state.unit).length} tablo',
                       style: context.text.caption.copyWith(
                         color: context.colors.textMuted,
                       ),
@@ -214,7 +239,9 @@ class TablesPage extends ConsumerWidget {
           ),
           const Gap(18),
         ],
-        if (state.area != TableArea.coord || state.unit != null) ...[
+        if (!state.loading &&
+            state.error == null &&
+            (state.area != TableArea.coord || state.unit != null)) ...[
           Text(
             state.unit == null ? l.uiTablesRecent : 'tablolar',
             style: context.text.kicker,
@@ -290,68 +317,69 @@ class TablesPage extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(14),
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: context.colors.surfaceRaised,
-                  ),
-                  child: ShaderMask(
-                    shaderCallback: (bounds) => LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        context.colors.text,
-                        context.colors.text,
-                        context.colors.text.withValues(alpha: 0),
-                      ],
-                      stops: const [0, .62, 1],
-                    ).createShader(bounds),
-                    blendMode: BlendMode.dstIn,
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            for (var i = 0; i < fields.length; i++)
-                              cell(
-                                fields[i].name,
-                                heading: true,
-                                first: i == 0,
-                              ),
-                          ],
-                        ),
-                        for (final row in d.rows.take(3))
-                          DecoratedBox(
-                            decoration: BoxDecoration(
-                              border: Border(
-                                top: BorderSide(color: context.colors.border),
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                for (var i = 0; i < fields.length; i++)
-                                  cell(
-                                    tableCellText(
-                                      context,
-                                      fields[i],
-                                      row.cells[TableFieldId(fields[i].id)],
-                                      ref
-                                          .read(tablesControllerProvider)
-                                          .documents,
-                                    ),
-                                    first: i == 0,
-                                  ),
-                              ],
-                            ),
+            if (!d.remote)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(14),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: context.colors.surfaceRaised,
+                    ),
+                    child: ShaderMask(
+                      shaderCallback: (bounds) => LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          context.colors.text,
+                          context.colors.text,
+                          context.colors.text.withValues(alpha: 0),
+                        ],
+                        stops: const [0, .62, 1],
+                      ).createShader(bounds),
+                      blendMode: BlendMode.dstIn,
+                      child: Column(
+                        children: [
+                          Row(
+                            children: [
+                              for (var i = 0; i < fields.length; i++)
+                                cell(
+                                  fields[i].name,
+                                  heading: true,
+                                  first: i == 0,
+                                ),
+                            ],
                           ),
-                      ],
+                          for (final row in d.rows.take(3))
+                            DecoratedBox(
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  top: BorderSide(color: context.colors.border),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  for (var i = 0; i < fields.length; i++)
+                                    cell(
+                                      tableCellText(
+                                        context,
+                                        fields[i],
+                                        row.cells[TableFieldId(fields[i].id)],
+                                        ref
+                                            .read(tablesControllerProvider)
+                                            .documents,
+                                      ),
+                                      first: i == 0,
+                                    ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 12, 16, 14),
               child: Column(
@@ -359,7 +387,7 @@ class TablesPage extends ConsumerWidget {
                 children: [
                   Row(
                     children: [
-                      if (!d.editable) ...[
+                      if (!d.remote && !d.editable) ...[
                         Icon(
                           Icons.lock_outline,
                           size: 14,
@@ -374,7 +402,16 @@ class TablesPage extends ConsumerWidget {
                   ),
                   const Gap(4),
                   Text(
-                    '${d.rows.length} ${l.uiTablesRow} · ${d.fields.length} ${l.uiTablesColumn}${d.id.startsWith('demo-plan-') ? ' · Kadir Özbek' : ''}',
+                    d.remote
+                        ? (d.unit.isEmpty
+                              ? 'Kişisel tablo'
+                              : (ref
+                                        .read(tablesControllerProvider)
+                                        .departmentNames[TableDepartmentId(
+                                      d.unit,
+                                    )] ??
+                                    'Koordinatörlük tablosu'))
+                        : '${d.rows.length} ${l.uiTablesRow} · ${d.fields.length} ${l.uiTablesColumn}${d.id.startsWith('demo-plan-') ? ' · Kadir Özbek' : ''}',
                     style: context.text.caption.copyWith(
                       color: context.colors.textMuted,
                     ),
@@ -423,142 +460,11 @@ class TablesPage extends ConsumerWidget {
     WidgetRef ref, {
     TableTemplate initialTemplate = TableTemplate.blank,
   }) async {
-    final l = context.l10n;
-    var name = '';
-    final initial = ref.read(tablesControllerProvider);
-    // Koordinatörlük tablosu (tablo projesi, `POST /v1/table-projects`) yönetici ve koordinatör
-    // yüzüdür; üye görünümünde yalnız kişisel tablo açılır. Erişim bilinmiyorsa kısıt yok.
-    final access = ref.read(effectiveAccessProvider);
-    final canProject = access.canCreateTask || !access.known;
-    var area = initial.unit == null || !canProject
-        ? TableArea.personal
-        : TableArea.coord;
-    var template = initialTemplate;
-    var share = false;
-    var shareAccess = TableAccess.edit;
-    var selectedUnit = initial.unit ?? 'DEMO-A';
-    final epoch = ref.read(tablesControllerProvider.notifier);
-    final lease = epoch.lease;
-    final changes = ValueNotifier(0);
-    void update(VoidCallback change) {
-      change();
-      changes.value++;
-    }
-
-    await showTableSheet(
-      ref,
+    await showCreateTableSheet(
       context,
-      title: l.uiTablesNew,
-      actions: (sheet) => [
-        ValueListenableBuilder<int>(
-          valueListenable: changes,
-          builder: (context, _, _) => NzButton.primary(
-            label: l.uiTablesCreate,
-            onPressed: name.trim().isEmpty
-                ? null
-                : () {
-                    final id = epoch.create(
-                      expectedLease: lease,
-                      unit: selectedUnit,
-                      title: name,
-                      area: area,
-                      fields: l.templateFields(template),
-                      people: share
-                          ? {const TablePersonId('demo-1'): shareAccess}
-                          : {},
-                    );
-                    Navigator.of(sheet).pop();
-                    if (id != null) onOpenTable(id);
-                  },
-          ),
-        ),
-      ],
-      builder: (sheet) => ValueListenableBuilder<int>(
-        valueListenable: changes,
-        builder: (context, _, _) => Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            NzTextField(
-              label: l.uiTablesName,
-              onChanged: (v) => update(() => name = v),
-            ),
-            const Gap(NizamioSpacing.space4),
-            NzSelect<TableTemplate>(
-              label: l.uiTablesTemplate,
-              value: template,
-              items: [
-                for (final t in TableTemplate.values)
-                  NzSelectItem(value: t, label: l.tableTemplate(t)),
-              ],
-              onChanged: (v) {
-                if (v != null) update(() => template = v);
-              },
-            ),
-            const Gap(NizamioSpacing.space3),
-            NzSelect<TableArea>(
-              label: l.uiTablesDestination,
-              value: area,
-              items: [
-                for (final a in [
-                  TableArea.personal,
-                  if (canProject) TableArea.coord,
-                ])
-                  NzSelectItem(value: a, label: l.tableArea(a)),
-              ],
-              onChanged: (v) {
-                if (v != null) update(() => area = v);
-              },
-            ),
-            if (area == TableArea.coord) ...[
-              const Gap(NizamioSpacing.space3),
-              NzSelect<String>(
-                label: l.uiTablesCoord,
-                value: tableDemoUnits.contains(selectedUnit)
-                    ? selectedUnit
-                    : null,
-                items: [
-                  for (final unit in tableDemoUnits)
-                    NzSelectItem(value: unit, label: l.tableUnit(unit)),
-                ],
-                onChanged: (v) {
-                  if (v != null) update(() => selectedUnit = v);
-                },
-              ),
-            ],
-            const Gap(NizamioSpacing.space3),
-            NzFormRows(
-              rows: [
-                NzFormRow.toggle(
-                  label: l.uiTablesAddPerson,
-                  value: share,
-                  onChanged: (v) => update(() => share = v),
-                ),
-              ],
-            ),
-            if (share) ...[
-              const Gap(NizamioSpacing.space3),
-              NzSelect<TableAccess>(
-                label: l.uiTablesProgramAccess,
-                value: shareAccess,
-                items: [
-                  for (final access in [TableAccess.view, TableAccess.edit])
-                    NzSelectItem(value: access, label: l.tableAccess(access)),
-                ],
-                onChanged: (v) {
-                  if (v != null) update(() => shareAccess = v);
-                },
-              ),
-            ],
-            const Gap(NizamioSpacing.space3),
-            Text(
-              l.templateFields(template).map((f) => f.name).join(' · '),
-              style: context.text.caption,
-            ),
-          ],
-        ),
-      ),
+      ref,
+      initialTemplate: initialTemplate,
+      onCreated: onOpenTable,
     );
-    changes.dispose();
   }
 }

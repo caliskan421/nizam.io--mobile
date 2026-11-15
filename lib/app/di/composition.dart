@@ -34,6 +34,7 @@ import '../../features/messages/messages_module.dart';
 import '../../features/notifications/notifications_module.dart';
 import '../../features/reports/reports_module.dart';
 import '../../features/scope/scope_module.dart';
+import '../../features/tables/tables_module.dart';
 import '../../features/tasks/tasks_module.dart';
 import '../../features/timeline/timeline_module.dart';
 import '../config/native_update_store.dart';
@@ -130,6 +131,7 @@ class Composition {
       apiDio: () => container.read(apiDioProvider),
     );
     registerTasksModule(locator, apiDio: () => container.read(apiDioProvider));
+    registerTablesModule(locator, apiDio: () => container.read(apiDioProvider));
     registerTimelineModule(locator);
     container = ProviderContainer(
       // Otomatik yeniden deneme YOK (A3 / CLAUDE.md): Riverpod 3 varsayılanı hata veren
@@ -189,6 +191,7 @@ class Composition {
           locator,
           apiDio: () => container.read(apiDioProvider),
         ),
+        ...tablesOverrides(locator),
         ...timelineOverrides(
           locator,
           apiDio: () => container.read(apiDioProvider),

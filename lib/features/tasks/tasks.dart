@@ -64,7 +64,8 @@ export 'presentation/decision/coordinator_sheets.dart'
         showReviewQueueSheet;
 export 'presentation/decision/task_decision_flows.dart' show TaskDecisionFlows;
 export 'presentation/detail/detail_actions.dart' show showUploadOriginSheet;
-export 'presentation/quick/quick_parts.dart' show QuickPane;
+export 'presentation/quick/quick_parts.dart'
+    show QuickPane, QuickFormLayout, QuickTitleField, AutoExpand;
 export 'presentation/quick_action_sheets.dart'
     show showInviteSheet, showMeetingSheet, showNewTaskSheet;
 export 'presentation/task_detail_page.dart' show TaskDetailPage;

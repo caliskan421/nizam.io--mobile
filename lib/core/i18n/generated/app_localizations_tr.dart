@@ -5036,7 +5036,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTasksTabSubtasks => 'Alt görev';
 
   @override
-  String get uiTasksTabFiles => 'Dosya';
+  String get uiTasksTabFiles => 'Arşiv';
 
   @override
   String get uiTasksTabNotes => 'Not';
@@ -5596,6 +5596,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiTasksTUnclaimed => 'Görevi bıraktın';
+
+  @override
+  String get uiTasksFileView => 'Görüntüle';
 
   @override
   String get uiTasksFileDownload => 'İndir';

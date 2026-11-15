@@ -64,6 +64,7 @@ Future<void> showArchivePreview(
   required String? Function(String workItemId) taskTitle,
   required String fileId,
   RecordFile? initialFile,
+  List<RecordFile>? files,
 }) {
   final l = context.l10n;
   return NzBottomSheet.show<void>(
@@ -75,6 +76,7 @@ Future<void> showArchivePreview(
       taskTitle: taskTitle,
       initial: fileId,
       initialFile: initialFile,
+      files: files,
       host: context,
     ),
   );
@@ -86,6 +88,7 @@ class _Preview extends ConsumerStatefulWidget {
     required this.taskTitle,
     required this.initial,
     this.initialFile,
+    this.files,
     required this.host,
   });
 
@@ -93,6 +96,9 @@ class _Preview extends ConsumerStatefulWidget {
   final String? Function(String workItemId) taskTitle;
   final String initial;
   final RecordFile? initialFile;
+
+  /// Dışarıdan açılan görev önizlemesi yalnız bu dosyalar arasında dolaşır.
+  final List<RecordFile>? files;
 
   /// Bildirimlerin gösterildiği sayfa bağlamı (alt sayfa kapandıktan sonra da geçerli).
   final BuildContext host;
@@ -103,6 +109,7 @@ class _Preview extends ConsumerStatefulWidget {
 
 class _PreviewState extends ConsumerState<_Preview> {
   late String _id = widget.initial;
+  final _tags = <String, RecordTag>{};
 
   ArchiveActionsController get _ctrl =>
       ref.read(archiveActionsControllerProvider(widget.code).notifier);
@@ -133,6 +140,9 @@ class _PreviewState extends ConsumerState<_Preview> {
             dot: c.tag(tag),
             onSelected: () async {
               final r = await _ctrl.retagFile(f, tag);
+              if (r.ok && mounted && widget.files != null) {
+                setState(() => _tags[f.id] = tag);
+              }
               if (widget.host.mounted) {
                 showArchiveOutcome(
                   widget.host,
@@ -182,6 +192,7 @@ class _PreviewState extends ConsumerState<_Preview> {
     final c = context.colors;
     final t = context.text;
     final loaded =
+        widget.files ??
         ref.watch(archiveFilesControllerProvider(widget.code)).value?.items ??
         const <RecordFile>[];
     final initial = widget.initialFile;
@@ -191,7 +202,19 @@ class _PreviewState extends ConsumerState<_Preview> {
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final i = list.indexWhere((f) => f.id == _id);
     if (i < 0) return const SizedBox.shrink();
-    final f = list[i];
+    final original = list[i];
+    final tag = _tags[original.id];
+    final f = tag == null
+        ? original
+        : RecordFile(
+            id: original.id,
+            workItemId: original.workItemId,
+            displayName: original.displayName,
+            contentType: original.contentType,
+            sizeBytes: original.sizeBytes,
+            tag: tag,
+            uploaderId: original.uploaderId,
+          );
     void go(int d) =>
         setState(() => _id = list[(i + d + list.length) % list.length].id);
     Widget round(IconData icon, String label, VoidCallback onTap) => Semantics(

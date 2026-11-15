@@ -33,7 +33,7 @@ import 'task_texts.dart';
 /// Görev ayrıntısı (prototip `detail`): üst çubukta kod + düzenle/diğer işlemler;
 /// koordinatörlük, başlık, durum ve öncelik seçicileri, tarih talebi/hatırlat daireleri ve
 /// "Kanıt yükle"; bekleyen tarih değişikliği talebi kartı (Reddet/Onayla); Özet / Alt görev /
-/// Dosya / Not sekmeleri. Silinen görevde "silinen kayıtlara taşındı" + Geri al. Alt menüde
+/// Arşiv / Not sekmeleri. Silinen görevde "silinen kayıtlara taşındı" + Geri al. Alt menüde
 /// "Görevler"e yeniden dokunmak bu görevin kısayol menüsünü açar.
 class TaskDetailPage extends ConsumerWidget {
   const TaskDetailPage({super.key, required this.code});
@@ -183,7 +183,7 @@ class TaskDetailPage extends ConsumerWidget {
   }
 }
 
-/// Özet / Alt görev / Dosya / Not sekmeleri (yapışkan şerit).
+/// Özet / Alt görev / Arşiv / Not sekmeleri (yapışkan şerit).
 class _Tabs extends ConsumerWidget {
   const _Tabs({required this.task});
 

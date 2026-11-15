@@ -10,6 +10,7 @@ import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../../archive/archive.dart';
 import '../../application/task_detail_controller.dart';
 import '../../domain/task_catalog.dart';
 import '../task_texts.dart';
@@ -279,7 +280,7 @@ class _TitleInputState extends State<_TitleInput> {
   );
 }
 
-/// Dosya sekmesi. Sunucu dosyasına dokunmak yetkiye göre indir / adı değiştir / sil
+/// Arşiv sekmesi. Dosyaya dokunmak görüntüle / indir / adı değiştir / sil
 /// işlemlerini açar ([TaskDetailActions.openFile]).
 class DetailFiles extends StatelessWidget {
   const DetailFiles({
@@ -298,12 +299,23 @@ class DetailFiles extends StatelessWidget {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    if (task.fileEntries.isEmpty) {
-      return NzEmptyState(title: l.uiTasksNoFiles);
-    }
     return Column(
       spacing: NizamioSpacing.space2,
       children: [
+        Align(
+          alignment: AlignmentDirectional.centerEnd,
+          child: NzIconButton(
+            icon: NzIcons.openExternal,
+            semanticLabel: l.uiCoordAllInArchive,
+            onPressed: () => openTaskArchive(
+              context,
+              departmentId: task.departmentId ?? task.coordinatorship,
+              workItemId: task.id,
+              taskTitle: (id) => catalog.task(id)?.title,
+            ),
+          ),
+        ),
+        if (task.fileEntries.isEmpty) NzEmptyState(title: l.uiTasksNoFiles),
         for (final f in task.fileEntries)
           InkWell(
             borderRadius: BorderRadius.circular(NizamioRadius.group),

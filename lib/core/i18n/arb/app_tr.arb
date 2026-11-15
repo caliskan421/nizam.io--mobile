@@ -6377,7 +6377,7 @@
   "@uiTasksTabSubtasks": {
     "description": "ui.tasks.tab_subtasks"
   },
-  "uiTasksTabFiles": "Dosya",
+  "uiTasksTabFiles": "Arşiv",
   "@uiTasksTabFiles": {
     "description": "ui.tasks.tab_files"
   },
@@ -7104,6 +7104,10 @@
   "uiTasksTUnclaimed": "Görevi bıraktın",
   "@uiTasksTUnclaimed": {
     "description": "ui.tasks.t_unclaimed"
+  },
+  "uiTasksFileView": "Görüntüle",
+  "@uiTasksFileView": {
+    "description": "ui.tasks.file_view"
   },
   "uiTasksFileDownload": "İndir",
   "@uiTasksFileDownload": {

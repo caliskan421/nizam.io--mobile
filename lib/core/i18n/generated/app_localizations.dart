@@ -9661,7 +9661,7 @@ abstract class AppLocalizations {
   /// ui.tasks.tab_files
   ///
   /// In tr, this message translates to:
-  /// **'Dosya'**
+  /// **'Arşiv'**
   String get uiTasksTabFiles;
 
   /// ui.tasks.tab_notes
@@ -10749,6 +10749,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Görevi bıraktın'**
   String get uiTasksTUnclaimed;
+
+  /// ui.tasks.file_view
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüntüle'**
+  String get uiTasksFileView;
 
   /// ui.tasks.file_download
   ///

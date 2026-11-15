@@ -18,6 +18,7 @@ Future<void> openArchiveFile(
   required String workItemId,
   required String fileId,
   required String? Function(String) taskTitle,
+  bool taskFilesOnly = false,
 }) async {
   final container = ProviderScope.containerOf(context, listen: false);
   final subscription = container.listen(
@@ -34,6 +35,7 @@ Future<void> openArchiveFile(
       return;
     }
     final repository = container.read(archiveRepositoryProvider);
+    final files = <RecordFile>[];
     final seen = <String>{};
     String? cursor;
     do {
@@ -43,8 +45,9 @@ Future<void> openArchiveFile(
         page: PageRequest(limit: 50, cursor: cursor),
       );
       if (!context.mounted) return;
+      files.addAll(page.items);
       final file = page.items.where((f) => f.id == fileId).firstOrNull;
-      if (file != null) {
+      if (file != null && !taskFilesOnly) {
         await showArchivePreview(
           context,
           code: folderCode,
@@ -57,6 +60,17 @@ Future<void> openArchiveFile(
       cursor = page.nextCursor;
       if (cursor != null && !seen.add(cursor)) break;
     } while (cursor != null);
+    if (taskFilesOnly && files.any((f) => f.id == fileId)) {
+      if (!context.mounted) return;
+      await showArchivePreview(
+        context,
+        code: folderCode,
+        taskTitle: taskTitle,
+        fileId: fileId,
+        files: files,
+      );
+      return;
+    }
     if (context.mounted) {
       NzToast.show(context, context.l10n.uiArchiveEmptyFiles);
     }

@@ -11,6 +11,7 @@ import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../../archive/archive.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_detail_controller.dart';
 import '../../application/tasks_providers.dart';
@@ -25,6 +26,7 @@ import 'detail_forms.dart';
 import 'subtask_create_sheet.dart';
 
 part 'detail_decision_actions.dart';
+part 'detail_file_actions.dart';
 part 'detail_list_option.dart';
 part 'detail_request_actions.dart';
 part 'upload_origin_sheet.dart';
@@ -498,84 +500,6 @@ class TaskDetailActions {
         style: context.text.bodyMd,
       ),
     );
-  }
-
-  // ---- dosya ------------------------------------------------------------------------------
-
-  /// Dosya satırının işlemleri (yetkiye göre): indir, adı değiştir, sil.
-  void openFile(TaskFile f) {
-    final l = context.l10n;
-    final c = context.colors;
-    final p = _perms;
-    if (!p.canDownloadFile && !p.canRenameFile(f) && !p.canDeleteFile(f)) {
-      return;
-    }
-    _listSheet(
-      title: f.name,
-      builder: (sheet) => [
-        if (p.canDownloadFile)
-          _ListOption(
-            label: l.uiTasksFileDownload,
-            leading: const NzIcon(
-              NzIcons.uploadFile,
-              size: NizamioSize.iconSizeSm,
-            ),
-            onTap: () async {
-              Navigator.of(sheet).pop();
-              final (r, _) = await _ctl.downloadFile(f);
-              _report(r, done: '${l.uiTasksTFileSaved} · ${f.name}');
-            },
-          ),
-        if (p.canRenameFile(f))
-          _ListOption(
-            label: l.uiTasksFileRename,
-            leading: const NzIcon(NzIcons.edit, size: NizamioSize.iconSizeSm),
-            onTap: () {
-              Navigator.of(sheet).pop();
-              _renameFile(f);
-            },
-          ),
-        if (p.canDeleteFile(f))
-          _ListOption(
-            label: l.uiTasksFileDelete,
-            color: c.danger,
-            leading: NzIcon(
-              NzIcons.delete,
-              size: NizamioSize.iconSizeSm,
-              color: c.danger,
-            ),
-            onTap: () {
-              Navigator.of(sheet).pop();
-              _deleteFile(f);
-            },
-          ),
-      ],
-    );
-  }
-
-  Future<void> _renameFile(TaskFile f) async {
-    final l = context.l10n;
-    final name = await _askText(
-      title: l.uiTasksFileRename,
-      description: f.name,
-      label: l.uiTasksFileNameLabel,
-      ok: l.uiTasksSave,
-      initial: f.name,
-    );
-    if (name == null || !context.mounted) return;
-    _report(await _ctl.renameFile(f, name), done: l.uiTasksTFileRenamed);
-  }
-
-  Future<void> _deleteFile(TaskFile f) async {
-    final l = context.l10n;
-    final yes = await _confirm(
-      title: l.uiTasksFileDeleteQ,
-      description: l.uiTasksFileDeleteDesc,
-      ok: l.uiTasksDeleteOk,
-      danger: true,
-    );
-    if (!yes || !context.mounted) return;
-    _report(await _ctl.deleteFile(f), done: l.uiTasksTFileDeleted);
   }
 
   // ---- alt görev, not ---------------------------------------------------------------------

@@ -2,8 +2,6 @@
 // cihazda (simülatör) çökmeden avatar karolarıyla açılır ve açıklama gösterir; panel "görüşmede"
 // kişileri listeler; yetkili ayrılırken "yalnız ayrıl" seçilince oda bırakılır, istek gitmez.
 // Telefon ve tablette taşma yok. Görsel/piksel denetimi yapılmaz.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,11 +19,9 @@ import '../meetings_server.dart';
 
 class _Link implements ConferenceLink {
   final calls = <String>[];
-  // ignore: close_sinks — test ömrü boyunca açık kalan sahte yayın.
-  final _signals = StreamController<ConferenceSignal>.broadcast();
 
   @override
-  Stream<ConferenceSignal> get signals => _signals.stream;
+  Stream<ConferenceSignal> get signals => const Stream.empty();
 
   @override
   List<ConferencePeer> get peers => const [

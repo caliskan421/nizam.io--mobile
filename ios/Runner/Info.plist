@@ -34,6 +34,11 @@
 	<string>Fotoğraf çekip mesaja, arşive ya da göreve eklemek ve toplantının görüntülü görüşmesinde görünmek için kamera gerekiyor.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Toplantının görüntülü görüşmesinde konuşabilmen için mikrofon gerekiyor.</string>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Seçtiğin NIZAM.IO sunucusuna yerel ağ üzerinden bağlanmak için erişim gerekiyor.</string>
 	<key>LSRequiresIPhoneOS</key>

@@ -6037,6 +6037,21 @@ class AppLocalizationsTr extends AppLocalizations {
       'Görev erken bitti: bitiş bugüne çekilir, plan bitişi saklanır.';
 
   @override
+  String get uiTasksPreviousStart => 'Önceki başlangıç';
+
+  @override
+  String get uiTasksPreviousDue => 'Önceki bitiş';
+
+  @override
+  String get uiTasksAfterDue => 'İşlem sonrası bitiş';
+
+  @override
+  String get uiTasksCompletionDate => 'Tamamlanma tarihi';
+
+  @override
+  String get uiTasksDateUnavailable => 'Tarih bilgisi yok';
+
+  @override
   String get uiTasksCmpPlan => 'Plan';
 
   @override

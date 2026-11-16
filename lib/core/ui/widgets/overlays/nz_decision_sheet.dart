@@ -4,7 +4,8 @@ import 'package:gap/gap.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../buttons/nz_button.dart';
-import '../inputs/nz_switch.dart';
+import '../feedback/nz_banner.dart';
+import '../inputs/nz_form_rows.dart';
 import '../inputs/nz_text_field.dart';
 import 'nz_bottom_sheet.dart';
 
@@ -18,6 +19,32 @@ class NzDecisionFact {
 
   /// Değer gecikme/uyarı rengiyle.
   final bool danger;
+}
+
+/// Karar özetleri ve tarih karşılaştırmaları ortak form satırı yüzeyini kullanır.
+/// Değerler kısaltılmaz; uzun adlar ve büyük metin birden fazla satıra yayılabilir.
+class NzDecisionFacts extends StatelessWidget {
+  const NzDecisionFacts({super.key, required this.facts});
+
+  final List<NzDecisionFact> facts;
+
+  @override
+  Widget build(BuildContext context) => NzFormRows(
+    rows: [
+      for (final fact in facts)
+        NzFormRow.custom(
+          label: fact.label,
+          trailing: Text(
+            fact.value,
+            textAlign: TextAlign.end,
+            style: context.text.bodyMd.copyWith(
+              color: fact.danger ? context.colors.danger : context.colors.text,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+    ],
+  );
 }
 
 /// Karar kaplamasının sonucu: yazılan not (kırpılmış) ve anahtarın son durumu.
@@ -147,77 +174,44 @@ class _DecisionBody extends StatelessWidget {
     final toggleLabel = this.toggleLabel;
     final comparison = this.comparison;
     final info = this.info;
-    Widget fact(NzDecisionFact f) => Padding(
-      padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space1),
-      child: Row(
-        children: [
-          Expanded(
-            child: Text(f.label, style: t.caption.copyWith(color: c.textMuted)),
-          ),
-          const Gap(NizamioSpacing.space2),
-          Flexible(
-            child: Text(
-              f.value,
-              textAlign: TextAlign.end,
-              style: t.bodySm.copyWith(color: f.danger ? c.danger : c.text),
-            ),
-          ),
-        ],
-      ),
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        for (final f in facts) fact(f),
+        if (facts.isNotEmpty) NzDecisionFacts(facts: facts),
         if (warning != null) ...[
           const Gap(NizamioSpacing.space3),
-          Text(warning, style: t.bodySm.copyWith(color: c.danger)),
+          NzBanner.warning(message: warning),
         ],
         if (toggleLabel != null) ...[
           const Gap(NizamioSpacing.space3),
           ValueListenableBuilder<bool>(
             valueListenable: toggled,
-            builder: (_, on, _) => NzSwitch(
-              label: toggleLabel,
-              description: toggleDescription,
-              value: on,
-              onChanged: (v) => toggled.value = v,
+            builder: (_, on, _) => NzFormRows(
+              rows: [
+                NzFormRow.toggle(
+                  label: toggleLabel,
+                  value: on,
+                  onChanged: (v) => toggled.value = v,
+                ),
+              ],
             ),
           ),
+          if (toggleDescription case final description?) ...[
+            const Gap(NizamioSpacing.space2),
+            Text(description, style: t.caption.copyWith(color: c.textMuted)),
+          ],
         ],
         if (comparison != null)
           ValueListenableBuilder<bool>(
             valueListenable: toggled,
             builder: (_, on, _) => Padding(
-              padding: const EdgeInsets.only(top: NizamioSpacing.space2),
-              child: Row(
-                spacing: NizamioSpacing.space2,
-                children: [
-                  for (final f in comparison(on))
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            f.label,
-                            style: t.caption.copyWith(color: c.textMuted),
-                          ),
-                          Text(
-                            f.value,
-                            style: t.bodySm.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: f.danger ? c.danger : c.text,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ),
+              padding: const EdgeInsets.only(top: NizamioSpacing.space3),
+              child: NzDecisionFacts(facts: comparison(on)),
             ),
           ),
         const Gap(NizamioSpacing.space4),
         NzTextField.multiline(
+          pill: true,
           label: noteLabel,
           hint: noteHint,
           controller: note,

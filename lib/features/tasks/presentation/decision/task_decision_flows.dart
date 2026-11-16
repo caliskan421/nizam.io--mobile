@@ -24,7 +24,7 @@ import '../../domain/member_flow.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_writes.dart';
 import '../task_texts.dart';
-import 'coordinator_texts.dart';
+import 'task_date_comparison.dart';
 
 /// Karar akışları: koordinatörde onayla, iade et, süre uzat, üstlen, ata; üyede başla ve
 /// onaya sun ([start], [submit]). Görev ayrıntısı, ana sayfa satırları, görev listesi ve onay
@@ -90,7 +90,7 @@ class TaskDecisionFlows {
     return details.hasValue ? _task?.fileEntries.length : null;
   }
 
-  List<NzDecisionFact> _facts(TaskItem t) {
+  List<NzDecisionFact> _facts(TaskItem t, {bool includeDue = true}) {
     final l = context.l10n;
     final files = _files;
     final subs = t.subtaskTotal;
@@ -103,11 +103,12 @@ class TaskDecisionFlows {
         ),
       if (files != null)
         NzDecisionFact(l.uiTasksInfoEvidence, '$files ${l.uiTasksFilesLc}'),
-      NzDecisionFact(
-        l.uiTasksCmpEnd,
-        TaskDates.full(t.due),
-        danger: isTaskLate(t),
-      ),
+      if (includeDue)
+        NzDecisionFact(
+          l.uiTasksDue,
+          TaskDates.full(t.due),
+          danger: isTaskLate(t),
+        ),
     ];
   }
 
@@ -122,23 +123,13 @@ class TaskDecisionFlows {
       context,
       title: l.uiTasksApprove,
       description: t.title,
-      facts: _facts(t),
+      facts: _facts(t, includeDue: false),
       warning: _files == 0 ? l.uiTasksApproveNoEvidence : null,
       toggleLabel: early ? l.uiTasksApprovePull : null,
       toggleDescription: early ? l.uiTasksApprovePullDesc : null,
       toggleInitial: early,
-      comparison: (pull) => [
-        NzDecisionFact(l.uiTasksCmpPlan, TaskDates.full(t.due)),
-        NzDecisionFact(
-          l.uiTasksCmpEnd,
-          TaskDates.full(early && !pull ? t.due : today),
-        ),
-        NzDecisionFact(
-          l.uiTasksCmpResult,
-          l.completionResult(due: t.due, done: today, pulled: pull),
-          danger: _day(today).isAfter(_day(t.due)),
-        ),
-      ],
+      comparison: (pull) =>
+          approvalDateFacts(l, due: t.due, today: today, pull: pull),
       noteLabel: l.uiTasksApproveNoteLabel,
       noteHint: l.uiTasksApproveNoteHint,
       noteMaxLength: decisionReasonMaxLength,
@@ -268,25 +259,6 @@ class TaskDecisionFlows {
           final txt = context.text;
           final end = _day(t.due).add(Duration(days: n));
           final late = _day(today).difference(end).inDays;
-          Widget cell(String label, String value, {bool danger = false}) =>
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: txt.caption.copyWith(color: c.textMuted),
-                    ),
-                    Text(
-                      value,
-                      style: txt.bodySm.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: danger ? c.danger : c.text,
-                      ),
-                    ),
-                  ],
-                ),
-              );
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -300,12 +272,11 @@ class TaskDecisionFlows {
                 ],
               ),
               const Gap(NizamioSpacing.space4),
-              Row(
-                spacing: NizamioSpacing.space2,
-                children: [
-                  cell(l.uiTasksCmpNow, TaskDates.full(t.due)),
-                  cell(l.uiTasksCmpNewEnd, TaskDates.full(end)),
-                  cell(
+              NzDecisionFacts(
+                facts: [
+                  NzDecisionFact(l.uiTasksPreviousDue, TaskDates.full(t.due)),
+                  NzDecisionFact(l.uiTasksNewDue, TaskDates.full(end)),
+                  NzDecisionFact(
                     l.uiTasksCmpResult,
                     late > 0
                         ? '$late ${l.uiTasksResultLateTail}'

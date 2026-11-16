@@ -8,8 +8,9 @@ import 'package:nizamio/core/ui/widgets/overlays/nz_decision_sheet.dart';
 import '../feedback/feedback_test_support.dart';
 
 class _Host extends StatefulWidget {
-  const _Host({this.required = false});
+  const _Host({this.required = false, this.detailed = false});
   final bool required;
+  final bool detailed;
 
   @override
   State<_Host> createState() => _HostState();
@@ -33,6 +34,23 @@ class _HostState extends State<_Host> {
             noteRequired: widget.required,
             toggleLabel: widget.required ? null : 'Bugüne çek',
             toggleInitial: !widget.required,
+            facts: widget.detailed
+                ? const [
+                    NzDecisionFact(
+                      'Sorumlu',
+                      'Bahar Kılıç, Muhammet Ali Çalışkan',
+                    ),
+                    NzDecisionFact('Kanıt', '1 dosya'),
+                  ]
+                : const [],
+            comparison: widget.detailed
+                ? (_) => const [
+                    NzDecisionFact('Önceki bitiş', '15.06.2026'),
+                    NzDecisionFact('İşlem sonrası bitiş', '15.06.2026'),
+                    NzDecisionFact('Tamamlanma tarihi', '16.11.2026'),
+                    NzDecisionFact('Sonuç', '154 gün geç', danger: true),
+                  ]
+                : null,
           );
           setState(() {
             result = r;
@@ -86,4 +104,41 @@ void main() {
     await t.pumpAndSettle();
     expect(find.text('sonuç: null|null'), findsOneWidget);
   });
+
+  for (final width in [320.0, 1024.0]) {
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('karar içeriği taşmaz: genişlik $width, metin $scale', (
+        t,
+      ) async {
+        t.view.devicePixelRatio = 1;
+        t.view.physicalSize = Size(width, 900);
+        addTearDown(t.view.resetDevicePixelRatio);
+        addTearDown(t.view.resetPhysicalSize);
+        await t.pumpWidget(
+          MaterialApp(
+            theme: theme(true),
+            locale: const Locale('tr'),
+            supportedLocales: const [Locale('tr')],
+            localizationsDelegates: testLocalizationDelegates,
+            builder: (context, child) => MediaQuery(
+              data: MediaQuery.of(context)
+                  .copyWith(textScaler: TextScaler.linear(scale)),
+              child: child!,
+            ),
+            home: const Scaffold(body: _Host(detailed: true)),
+          ),
+        );
+        await t.tap(find.text('aç'));
+        await t.pumpAndSettle();
+        expect(t.takeException(), isNull);
+        await t.ensureVisible(find.byType(TextField));
+        await t.enterText(find.byType(TextField), 'Karar notu');
+        await t.pumpAndSettle();
+        expect(t.takeException(), isNull);
+        await t.tap(find.text('Gönder'));
+        await t.pumpAndSettle();
+        expect(find.text('sonuç: Karar notu|true'), findsOneWidget);
+      });
+    }
+  }
 }

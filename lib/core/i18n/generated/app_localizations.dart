@@ -11572,6 +11572,36 @@ abstract class AppLocalizations {
   /// **'Görev erken bitti: bitiş bugüne çekilir, plan bitişi saklanır.'**
   String get uiTasksApprovePullDesc;
 
+  /// ui.tasks.previous_start
+  ///
+  /// In tr, this message translates to:
+  /// **'Önceki başlangıç'**
+  String get uiTasksPreviousStart;
+
+  /// ui.tasks.previous_due
+  ///
+  /// In tr, this message translates to:
+  /// **'Önceki bitiş'**
+  String get uiTasksPreviousDue;
+
+  /// ui.tasks.after_due
+  ///
+  /// In tr, this message translates to:
+  /// **'İşlem sonrası bitiş'**
+  String get uiTasksAfterDue;
+
+  /// ui.tasks.completion_date
+  ///
+  /// In tr, this message translates to:
+  /// **'Tamamlanma tarihi'**
+  String get uiTasksCompletionDate;
+
+  /// ui.tasks.date_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Tarih bilgisi yok'**
+  String get uiTasksDateUnavailable;
+
   /// ui.tasks.cmp_plan
   ///
   /// In tr, this message translates to:

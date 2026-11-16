@@ -7,6 +7,7 @@ import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/task_catalog.dart';
+import '../decision/task_date_comparison.dart';
 import '../task_texts.dart';
 
 /// Görev ayrıntısı ve çizelgede kullanılan tarih talebi ve karar kartı.
@@ -83,37 +84,12 @@ class TaskDateRequestCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Wrap(
-                spacing: NizamioSpacing.space2,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    TaskDates.full(r.oldDue),
-                    style: t.mono.copyWith(
-                      color: c.textMuted,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: c.textMuted,
-                    ),
-                  ),
-                  ExcludeSemantics(
-                    child: Text(
-                      '→',
-                      style: t.mono.copyWith(color: c.textMuted),
-                    ),
-                  ),
-                  Text(
-                    TaskDates.full(r.due),
-                    style: t.mono.copyWith(
-                      color: c.accentText,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    l.plusDays(plus),
-                    style: t.caption.copyWith(color: c.textMuted),
-                  ),
-                ],
-              ),
+              TaskDateComparison.request(request: r),
+              if (plus != 0)
+                Text(
+                  '${l.uiTasksDue} · ${l.plusDays(plus)}',
+                  style: t.caption.copyWith(color: c.textMuted),
+                ),
               Text(
                 '“${r.reason.isEmpty ? l.uiTasksNoReason : r.reason}”',
                 style: t.caption.copyWith(color: c.textMuted),

@@ -7653,6 +7653,26 @@
   "@uiTasksApprovePullDesc": {
     "description": "ui.tasks.approve_pull_desc"
   },
+  "uiTasksPreviousStart": "Önceki başlangıç",
+  "@uiTasksPreviousStart": {
+    "description": "ui.tasks.previous_start"
+  },
+  "uiTasksPreviousDue": "Önceki bitiş",
+  "@uiTasksPreviousDue": {
+    "description": "ui.tasks.previous_due"
+  },
+  "uiTasksAfterDue": "İşlem sonrası bitiş",
+  "@uiTasksAfterDue": {
+    "description": "ui.tasks.after_due"
+  },
+  "uiTasksCompletionDate": "Tamamlanma tarihi",
+  "@uiTasksCompletionDate": {
+    "description": "ui.tasks.completion_date"
+  },
+  "uiTasksDateUnavailable": "Tarih bilgisi yok",
+  "@uiTasksDateUnavailable": {
+    "description": "ui.tasks.date_unavailable"
+  },
   "uiTasksCmpPlan": "Plan",
   "@uiTasksCmpPlan": {
     "description": "ui.tasks.cmp_plan"

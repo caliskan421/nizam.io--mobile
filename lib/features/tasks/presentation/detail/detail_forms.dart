@@ -16,6 +16,7 @@ import '../../application/tasks_providers.dart';
 import '../../domain/coordinator_board.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_writes.dart';
+import '../decision/task_date_comparison.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 
@@ -148,6 +149,16 @@ class _ServerEditBody extends ConsumerWidget {
           onStart: (v) => ctl.updateEdit(d.copyWith(start: v)),
           onEnd: (v) => ctl.updateEdit(d.copyWith(due: v)),
         ),
+        if (!DateUtils.isSameDay(task.start, d.start) ||
+            !DateUtils.isSameDay(task.due, d.due)) ...[
+          const Gap(NizamioSpacing.space3),
+          TaskDateComparison(
+            previousStart: task.start,
+            previousDue: task.due,
+            start: d.start,
+            due: d.due,
+          ),
+        ],
         if (d.datesInvalid) ...[
           const Gap(NizamioSpacing.space1),
           TaskFormError(l.uiTasksErrDates),
@@ -296,16 +307,6 @@ class DateRequestForm extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
-          children: [
-            Text(l.uiTasksNowLc, style: t.kicker.copyWith(color: c.textMuted)),
-            const Gap(NizamioSpacing.space2),
-            Flexible(
-              child: Text(TaskDates.range(task.start, task.due), style: t.mono),
-            ),
-          ],
-        ),
-        const Gap(NizamioSpacing.space4),
         _DatePair(
           startLabel: l.uiTasksNewStart,
           endLabel: l.uiTasksNewDue,
@@ -313,6 +314,13 @@ class DateRequestForm extends ConsumerWidget {
           end: d.due,
           onStart: (v) => ctl.updateDateDraft(d.copyWith(start: v)),
           onEnd: (v) => ctl.updateDateDraft(d.copyWith(due: v)),
+        ),
+        const Gap(NizamioSpacing.space3),
+        TaskDateComparison(
+          previousStart: task.start,
+          previousDue: task.due,
+          start: d.start,
+          due: d.due,
         ),
         if (plus != 0) ...[
           const Gap(NizamioSpacing.space2),

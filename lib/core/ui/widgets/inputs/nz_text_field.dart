@@ -8,6 +8,7 @@ import '../../extensions/context_ext.dart';
 import '../../layout/nz_pane.dart';
 import '../nz_size.dart';
 import 'nz_field_errors.dart';
+import 'nz_pill_field_style.dart';
 import 'nz_validators.dart';
 
 enum _TextFieldKind { text, email, multiline, number }
@@ -35,6 +36,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
+    this.pill = false,
     this.labelAbove = true,
     this.leading,
     this.trailing,
@@ -61,6 +63,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
+    this.pill = false,
     this.labelAbove = true,
     this.leading,
     this.trailing,
@@ -86,6 +89,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
+    this.pill = false,
     this.labelAbove = true,
     this.leading,
     this.trailing,
@@ -113,6 +117,7 @@ class NzTextField extends StatefulWidget {
     this.enabled = true,
     this.readOnly = false,
     this.size = NzSize.md,
+    this.pill = false,
     this.labelAbove = true,
     this.leading,
     this.trailing,
@@ -140,6 +145,9 @@ class NzTextField extends StatefulWidget {
   final bool enabled;
   final bool readOnly;
   final NzSize size;
+
+  /// Compact page-search appearance without changing the field's input behavior.
+  final bool pill;
 
   /// true (varsayılan) → etiket alanın üstünde (prototip `rp-field` / `.t-label`: 13/600,
   /// altında 8 boşluk); okuyucuda etiket alanla birleşir. false → etiket görünmez, okuyucu
@@ -182,6 +190,12 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
     final validator = widget.validator;
     final l = context.l10n;
     final errorTheme = Theme.of(context).inputDecorationTheme;
+    final text = widget.pill
+        ? nzPillFieldText(context, widget.size)
+        : style.text;
+    final shell = widget.pill
+        ? nzPillFieldDecoration(context, text: text, multiline: multiline)
+        : const InputDecoration();
     final field = TextFormField(
       onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
       controller: widget.controller,
@@ -189,7 +203,7 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
       focusNode: widget.focusNode,
       enabled: widget.enabled,
       readOnly: widget.readOnly,
-      style: style.text,
+      style: text,
       keyboardType: switch (widget._kind) {
         _TextFieldKind.email => TextInputType.emailAddress,
         _TextFieldKind.multiline => TextInputType.multiline,
@@ -207,7 +221,7 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
       minLines: multiline ? 3 : 1,
       maxLines: multiline ? 6 : 1,
       maxLength: widget.maxLength,
-      decoration: InputDecoration(
+      decoration: shell.copyWith(
         // Yüzen (Material) etiket yok: etiket ya üstte ya yer tutucu (prototip).
         hintText: widget.labelAbove ? widget.hint : widget.hint ?? widget.label,
         helperText: widget.helper,
@@ -216,13 +230,23 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
         counterText: '',
         prefixIcon: widget.leading,
         suffixIcon: widget.trailing,
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: NizamioSpacing.space4,
-          vertical: style.vertical,
-        ),
-        constraints: const BoxConstraints(minHeight: NizamioSpacing.space12),
-        enabledBorder: widget.invalid ? errorTheme.errorBorder : null,
-        focusedBorder: widget.invalid ? errorTheme.focusedErrorBorder : null,
+        contentPadding: widget.pill
+            ? shell.contentPadding
+            : EdgeInsets.symmetric(
+                horizontal: NizamioSpacing.space4,
+                vertical: style.vertical,
+              ),
+        constraints: widget.pill
+            ? shell.constraints
+            : const BoxConstraints(minHeight: NizamioSpacing.space12),
+        enabledBorder: widget.invalid
+            ? (widget.pill ? shell.errorBorder : errorTheme.errorBorder)
+            : null,
+        focusedBorder: widget.invalid
+            ? (widget.pill
+                  ? shell.focusedErrorBorder
+                  : errorTheme.focusedErrorBorder)
+            : null,
       ),
       forceErrorText: serverErrorText,
       validator: validator == null
@@ -234,9 +258,17 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
       },
       onFieldSubmitted: widget.onSubmitted,
     );
+    final input = widget.pill
+        ? ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: NizamioSpacing.space12,
+            ),
+            child: Center(heightFactor: 1, child: field),
+          )
+        : field;
     return widget.labelAbove
-        ? NzFieldLabelAbove(label: widget.label, child: field)
-        : Semantics(label: widget.label, child: field);
+        ? NzFieldLabelAbove(label: widget.label, child: input)
+        : Semantics(label: widget.label, child: input);
   }
 }
 

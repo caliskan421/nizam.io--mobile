@@ -7,7 +7,7 @@ import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 
 /// Sağdan açılan çekmece (README "Gezinme": tüm modüller): `bg-surface`, sol kenarda 1 px
-/// `border-strong`, sol köşeler `m-r-sheet`, gölge `m-sh-drawer`, arkada `scrim`. Açılış
+/// `border-strong`, düz köşeler, gölge `m-sh-drawer`, arkada `scrim`. Açılış
 /// `easeSheet` / `durSheet`, kapanış `easeExit` / `durExit`; dışarı dokunma ve geri kapatır.
 /// Uygulamanın kök Navigator'ında açılır (PrivacyMask altında kalır). Üst/alt güvenli alan
 /// tüketilmez: içerik ekranın kenarına kadar kayar, payı kendi kaydırma dolgusuna ekler
@@ -60,9 +60,7 @@ class _Panel extends StatelessWidget {
       NizamioSize.drawerWidth,
       MediaQuery.sizeOf(context).width * _maxFraction,
     );
-    const radius = BorderRadius.horizontal(
-      left: Radius.circular(NizamioRadius.sheet),
-    );
+    const radius = BorderRadius.zero;
     return Align(
       alignment: AlignmentDirectional.centerEnd,
       child: Semantics(

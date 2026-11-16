@@ -297,7 +297,6 @@ class _GlassCircle extends StatelessWidget {
           enabled: onPressed != null,
           child: NzGlass.circle(
             tone: NzGlassTone.float,
-            shadow: context.shadows.float,
             child: InkWell(
               onTap: onPressed,
               customBorder: const CircleBorder(),

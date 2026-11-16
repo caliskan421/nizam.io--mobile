@@ -2,8 +2,6 @@
 // cihazda (simülatör) çökmeden avatar karolarıyla açılır ve açıklama gösterir; panel "görüşmede"
 // kişileri listeler; yetkili ayrılırken "yalnız ayrıl" seçilince oda bırakılır, istek gitmez.
 // Telefon ve tablette taşma yok. Görsel/piksel denetimi yapılmaz.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,17 +12,15 @@ import 'package:nizamio/features/meetings/domain/conference.dart';
 import 'package:nizamio/features/meetings/presentation/conference_page.dart';
 import 'package:nizamio/features/meetings/presentation/conference_tiles.dart';
 
-import '../../pilot_support.dart';
 import '../../../support/recording_app_nav.dart';
 import '../../../support/screen_matrix.dart';
+import '../../pilot_support.dart';
 import '../meetings_server.dart';
 
 class _Link implements ConferenceLink {
   final calls = <String>[];
-  final _signals = StreamController<ConferenceSignal>.broadcast();
-
   @override
-  Stream<ConferenceSignal> get signals => _signals.stream;
+  Stream<ConferenceSignal> get signals => const Stream.empty();
 
   @override
   List<ConferencePeer> get peers => const [

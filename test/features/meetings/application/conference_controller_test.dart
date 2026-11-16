@@ -22,8 +22,8 @@ class _Repo implements MeetingsRepository {
   String url = 'wss://lk.example.test';
   ConferenceRole role = ConferenceRole.speaker;
   DateTime expires = DateTime.utc(2100);
-  Object? joinError;
-  Object? endError;
+  Exception? joinError;
+  Exception? endError;
   final calls = <String>[];
 
   @override
@@ -51,7 +51,7 @@ class _Repo implements MeetingsRepository {
 class _Link implements ConferenceLink {
   final _signals = StreamController<ConferenceSignal>.broadcast();
   final calls = <String>[];
-  Object? connectError;
+  Exception? connectError;
   MediaIssue? micIssue;
   MediaIssue? camIssue;
   String? token;

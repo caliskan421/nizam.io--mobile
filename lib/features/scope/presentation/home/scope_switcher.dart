@@ -129,6 +129,7 @@ class ScopeSwitcher extends ConsumerWidget {
         semanticLabel: l.uiHomePickDepartment,
         anchor: _rect(card),
         below: true,
+        alignEnd: true,
         entries: [
           for (final s in seats)
             NzFlyoutItem(

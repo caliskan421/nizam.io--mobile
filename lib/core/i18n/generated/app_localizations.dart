@@ -5812,6 +5812,60 @@ abstract class AppLocalizations {
   /// **'Developed by KAYACAN, COSMAN, CALISKAN'**
   String get uiIdentityLoginFooter;
 
+  /// ui.identity.profile_general
+  ///
+  /// In tr, this message translates to:
+  /// **'Genel bilgiler'**
+  String get uiIdentityProfileGeneral;
+
+  /// ui.identity.profile_work
+  ///
+  /// In tr, this message translates to:
+  /// **'İş ve ekip'**
+  String get uiIdentityProfileWork;
+
+  /// ui.identity.profile_roles_intro
+  ///
+  /// In tr, this message translates to:
+  /// **'Rollerin program ve koordinatörlüğe göre değişir.'**
+  String get uiIdentityProfileRolesIntro;
+
+  /// ui.identity.profile_no_memberships
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu programda bir koordinatörlüğe bağlı değilsin.'**
+  String get uiIdentityProfileNoMemberships;
+
+  /// ui.identity.profile_personal_work
+  ///
+  /// In tr, this message translates to:
+  /// **'Bana atanan görevler'**
+  String get uiIdentityProfilePersonalWork;
+
+  /// ui.identity.profile_team_work
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordine ettiğim işler'**
+  String get uiIdentityProfileTeamWork;
+
+  /// ui.identity.profile_partial
+  ///
+  /// In tr, this message translates to:
+  /// **'Yüklenen görevlerin özeti gösteriliyor; liste eksik olabilir.'**
+  String get uiIdentityProfilePartial;
+
+  /// ui.identity.profile_password_intro
+  ///
+  /// In tr, this message translates to:
+  /// **'Güvenliğin için mevcut parolanı doğrula. Parola değişince diğer cihazlardaki oturumların kapanır.'**
+  String get uiIdentityProfilePasswordIntro;
+
+  /// ui.identity.profile_password_saved
+  ///
+  /// In tr, this message translates to:
+  /// **'Parolan değiştirildi.'**
+  String get uiIdentityProfilePasswordSaved;
+
   /// ui.inputs.password_show
   ///
   /// In tr, this message translates to:

@@ -3042,6 +3042,37 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiIdentityLoginFooter => 'Developed by KAYACAN, COSMAN, CALISKAN';
 
   @override
+  String get uiIdentityProfileGeneral => 'Genel bilgiler';
+
+  @override
+  String get uiIdentityProfileWork => 'İş ve ekip';
+
+  @override
+  String get uiIdentityProfileRolesIntro =>
+      'Rollerin program ve koordinatörlüğe göre değişir.';
+
+  @override
+  String get uiIdentityProfileNoMemberships =>
+      'Bu programda bir koordinatörlüğe bağlı değilsin.';
+
+  @override
+  String get uiIdentityProfilePersonalWork => 'Bana atanan görevler';
+
+  @override
+  String get uiIdentityProfileTeamWork => 'Koordine ettiğim işler';
+
+  @override
+  String get uiIdentityProfilePartial =>
+      'Yüklenen görevlerin özeti gösteriliyor; liste eksik olabilir.';
+
+  @override
+  String get uiIdentityProfilePasswordIntro =>
+      'Güvenliğin için mevcut parolanı doğrula. Parola değişince diğer cihazlardaki oturumların kapanır.';
+
+  @override
+  String get uiIdentityProfilePasswordSaved => 'Parolan değiştirildi.';
+
+  @override
   String get uiInputsPasswordShow => 'Şifreyi göster';
 
   @override

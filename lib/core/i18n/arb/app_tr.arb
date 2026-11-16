@@ -3813,6 +3813,42 @@
   "@uiIdentityLoginFooter": {
     "description": "ui.identity.login_footer"
   },
+  "uiIdentityProfileGeneral": "Genel bilgiler",
+  "@uiIdentityProfileGeneral": {
+    "description": "ui.identity.profile_general"
+  },
+  "uiIdentityProfileWork": "İş ve ekip",
+  "@uiIdentityProfileWork": {
+    "description": "ui.identity.profile_work"
+  },
+  "uiIdentityProfileRolesIntro": "Rollerin program ve koordinatörlüğe göre değişir.",
+  "@uiIdentityProfileRolesIntro": {
+    "description": "ui.identity.profile_roles_intro"
+  },
+  "uiIdentityProfileNoMemberships": "Bu programda bir koordinatörlüğe bağlı değilsin.",
+  "@uiIdentityProfileNoMemberships": {
+    "description": "ui.identity.profile_no_memberships"
+  },
+  "uiIdentityProfilePersonalWork": "Bana atanan görevler",
+  "@uiIdentityProfilePersonalWork": {
+    "description": "ui.identity.profile_personal_work"
+  },
+  "uiIdentityProfileTeamWork": "Koordine ettiğim işler",
+  "@uiIdentityProfileTeamWork": {
+    "description": "ui.identity.profile_team_work"
+  },
+  "uiIdentityProfilePartial": "Yüklenen görevlerin özeti gösteriliyor; liste eksik olabilir.",
+  "@uiIdentityProfilePartial": {
+    "description": "ui.identity.profile_partial"
+  },
+  "uiIdentityProfilePasswordIntro": "Güvenliğin için mevcut parolanı doğrula. Parola değişince diğer cihazlardaki oturumların kapanır.",
+  "@uiIdentityProfilePasswordIntro": {
+    "description": "ui.identity.profile_password_intro"
+  },
+  "uiIdentityProfilePasswordSaved": "Parolan değiştirildi.",
+  "@uiIdentityProfilePasswordSaved": {
+    "description": "ui.identity.profile_password_saved"
+  },
   "uiInputsPasswordShow": "Şifreyi göster",
   "@uiInputsPasswordShow": {
     "description": "ui.inputs.password_show"

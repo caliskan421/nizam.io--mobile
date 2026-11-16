@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../tasks/tasks.dart';
 
 /// Seçili görevin alt görevleri (web'deki gibi): ayrıntı okunur ([taskDetailsProvider]) ve
@@ -67,7 +68,7 @@ class _SubtasksState extends ConsumerState<TimelineSelectionSubtasks> {
                         ),
                       ),
                       const Gap(8),
-                      Icon(
+                      NzIcon(
                         _expanded ? Icons.expand_less : Icons.expand_more,
                         size: 20,
                         color: c.textMuted,
@@ -92,7 +93,7 @@ class _SubtasksState extends ConsumerState<TimelineSelectionSubtasks> {
                 ),
                 child: Row(
                   children: [
-                    Icon(
+                    NzIcon(
                       s.done
                           ? Icons.check_circle_rounded
                           : Icons.radio_button_unchecked_rounded,

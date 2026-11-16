@@ -2,14 +2,28 @@ import 'package:flutter/widgets.dart';
 
 import '../extensions/context_ext.dart';
 
-/// Tasarım çizgi ikonu (RoketPortal ana sayfa ikon seti): 24×24 görünüm kutusunda tek SVG yolu,
-/// çizgi 1.75, yuvarlak uç ve birleşim; dolgu yok. Yol verisi pakete bağlı kalmadan [NzGlyphIcon]
-/// içinde çizilir (M/L/H/V/C/S/A/Z, mutlak ve göreli).
+part 'design_glyphs.dart';
+
+/// 24×24 SVG ikonu: varsayılan çizgi 1.75, yuvarlak uç ve birleşim.
+/// SVG'nin özel çizgi kalınlığı, dolgu ve şeffaf maske bilgisi korunur.
+/// Yol verisi [NzGlyphIcon] içinde çizilir (M/L/H/V/C/S/A/Z, mutlak ve göreli).
 @immutable
 final class NzGlyph {
-  const NzGlyph(this.path);
+  const NzGlyph(
+    this.path, {
+    this.filled = false,
+    this.strokeWidth = 1.75,
+    this.cutout,
+    this.cutoutWidth = 2,
+  });
 
   final String path;
+  final bool filled;
+  final double strokeWidth;
+
+  /// SVG maskesindeki şeffaf çizgi; dolgunun altındaki yüzeyi gösterir.
+  final String? cutout;
+  final double cutoutWidth;
 }
 
 /// Ana sayfada kullanılan ikonlar (kaynak: tasarım ikon zip'i, dosya adı yorumda).
@@ -40,6 +54,31 @@ abstract final class NzGlyphs {
 
   /// ok-capraz
   static const northEast = NzGlyph('M7 17L17 7M9 7h8v8');
+
+  /// Ürün sahibinin arşive yönlendirme SVG'si.
+  static const openExternal = NzGlyph(
+    'M14 4h6v6M20 4l-8.5 8.5M18 13.5V18a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4.5',
+  );
+
+  /// duzenle.svg
+  static const edit = NzGlyph(
+    'M15.5 5.5l3 3M4 20l1-4.2L16.3 4.5a1.5 1.5 0 0 1 2.1 0l1.1 1.1a1.5 1.5 0 0 1 0 2.1L8.2 19 4 20zM13 20h7',
+  );
+
+  /// goruntule.svg
+  static const view = NzGlyph(
+    'M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12zM15 12a3 3 0 1 0-6 0a3 3 0 1 0 6 0z',
+  );
+
+  /// indir.svg
+  static const download = NzGlyph(
+    'M12 4v11M7.5 10.5 12 15l4.5-4.5M4.5 15.5v2.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2.5',
+  );
+
+  /// sil.svg
+  static const delete = NzGlyph(
+    'M4 7h16M9.5 7V5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1v2M6 7l1 12a2 2 0 0 0 2 1.8h6a2 2 0 0 0 2-1.8L18 7M10 11v6M14 11v6',
+  );
 
   /// islem-gecmisi
   static const history = NzGlyph(
@@ -89,11 +128,16 @@ class NzGlyphIcon extends StatelessWidget {
     final theme = IconTheme.of(context);
     final side = size ?? theme.size ?? 24;
     return ExcludeSemantics(
-      child: CustomPaint(
-        size: Size.square(side),
-        painter: _GlyphPainter(
-          glyphPath(glyph.path),
-          color ?? theme.color ?? context.colors.text,
+      child: SizedBox.square(
+        dimension: side,
+        child: Center(
+          child: CustomPaint(
+            size: Size.square(side),
+            painter: _GlyphPainter(
+              glyph,
+              color ?? theme.color ?? context.colors.text,
+            ),
+          ),
         ),
       ),
     );
@@ -101,29 +145,45 @@ class NzGlyphIcon extends StatelessWidget {
 }
 
 class _GlyphPainter extends CustomPainter {
-  const _GlyphPainter(this.path, this.color);
+  const _GlyphPainter(this.glyph, this.color);
 
-  final Path path;
+  final NzGlyph glyph;
   final Color color;
 
   @override
   void paint(Canvas canvas, Size size) {
     final scale = size.width / 24;
     canvas.scale(scale);
+    final cutout = glyph.cutout;
+    if (cutout != null) {
+      canvas.saveLayer(const Rect.fromLTWH(0, 0, 24, 24), Paint());
+    }
     canvas.drawPath(
-      path,
+      glyphPath(glyph.path),
       Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 1.75
+        ..style = glyph.filled ? PaintingStyle.fill : PaintingStyle.stroke
+        ..strokeWidth = glyph.strokeWidth
         ..strokeCap = StrokeCap.round
         ..strokeJoin = StrokeJoin.round
         ..color = color,
     );
+    if (cutout != null) {
+      canvas.drawPath(
+        glyphPath(cutout),
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = glyph.cutoutWidth
+          ..strokeCap = StrokeCap.round
+          ..strokeJoin = StrokeJoin.round
+          ..blendMode = BlendMode.clear,
+      );
+      canvas.restore();
+    }
   }
 
   @override
   bool shouldRepaint(_GlyphPainter old) =>
-      old.path != path || old.color != color;
+      old.glyph != glyph || old.color != color;
 }
 
 final _cache = <String, Path>{};

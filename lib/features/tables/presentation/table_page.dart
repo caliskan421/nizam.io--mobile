@@ -12,6 +12,7 @@ import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/nz_menu_group.dart';
 import '../../../core/ui/widgets/navigation/nz_top_bar.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
@@ -135,12 +136,12 @@ class _TablePageState extends ConsumerState<TablePage> {
             children: [
               IconButton(
                 tooltip: l.uiTablesOptions,
-                icon: const Icon(Icons.more_horiz),
+                icon: const NzIcon(Icons.more_horiz),
                 onPressed: () => _options(d),
               ),
               FilledButton.icon(
                 onPressed: () => tableSharing(context, ref, d.id),
-                icon: const Icon(Icons.ios_share, size: 16),
+                icon: const NzIcon(Icons.ios_share, size: 16),
                 label: Text(l.uiTablesShare),
                 style: FilledButton.styleFrom(
                   backgroundColor: context.colors.text,
@@ -397,7 +398,7 @@ class _TablePageState extends ConsumerState<TablePage> {
                                             ),
                                             child: Row(
                                               children: [
-                                                Icon(
+                                                NzIcon(
                                                   _fieldIcon(f.type),
                                                   size: 14,
                                                 ),
@@ -421,7 +422,10 @@ class _TablePageState extends ConsumerState<TablePage> {
                                         width: 48,
                                         child: IconButton(
                                           tooltip: l.uiTablesNewColumn,
-                                          icon: const Icon(Icons.add, size: 20),
+                                          icon: const NzIcon(
+                                            Icons.add,
+                                            size: 20,
+                                          ),
                                           onPressed: () => tableColumn(
                                             context,
                                             ref,

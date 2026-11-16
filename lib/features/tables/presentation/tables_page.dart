@@ -8,6 +8,7 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
 import '../application/tables_controller.dart';
@@ -148,7 +149,7 @@ class TablesPage extends ConsumerWidget {
             child: TextButton.icon(
               onPressed: () =>
                   ref.read(tablesControllerProvider.notifier).setUnit(null),
-              icon: const Icon(Icons.chevron_left),
+              icon: const NzIcon(Icons.chevron_left),
               label: const Text('Tüm tablolar'),
               style: TextButton.styleFrom(
                 backgroundColor: context.colors.surfaceRaised,
@@ -388,7 +389,7 @@ class TablesPage extends ConsumerWidget {
                   Row(
                     children: [
                       if (!d.remote && !d.editable) ...[
-                        Icon(
+                        NzIcon(
                           Icons.lock_outline,
                           size: 14,
                           color: context.colors.textMuted,

@@ -4,6 +4,7 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/nz_menu_group.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../domain/table_document.dart';
 import 'table_sheets.dart' show tableCellText;
@@ -161,6 +162,10 @@ class TableCellEditor extends StatelessWidget {
                     final initial =
                         DateTime.tryParse('$value') ?? DateTime(2026, 11, 9);
                     final picked = await showDatePicker(
+                      switchToInputEntryModeIcon: const NzIcon(NzIcons.edit),
+                      switchToCalendarEntryModeIcon: const NzIcon(
+                        NzIcons.calendar,
+                      ),
                       context: context,
                       initialDate: initial,
                       firstDate: DateTime(2000),

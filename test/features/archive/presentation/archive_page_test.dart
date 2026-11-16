@@ -10,9 +10,12 @@ import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/core/ui/widgets/feedback/feedback.dart';
 import 'package:nizamio/features/archive/application/archive_controller.dart';
+import 'package:nizamio/features/archive/application/archive_folder_controller.dart';
 import 'package:nizamio/features/archive/archive.dart';
 import 'package:nizamio/features/archive/domain/archive.dart';
 import 'package:nizamio/features/archive/domain/records.dart';
+import 'package:nizamio/features/archive/presentation/archive/archive_folder_card.dart';
+import 'package:nizamio/features/archive/presentation/archive/archive_folder_parts.dart';
 import 'package:nizamio/features/archive/presentation/archive/archive_storage.dart';
 
 import '../../../support/harness.dart';
@@ -55,6 +58,66 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
+
+  testWidgets(
+    'koordinatör kök arşivinden tüm dosyalara ve görev dosyalarına geçer',
+    (tester) async {
+      final repo = FakeArchiveRepository();
+      final (h, nav, _) = await _open(tester, repo: repo);
+      expect(find.text(_l.uiArchiveTabTasks), findsOneWidget);
+      expect(find.byType(ArchiveTaskFolderCard), findsNWidgets(2));
+      expect(find.byType(ArchiveFolderIcon), findsNWidgets(2));
+      // Arşiv başlığı ile aynı adı taşıyan sekme.
+      await _tap(tester, find.text(_l.uiArchiveTitle).last);
+      expect(find.text('f1.pdf'), findsOneWidget);
+      expect(find.text('f3.pdf'), findsOneWidget);
+      expect(
+        h.container.read(archiveFolderControllerProvider('d1')).task,
+        isNull,
+      );
+      h.container.read(archiveControllerProvider.notifier).setQuery('Saha');
+      await settle(tester);
+      expect(repo.filters.last.search, 'Saha');
+      await _tap(tester, find.text(_l.uiArchiveTabTasks));
+      await _tap(tester, find.text('Saha keşfi'));
+      expect(nav.calls, isEmpty);
+      expect(h.container.read(archiveControllerProvider).query, isEmpty);
+      final view = h.container.read(archiveFolderControllerProvider('d1'));
+      expect(view.tab, ArchiveFolderTab.files);
+      expect(view.task, 'w1');
+      expect(repo.filters.last.workItemId, 'w1');
+      expect(find.text('f1.pdf'), findsOneWidget);
+      // Arşiv sekmesine doğrudan dokunuş görev süzgecini kaldırır.
+      await _tap(tester, find.text(_l.uiArchiveTitle).last);
+      expect(
+        h.container.read(archiveFolderControllerProvider('d1')).task,
+        isNull,
+      );
+    },
+  );
+
+  testWidgets('üye görev klasörü ortak karttan seçili görev arşivini açar', (
+    tester,
+  ) async {
+    final repo = FakeArchiveRepository()
+      ..folders = const [
+        ArchiveFolder(
+          code: 'mine',
+          name: 'Görevlerim',
+          files: 3,
+          isVirtual: true,
+        ),
+      ];
+    final (h, nav, _) = await _open(tester, repo: repo, member: true);
+    expect(find.byType(ArchiveTaskFolderCard), findsNWidgets(2));
+    expect(find.byType(ArchiveFolderIcon), findsNWidgets(2));
+    await _tap(tester, find.text('Saha keşfi'));
+    expect(nav.calls.last, 'folder:mine');
+    expect(
+      h.container.read(archiveFolderControllerProvider('mine')).task,
+      'w1',
+    );
+  });
 
   testWidgets(
     'üye: depolama, etiketler, ilk beş dosya ve tümü; etiket iki listeyi süzer',

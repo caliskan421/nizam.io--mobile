@@ -25,6 +25,7 @@ import '../application/archive_providers.dart';
 import '../application/archive_summary_provider.dart';
 import '../domain/archive.dart';
 import '../domain/archive_summary.dart';
+import 'archive/archive_coordinator_contents.dart';
 import 'archive/archive_folder_grid.dart';
 import 'archive/archive_outcome.dart';
 import 'archive/archive_role_views.dart';
@@ -125,6 +126,9 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
       if (next?.tab != ArchivePage.shellTab || !visible) return;
       _shortcuts();
     });
+    ref.listen(archiveControllerProvider.select((s) => s.query), (_, query) {
+      if (_search.text != query) _search.text = query;
+    });
     final l = context.l10n;
     // Kök yalnız arama açıklığını izler; klasörler kendi dilimini izler (aramada her tuş
     // vuruşu yalnız klasör ızgarasını yeniden kurar).
@@ -198,15 +202,20 @@ class _Folders extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final view = ref.watch(effectiveAccessProvider);
-    // Koordinatör: koordinatörlük klasörünün düz görev klasörü listesi.
+    // Koordinatör: görev klasörleri ve aynı sayfada arşiv dosyaları.
     if (view.isCoordinatorView) {
       final own =
           all.where((f) => f.code == view.departmentId).firstOrNull ??
           all.where((f) => !f.isVirtual).firstOrNull;
-      if (own != null) return ArchiveTaskFolderList(folder: own);
+      if (own != null) {
+        return ArchiveCoordinatorContents(
+          key: ValueKey((view.programId, own.code)),
+          folder: own,
+        );
+      }
     }
-    // Üye: önce kendi yüklediği dosyalar, sonra sanal "Görevlerim" klasörünün düz görev
-    // klasörü listesi; depolama kartı atanmış görevlerin bütün dosyalarını sayar.
+    // Üye: önce kendi dosyaları, sonra sanal "Görevlerim" klasörünün görev kartları;
+    // depolama kartı atanmış görevlerin bütün dosyalarını sayar.
     if (view.isMemberView) {
       final mine = all.where((f) => f.isVirtual).firstOrNull ?? all.firstOrNull;
       if (mine != null) {
@@ -230,7 +239,6 @@ class _Folders extends ConsumerWidget {
               onRetry: () => retryArchive(ref),
               data: (ids) => ArchiveTaskFolderList(
                 folder: mine,
-                summary: false,
                 empty: l.uiArchiveEmptyAssigned,
                 onlyTasks: ids,
               ),

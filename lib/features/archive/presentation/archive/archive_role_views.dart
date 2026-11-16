@@ -7,40 +7,30 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/state/nz_async_view.dart';
-import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../../../tasks/tasks.dart';
+import '../../../tasks/tasks.dart' show effectiveAccessProvider;
 import '../../application/archive_controller.dart';
 import '../../application/archive_folder_controller.dart';
 import '../../application/archive_folder_sources.dart';
 import '../../domain/archive.dart';
 import '../../domain/records.dart';
 import '../person_files.dart';
-import 'archive_summary_cards.dart';
-import 'archive_texts.dart';
+import 'archive_folder_grid.dart';
+import 'archive_folder_parts.dart';
 
-/// Koordinatör görünümünün arşivi (prototip `archive` koordinatör dalı): klasör ızgarası
-/// yerine etkin koordinatörlüğün DÜZ görev klasörü listesi ("görev klasörleri · n"): klasör
-/// çizimi, görev başlığı, "kod · n dosya", durum noktası. Satır klasör ayrıntısını o görevle
-/// süzülmüş Dosyalar sekmesinde açar. Kaynak `archiveTasks` (dosyası olan görevler).
+/// Koordinatör ve üyenin görev klasörleri: yöneticiyle aynı klasör yüzü ve ızgara.
+/// Kaynak `archiveTasks`; dokunuş görev dosyalarını aynı görünümde veya klasörde açar.
 class ArchiveTaskFolderList extends ConsumerWidget {
   const ArchiveTaskFolderList({
     super.key,
     required this.folder,
-    this.summary = true,
-    this.hint,
     this.empty,
     this.onlyTasks,
+    this.onOpen,
   });
 
   /// Koordinatörün koordinatörlük klasörü; üyede sanal "Görevlerim" klasörü.
   final ArchiveFolder folder;
-
-  /// Üstte özet kartları çizilsin mi (üyede çizilmez).
-  final bool summary;
-
-  /// Başlığın sağındaki ipucu (üyede "yalnız sana atananlar").
-  final String? hint;
 
   /// Klasörde hiç görev yokken (arama yokken) gösterilen metin; yoksa arama boş metni.
   final String? empty;
@@ -48,16 +38,14 @@ class ArchiveTaskFolderList extends ConsumerWidget {
   /// Etiket süzgeci: yalnız bu görevler (seçili etiketli dosyası olanlar); null → hepsi.
   final Set<String>? onlyTasks;
 
-  /// Liste satırındaki küçük klasör çizimi.
-  static const _art = Size(32, 27);
+  /// Kök koordinatör görünümünde görevin dosyalarını aynı sayfada açar.
+  final ValueChanged<String>? onOpen;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l = context.l10n;
-    final c = context.colors;
     final code = folder.code;
     final query = ref.watch(archiveControllerProvider.select((v) => v.query));
-    final catalog = ref.watch(taskCatalogControllerProvider).value;
     // Klasör ayrıntısının görünüm durumu bu liste açıkken yaşar: satıra dokunuşta seçilen
     // görev süzgeci ayrıntı açılana dek düşmez.
     ref.listen(archiveFolderControllerProvider(code), (_, _) {});
@@ -75,14 +63,7 @@ class ArchiveTaskFolderList extends ConsumerWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (summary) ...[
-              ArchiveSummaryCards(files: folder.files, folders: all.length),
-              const Gap(NizamioSpacing.space5),
-            ],
-            NzKicker(
-              '${l.uiArchiveTaskFolders} · ${list.length}',
-              trailing: hint,
-            ),
+            NzKicker('${l.uiArchiveTaskFolders} · ${list.length}'),
             const Gap(NizamioSpacing.space3),
             if (list.isEmpty)
               Padding(
@@ -94,32 +75,28 @@ class ArchiveTaskFolderList extends ConsumerWidget {
                       ? (empty ?? l.uiArchiveEmptyTaskFolders)
                       : l.uiArchiveEmptyTaskFolders,
                   textAlign: TextAlign.center,
-                  style: context.text.caption.copyWith(color: c.textMuted),
+                  style: context.text.caption.copyWith(
+                    color: context.colors.textMuted,
+                  ),
                 ),
               )
             else
-              NzMenuGroup(
-                rows: [
+              ArchiveFolderGrid(
+                children: [
                   for (final t in list)
-                    NzListTile.navigation(
-                      leading: const NzFolderArt(size: _art, frontTop: 9),
-                      title: t.title,
-                      subtitle: [
-                        ?catalog?.task(t.workItemId)?.displayCode,
-                        l.files(t.fileCount),
-                      ].join(' · '),
-                      trailing: switch (catalog?.task(t.workItemId)?.status) {
-                        final s? => NzDot(color: statusTone(s).color(c)),
-                        null => null,
-                      },
-                      onTap: () {
-                        ref
-                            .read(
-                              archiveFolderControllerProvider(code).notifier,
-                            )
-                            .openTask(t.workItemId);
-                        context.appNav.openArchiveFolder(code);
-                      },
+                    ArchiveTaskFolderCard(
+                      task: t,
+                      onOpen:
+                          onOpen ??
+                          (id) {
+                            ref
+                                .read(
+                                  archiveFolderControllerProvider(code)
+                                      .notifier,
+                                )
+                                .openTask(id);
+                            context.appNav.openArchiveFolder(code);
+                          },
                     ),
                 ],
               ),

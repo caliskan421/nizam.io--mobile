@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/providers.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../application/gantt_provider.dart';
 import '../../application/timeline_controller.dart';
 import '../../domain/horizontal_timeline.dart';
@@ -114,6 +116,8 @@ class _GanttSelectionCardState extends ConsumerState<GanttSelectionCard> {
       view.year,
     );
     final picked = await showDatePicker(
+      switchToInputEntryModeIcon: const NzIcon(NzIcons.edit),
+      switchToCalendarEntryModeIcon: const NzIcon(NzIcons.calendar),
       context: context,
       initialDate: date,
       firstDate: start

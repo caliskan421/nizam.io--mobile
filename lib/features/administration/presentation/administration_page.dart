@@ -18,6 +18,7 @@ import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/nz_bottom_sheet.dart';
+import '../../../core/ui/widgets/surfaces/nz_expansion_tile.dart';
 import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
@@ -405,7 +406,7 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
         ],
         const Gap(NizamioSpacing.space4),
         if (allowed)
-          ExpansionTile(
+          NzExpansionTile(
             title: Text(l.uiUsersManagement),
             children: [
               AbsorbPointer(

@@ -1,4 +1,7 @@
-import 'package:flutter/painting.dart';
+import 'dart:ui' as ui;
+
+import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/ui/widgets/nz_glyph.dart';
 
@@ -48,5 +51,39 @@ void main() {
     expect(b.right, closeTo(21, .01));
     expect(b.top, closeTo(3, .01));
     expect(b.bottom, closeTo(21, .01));
+  });
+
+  testWidgets('dolu ikonun maskesi alttaki yüzeyi şeffaf bırakır', (
+    tester,
+  ) async {
+    final key = GlobalKey();
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: RepaintBoundary(
+            key: key,
+            child: const NzGlyphIcon(
+              NzGlyph('M2 2h20v20H2z', filled: true, cutout: 'M6 12h12'),
+              size: 24,
+              color: Color(0xFFFF0000),
+            ),
+          ),
+        ),
+      ),
+    );
+    final boundary = tester.renderObject<RenderRepaintBoundary>(
+      find.byKey(key),
+    );
+    final data = await tester.runAsync(() async {
+      final image = await boundary.toImage();
+      try {
+        return await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+      } finally {
+        image.dispose();
+      }
+    });
+    expect(data!.getUint8((5 * 24 + 12) * 4 + 3), 255);
+    expect(data.getUint8((12 * 24 + 12) * 4 + 3), 0);
   });
 }

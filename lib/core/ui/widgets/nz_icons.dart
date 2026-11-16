@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
-/// Uygulamanın tek ikon kaynağı (telefon tasarımı, Material). Ekranlar `Icons.*` yerine buradan
-/// okur; aynı anlam tek ada iner, telefon ve tablet aynı ikonu çizer. Dolu (`*Filled`) adlar
-/// seçili durum içindir.
+/// Anlamsal ikon kimlikleri. NzIcon mevcut özel SVG karşılığını öncelikli çizer;
+/// özel çizimi olmayan kimlikler Material olarak kalır. Ekranlar Icons.* yerine
+/// bu kataloğu kullanır; *Filled adları seçili durumu belirtir.
 abstract final class NzIcons {
   static const IconData add = Icons.add_rounded;
   static const IconData arrowDown = Icons.arrow_downward_rounded;

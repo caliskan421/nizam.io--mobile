@@ -329,7 +329,7 @@ class _SubtaskLabel extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         child: Row(
           children: [
-            Icon(
+            NzIcon(
               subtask.done
                   ? Icons.check_box_rounded
                   : Icons.check_box_outline_blank_rounded,

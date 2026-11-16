@@ -10,6 +10,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/state/nz_async_view.dart';
 import '../../../../core/ui/widgets/feedback/nz_toast.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/effective_access.dart';
 import '../../application/task_catalog_controller.dart';
@@ -167,7 +168,7 @@ class TaskDependencies extends ConsumerWidget {
                               final id = picked?.id;
                               if (id != null) await change(add: id);
                             },
-                      icon: const Icon(Icons.add),
+                      icon: const NzIcon(Icons.add),
                       label: const Text('Ön görev ekle'),
                     ),
                   ),
@@ -318,7 +319,7 @@ class _DependencyRow extends StatelessWidget {
                     IconButton(
                       tooltip: 'Bağımlılığı kaldır',
                       onPressed: onRemove,
-                      icon: const Icon(Icons.close),
+                      icon: const NzIcon(Icons.close),
                     ),
                 ],
               ),

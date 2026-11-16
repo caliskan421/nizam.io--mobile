@@ -1,3 +1,5 @@
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -109,7 +111,7 @@ class _Preview extends ConsumerStatefulWidget {
 
 class _PreviewState extends ConsumerState<_Preview> {
   late String _id = widget.initial;
-  final _tags = <String, RecordTag>{};
+  final _tags = HashMap<String, RecordTag>();
 
   ArchiveActionsController get _ctrl =>
       ref.read(archiveActionsControllerProvider(widget.code).notifier);

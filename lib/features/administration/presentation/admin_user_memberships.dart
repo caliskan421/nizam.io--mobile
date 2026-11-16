@@ -8,6 +8,8 @@ import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/nz_card.dart';
 import '../../coordinatorships/coordinatorships.dart';
 import '../../scope/scope.dart';
@@ -100,6 +102,7 @@ class AdminUserMemberships extends ConsumerWidget {
                     : l.uiUsersNotMember,
               ),
               trailing: PopupMenuButton<String>(
+                icon: const NzIcon(NzIcons.more),
                 enabled: !busy,
                 onSelected: (value) async {
                   if (scope != ref.read(scopeStateProvider) ||

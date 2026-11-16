@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/ui/widgets/nz_icons.dart';
 
-// Tek ikon kaynağı değişmezi: NzIcons yalnız Material yazı tipinden okur (telefon ve tablet
-// aynı ikonu çizer; tablet SVG ikonları kaldırıldı). Tek tek ikon eşlemesi test edilmez.
+// NzIcons kararlı IconData kimlikleridir; NzIcon bunları çizimde özel SVG ile çözer.
+// Burada çizim tercihi değil katalog kimliklerinin Flutter ile uyumu doğrulanır.
 void main() {
-  test('ikonlar tek kaynaktan (Material yazı tipi) gelir', () {
+  test('ikon kataloğu Flutter IconData kimliklerini korur', () {
     for (final icon in [
       NzIcons.add,
       NzIcons.back,

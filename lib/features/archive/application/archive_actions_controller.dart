@@ -13,6 +13,7 @@ import 'archive_folder_controller.dart';
 import 'archive_folder_sources.dart';
 import 'archive_folders_controller.dart';
 import 'archive_providers.dart';
+import 'person_files_controller.dart';
 
 part 'archive_actions_controller.g.dart';
 
@@ -109,12 +110,14 @@ class ArchiveActionsController extends _$ArchiveActionsController {
   });
 
   /// Dosyayı siler (sunucu yalnız yükleyene izin verir); listeler yeniden okunur.
-  Future<ArchiveOutcome> deleteFile(RecordFile file) => _run(() async {
-    final ctx = await _context();
-    await _repo.deleteFile(file.id, department: ctx.department);
-    _reload();
-    return (ok: true, error: null, path: null);
-  });
+  Future<ArchiveOutcome> deleteFile(RecordFile file, {String? department}) =>
+      _run(() async {
+        // Profil listesi birden fazla departman içerebilir; yazma dosyanın kapsamıyla gider.
+        final target = department ?? (await _context()).department;
+        await _repo.deleteFile(file.id, department: target);
+        _reload(workItemId: file.workItemId);
+        return (ok: true, error: null, path: null);
+      });
 
   /// Etiketi değiştirir; aynı etiket ya da bilinmeyen değer istek göndermez (vazgeçme).
   /// Başarıda listeler yeniden okunur.
@@ -123,7 +126,7 @@ class ArchiveActionsController extends _$ArchiveActionsController {
         if (tag == file.tag || tag == RecordTag.unknown) return _cancelled;
         final ctx = await _context();
         await _repo.retagFile(file.id, tag, department: ctx.department);
-        _reload();
+        _reload(workItemId: file.workItemId);
         return (ok: true, error: null, path: null);
       });
 
@@ -222,20 +225,22 @@ class ArchiveActionsController extends _$ArchiveActionsController {
       rethrow;
     }
     _keys = _keys.clear(_upload);
-    _reload();
+    _reload(workItemId: i.workItemId);
     return (ok: true, error: null, path: null);
   }
 
   /// Bekleyen yükleme anahtarı (test ve tanılama).
   String? get pendingUploadKey => _keys.pending(_upload);
 
-  void _reload() {
+  void _reload({required String workItemId}) {
     if (!ref.mounted) return;
     ref
-      ..invalidate(archiveFilesControllerProvider(code))
-      ..invalidate(archiveFolderTasksProvider(code))
-      ..invalidate(archiveFolderUploadersProvider(code))
-      ..invalidate(archiveFoldersControllerProvider);
+      ..invalidate(archiveFilesControllerProvider)
+      ..invalidate(archiveFolderTasksProvider)
+      ..invalidate(archiveFolderUploadersProvider)
+      ..invalidate(archiveFoldersControllerProvider)
+      ..invalidate(personFilesControllerProvider)
+      ..invalidate(taskDetailsProvider(workItemId));
   }
 }
 

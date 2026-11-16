@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../errors/api_error.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../nz_icon.dart';
+import '../nz_icons.dart';
 import '../nz_size.dart';
 import 'nz_field_errors.dart';
 import 'nz_validators.dart';
@@ -130,6 +132,7 @@ class _NzSelectState<T> extends State<NzSelect<T>> with NzServerFieldError {
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
+              icon: const NzIcon(NzIcons.chevronDown),
               value: widget.value,
               isExpanded: true,
               focusNode: _focus,

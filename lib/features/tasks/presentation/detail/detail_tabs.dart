@@ -8,6 +8,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../archive/archive.dart';
@@ -305,7 +306,7 @@ class DetailFiles extends StatelessWidget {
         Align(
           alignment: AlignmentDirectional.centerEnd,
           child: NzIconButton(
-            icon: NzIcons.openExternal,
+            glyph: NzGlyphs.openExternal,
             semanticLabel: l.uiCoordAllInArchive,
             onPressed: () => openTaskArchive(
               context,

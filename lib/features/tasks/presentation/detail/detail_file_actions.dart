@@ -17,8 +17,8 @@ extension TaskDetailFileActions on TaskDetailActions {
         if (p.canDownloadFile)
           _ListOption(
             label: l.uiTasksFileView,
-            leading: const NzIcon(
-              NzIcons.visible,
+            leading: const NzGlyphIcon(
+              NzGlyphs.view,
               size: NizamioSize.iconSizeSm,
             ),
             onTap: () {
@@ -37,8 +37,8 @@ extension TaskDetailFileActions on TaskDetailActions {
         if (p.canDownloadFile)
           _ListOption(
             label: l.uiTasksFileDownload,
-            leading: const NzIcon(
-              NzIcons.uploadFile,
+            leading: const NzGlyphIcon(
+              NzGlyphs.download,
               size: NizamioSize.iconSizeSm,
             ),
             onTap: () async {
@@ -50,7 +50,10 @@ extension TaskDetailFileActions on TaskDetailActions {
         if (p.canRenameFile(f))
           _ListOption(
             label: l.uiTasksFileRename,
-            leading: const NzIcon(NzIcons.edit, size: NizamioSize.iconSizeSm),
+            leading: const NzGlyphIcon(
+              NzGlyphs.edit,
+              size: NizamioSize.iconSizeSm,
+            ),
             onTap: () {
               Navigator.of(sheet).pop();
               _renameFile(f);
@@ -60,8 +63,8 @@ extension TaskDetailFileActions on TaskDetailActions {
           _ListOption(
             label: l.uiTasksFileDelete,
             color: c.danger,
-            leading: NzIcon(
-              NzIcons.delete,
+            leading: NzGlyphIcon(
+              NzGlyphs.delete,
               size: NizamioSize.iconSizeSm,
               color: c.danger,
             ),
@@ -96,6 +99,12 @@ extension TaskDetailFileActions on TaskDetailActions {
       danger: true,
     );
     if (!yes || !context.mounted) return;
-    _report(await _ctl.deleteFile(f), done: l.uiTasksTFileDeleted);
+    final result = await _ctl.deleteFile(f);
+    if (result.ok && context.mounted) {
+      ref
+        ..invalidate(archiveFoldersControllerProvider)
+        ..invalidate(personFilesControllerProvider);
+    }
+    _report(result, done: l.uiTasksTFileDeleted);
   }
 }

@@ -17,7 +17,7 @@ void main() {
       const Size.square(NizamioSize.iconTile),
     );
     expect(
-      t.widget<Icon>(find.byType(Icon)).color,
+      t.widget<Icon>(find.byWidgetPredicate((w) => w is Icon)).color,
       NizamioColors.light.textMuted,
     );
     await t.pumpWidget(
@@ -27,6 +27,9 @@ void main() {
         ),
       ),
     );
-    expect(t.widget<Icon>(find.byType(Icon)).color, NizamioColors.light.danger);
+    expect(
+      t.widget<Icon>(find.byWidgetPredicate((w) => w is Icon)).color,
+      NizamioColors.light.danger,
+    );
   });
 }

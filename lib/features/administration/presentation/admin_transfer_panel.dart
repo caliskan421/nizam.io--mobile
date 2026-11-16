@@ -6,6 +6,9 @@ import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
+import '../../../core/ui/widgets/surfaces/nz_expansion_tile.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_transfer_controller.dart';
 
@@ -52,7 +55,7 @@ class _AdminTransferPanelState extends ConsumerState<AdminTransferPanel> {
       }
     }
 
-    return ExpansionTile(
+    return NzExpansionTile(
       title: const Text('Programlar arası görev aktarımı'),
       children: [
         if (transfer.outcome case final outcome?)
@@ -113,6 +116,7 @@ class _AdminTransferPanelState extends ConsumerState<AdminTransferPanel> {
                   'Program listesi kesildi. Bazı hedefler görünmeyebilir.',
                 ),
               DropdownButton<String>(
+                icon: const NzIcon(NzIcons.chevronDown),
                 value: _target,
                 hint: const Text('Hedef program'),
                 isExpanded: true,
@@ -129,6 +133,7 @@ class _AdminTransferPanelState extends ConsumerState<AdminTransferPanel> {
           ),
         ),
         DropdownButton<String>(
+          icon: const NzIcon(NzIcons.chevronDown),
           value: _department,
           hint: const Text('Koordinatörlük'),
           isExpanded: true,

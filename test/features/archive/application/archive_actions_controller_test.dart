@@ -112,6 +112,19 @@ void main() {
     expect(repo.calls.where((x) => x.$1 == 'files').length, before + 1);
   });
 
+  test('profil silmesi dosyanın departmanını kullanır', () async {
+    final repo = FakeArchiveRepository();
+    final c = archiveContainer(repo, catalog: archiveCatalog(admin: true));
+    final result = await _ctrl(c)
+        .deleteFile(archiveFile('mine'), department: 'd2');
+    expect(result.ok, isTrue);
+    expect(repo.calls.firstWhere((c) => c.$1 == 'delete'), (
+      'delete',
+      'd2',
+      'mine',
+    ));
+  });
+
   test('etiket değişimi sunucuda; aynı etiket istek göndermez', () async {
     final repo = FakeArchiveRepository();
     final c = archiveContainer(repo);

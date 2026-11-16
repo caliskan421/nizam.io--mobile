@@ -19,6 +19,7 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../scope/scope.dart';
@@ -185,6 +186,8 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
         ? DateTime(initialDate.year - 10)
         : seasonDate(sel.draft.start, v.year);
     final picked = await showDatePicker(
+      switchToInputEntryModeIcon: const NzIcon(NzIcons.edit),
+      switchToCalendarEntryModeIcon: const NzIcon(NzIcons.calendar),
       context: context,
       initialDate: initialDate,
       firstDate: first,

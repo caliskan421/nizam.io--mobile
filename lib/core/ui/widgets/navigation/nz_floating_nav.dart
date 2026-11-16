@@ -343,8 +343,8 @@ class _NavButton extends StatelessWidget {
 class _ActionCircle extends StatelessWidget {
   const _ActionCircle({required this.action});
 
-  // Prototip asistan ikonu 26 px (ikon ölçüsünün 1.3 katı).
-  static const _actionIcon = NizamioSize.iconSize * 1.3;
+  // Asistan da standart ikon boyutunu kullanır; kapsül dokunma alanı ayrı kalır.
+  static const _actionIcon = NizamioSize.iconSize;
 
   final NzNavAction action;
 

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/widgets/nz_icon.dart';
 
 class TablesUnitTile extends StatelessWidget {
   const TablesUnitTile({
@@ -247,7 +248,7 @@ class TablesTemplateTile extends StatelessWidget {
                 color: context.colors.surfaceRaised,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Icon(icon, size: 18, color: context.colors.textMuted),
+              child: NzIcon(icon, size: 18, color: context.colors.textMuted),
             ),
             const Gap(6),
             Text(

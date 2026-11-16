@@ -13,8 +13,10 @@ import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
+import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/nz_card.dart';
 import '../../tasks/tasks.dart';
+import '../application/archive_actions_controller.dart';
 import '../application/archive_providers.dart';
 import '../application/person_files_controller.dart';
 import '../domain/records.dart';
@@ -40,6 +42,7 @@ class PersonFiles extends ConsumerStatefulWidget {
 class _PersonFilesState extends ConsumerState<PersonFiles> {
   bool _downloading = false;
   bool _expanded = false;
+  bool _deleting = false;
 
   Future<void> _download(RecordFile file, String department) async {
     if (_downloading) return;
@@ -67,6 +70,48 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
       if (mounted) NzToast.error(context, api);
     } finally {
       if (mounted) setState(() => _downloading = false);
+    }
+  }
+
+  Future<void> _delete(RecordFile file, String department) async {
+    if (_deleting) return;
+    final scope = ref.read(scopeStateProvider);
+    final session = ref.read(sessionGenerationProvider);
+    final me = ref.read(taskCatalogControllerProvider).value?.me;
+    if (me == null || file.uploaderId != me) return;
+    bool current() =>
+        mounted &&
+        scope == ref.read(scopeStateProvider) &&
+        session == ref.read(sessionGenerationProvider);
+    setState(() => _deleting = true);
+    try {
+      final l = context.l10n;
+      final yes = await NzDialog.confirm(
+        context,
+        title: l.uiArchiveDelete,
+        message: '${file.displayName} · ${l.uiArchiveDeleteConfirm}',
+        confirmLabel: l.uiArchiveDeleteOk,
+        tone: NzDialogTone.destructive,
+      );
+      if (!yes || !mounted || !current()) return;
+      final container = ProviderScope.containerOf(context, listen: false);
+      final provider = archiveActionsControllerProvider(department);
+      final subscription = container.listen(provider, (_, _) {});
+      try {
+        final result = await container
+            .read(provider.notifier)
+            .deleteFile(file, department: department);
+        if (!mounted || !current()) return;
+        if (result.ok) {
+          NzToast.success(context, l.uiArchiveDeleted);
+        } else if (result.error case final error?) {
+          NzToast.error(context, error);
+        }
+      } finally {
+        subscription.close();
+      }
+    } finally {
+      if (mounted) setState(() => _deleting = false);
     }
   }
 
@@ -153,6 +198,15 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
     TaskCatalog? catalog,
   ) {
     final task = catalog?.task(file.workItemId);
+    // Lehte rol varsayımı yapılmaz: dosya sahipliği ve bilinen görev kapsamı kullanılır.
+    final ownDepartment =
+        task?.departmentId ??
+        task?.coordinatorship ??
+        ref.watch(effectiveAccessProvider).departmentId;
+    final canDelete =
+        file.uploaderId != null &&
+        file.uploaderId == catalog?.me &&
+        ownDepartment != null;
     final dot = file.displayName.lastIndexOf('.');
     final extension = dot < 0 ? '' : file.displayName.substring(dot + 1);
     final kind = file.contentType == 'application/pdf'
@@ -222,6 +276,14 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
                     ],
                   ),
                 ),
+                if (canDelete)
+                  NzIconButton(
+                    icon: NzIcons.delete,
+                    semanticLabel: context.l10n.uiArchiveDelete,
+                    onPressed: _deleting
+                        ? null
+                        : () => _delete(file, ownDepartment),
+                  ),
                 NzIconButton(
                   icon: NzIcons.download,
                   semanticLabel: context.l10n.uiArchiveDownload,

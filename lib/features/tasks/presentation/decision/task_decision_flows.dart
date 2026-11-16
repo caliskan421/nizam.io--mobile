@@ -166,7 +166,11 @@ class TaskDecisionFlows {
       context,
       title: l.uiTasksReturn,
       description: t.title,
-      facts: _facts(t),
+      facts: [
+        ..._facts(t),
+        if (t.dateRequest case final request? when request.isPending)
+          NzDecisionFact(l.uiTasksNewDue, TaskDates.full(request.due)),
+      ],
       noteLabel: l.uiTasksReturnReasonLabel,
       noteHint: l.uiTasksReturnReasonHint,
       noteRequired: true,

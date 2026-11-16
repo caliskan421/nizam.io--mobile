@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 15 |
 | istisna | 59 |
-| rapor | 196 |
+| rapor | 197 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -164,6 +164,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/archive/application/archive_files_controller.dart` | `ArchiveFilesController.loadMore` | catch | rapor | 1 |
 | `features/archive/application/person_files_controller.dart` | `PersonFilesController.loadMore` | catch | rapor | 1 |
 | `features/archive/presentation/open_archive_file.dart` | `openArchiveFile` | catch | rapor | 1 |
+| `features/archive/presentation/open_task_archive.dart` | `openTaskArchive` | catch | rapor | 1 |
 | `features/archive/presentation/person_files.dart` | `_PersonFilesState._download` | catch | rapor | 1 |
 | `features/assistant/application/assistant_controller.dart` | `AssistantController.delete` | catch | rapor | 1 |
 | `features/assistant/application/assistant_controller.dart` | `AssistantController.open` | catch | rapor | 1 |

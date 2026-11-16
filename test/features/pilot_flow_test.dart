@@ -110,6 +110,14 @@ void main() {
     );
     await settle(tester);
     expect(find.text('a@b.test'), findsOneWidget);
+    // Çıkış profilin "Hesap" sekmesinde, listenin sonundadır.
+    await tester.tap(find.text(_l.uiUsersAccount));
+    await settle(tester);
+    await tester.scrollUntilVisible(
+      find.text(_l.uiIdentitySignOut).hitTestable(),
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.tap(find.text(_l.uiIdentitySignOut));
     await settle(tester);
     await tester.tap(

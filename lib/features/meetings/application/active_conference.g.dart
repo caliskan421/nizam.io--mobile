@@ -43,7 +43,7 @@ final class ActiveConferenceControllerProvider
 }
 
 String _$activeConferenceControllerHash() =>
-    r'f474d1f40aec4c1c3fa0461e7df918d33d56cfab';
+    r'45c020be4d879f488df583b456428822c4aa9e8d';
 
 abstract class _$ActiveConferenceController
     extends $Notifier<ActiveConference> {

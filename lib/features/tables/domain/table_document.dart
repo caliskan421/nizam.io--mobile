@@ -2,6 +2,8 @@ import '../../../core/errors/api_error.dart';
 
 extension type const TableFieldId(String value) {}
 
+extension type const TableDocumentId(String value) {}
+
 extension type const TablePersonId(String value) {}
 
 extension type const TableDepartmentId(String value) {}
@@ -97,6 +99,8 @@ class TableDocument {
     this.programId = '',
     this.ownerId = '',
     this.previewHasMore = false,
+    this.projectId,
+    this.isTemplate = false,
   }) : fields = List.unmodifiable(fields),
        rows = List.unmodifiable(rows),
        people = Map.unmodifiable(people),
@@ -106,6 +110,8 @@ class TableDocument {
   final String programId;
   final String ownerId;
   final bool previewHasMore;
+  final String? projectId;
+  final bool isTemplate;
   final String title;
   final TableArea area;
   final String unit;
@@ -140,6 +146,8 @@ class TableDocument {
     programId: programId,
     ownerId: ownerId,
     previewHasMore: previewHasMore ?? this.previewHasMore,
+    projectId: projectId,
+    isTemplate: isTemplate,
     title: title ?? this.title,
     area: area ?? this.area,
     unit: unit ?? this.unit,
@@ -163,6 +171,8 @@ class TablesState {
     this.loading = false,
     this.error,
     this.departmentNames = const {},
+    this.project,
+    this.templatesOnly = false,
   }) : documents = List.unmodifiable(documents);
   final List<TableDocument> documents;
   final TableArea area;
@@ -172,11 +182,16 @@ class TablesState {
   final Map<TableDepartmentId, String> departmentNames;
   final String query;
   final String? unit;
+  final String? project;
+  final bool templatesOnly;
   List<TableDocument> get visible => documents
       .where(
         (d) =>
-            d.area == area &&
+            (d.area == area ||
+                (remote && area == TableArea.coord && d.unit.isNotEmpty)) &&
             (unit == null || d.unit == unit) &&
+            (project == null || d.projectId == project) &&
+            (!templatesOnly || d.isTemplate) &&
             d.title.toLowerCase().contains(query.toLowerCase().trim()),
       )
       .toList();
@@ -195,6 +210,8 @@ class TablesState {
     bool? loading,
     ApiError? Function()? error,
     Map<TableDepartmentId, String>? departmentNames,
+    String? Function()? project,
+    bool? templatesOnly,
   }) => TablesState(
     documents: documents ?? this.documents,
     remote: remote,
@@ -204,5 +221,7 @@ class TablesState {
     area: area ?? this.area,
     query: query ?? this.query,
     unit: unit == null ? this.unit : unit(),
+    project: project == null ? this.project : project(),
+    templatesOnly: templatesOnly ?? this.templatesOnly,
   );
 }

@@ -83,15 +83,26 @@ açar; kimlik doğrulama isteği göndermez ve oturum oluşturmaz. Prod giriş d
 iOS simülatörü: `flutter run -d <simulator-id> --flavor dev -t lib/main_dev.dart`.
 
 Tablolar listeleme/oluşturma, sütun kurulumu ve paylaşım için pinli backend uçlarını kullanır.
+Başlangıç düzeni liste ekranındaki şablon kartından seçilir; oluşturma formunda yalnız
+seçilen düzen gösterilir. Paylaşımda kişiler başlangıçta kapalı koordinatörlük gruplarında, koordinatörler üyelerden önce gösterilir.
+Liste ortak aşağı çekerek yenileme ve bayat veri mekanizmasını kullanır; değişmeyen veri
+mevcut görünümü korur.
 Yeni tablo varsayılan yalnız sahibine açıktır. Kişi başına görüntüleme/düzenleme ve tek
-koordinatörlük ekibi için yetki seçilir; konum paylaşım seçiminden türetilir. Hedefin
-koordinatörü/yöneticisi doğrudan ekip erişimini açar; diğer üyeler kişisel tablo oluşturup
-`propose_move` ile onay ister. Onay gereken ekip paylaşımı ayrıca kişi seçimi taşımaz.
+koordinatörlük için erişim seçilir; konum paylaşım seçiminden türetilir. Koordinatörlük
+seçildiğinde varsayılan yalnız sahip ve açıkça seçilen kişilerdir (`grant`); ekip erişimi
+kapalı kalır. "Tüm ekip" ayrıca seçilirse dinamik `team_role` açılır ve kişi seçimleri
+kayda gönderilmez. Yeni koordinatörlük tablosunu kapsam üyesi doğrudan oluşturabilir;
+kişisel tabloyu sonradan taşıma/öneri onayı bundan ayrıdır.
 Kişiler mevcut yetkili görev/ekip kataloğuyla sınırlıdır; herkese açık genel kişi seçici ucu yoktur.
 Oluşturma, sütun ve paylaşım ayrı isteklerdir: form aynı oturumda kapanıp açılsa da kalan
 adımlar aynı işlem anahtarlarıyla sürer. Hesap/kapsam değişimi taslağı siler. Canlı listede
-örnek veri yoktur; hata demo veriye düşmez. Tablo detayı bu aşamada sunucudan ilk 200 satırlık
-salt okunur önizlemedir; prototip düzenleme/paylaşım/kopyalama komutları canlı tabloda çalışmaz.
+örnek veri yoktur; hata demo veriye düşmez. Canlı detay; sayfalı satır/hücre düzenleme,
+sütun yönetimi, yorumlar, dosyalar, projeler, paylaşım, kopya/taşıma/öneri, şablon,
+filtre/sıralama ve geri alma uçlarını kullanır. Hücre/şema çakışmalarında taslak korunur;
+belirsiz yazımlar aynı anahtarla sürdürülür. SSE değişiklikleri ve görünürlükle sınırlı presence
+aktiftir. Snapshot mevcut kişi yetkilerini ve okuyanın etkin rolünü vermediği için mevcut
+grant listesi gösterilmez; içerik yazım yetkisini sunucu doğrular. Ayrıntı ve doğrulama:
+[tablo çalışma notu](docs/yurutme/tablo-workspace-calisma.md).
 
 ## Uygulama kimliği ve imzalama
 

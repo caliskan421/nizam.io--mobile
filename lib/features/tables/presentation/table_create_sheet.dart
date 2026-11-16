@@ -10,33 +10,30 @@ import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
+import '../../../core/ui/widgets/feedback/nz_loader.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../tasks/tasks.dart'
-    show
-        AutoExpand,
-        QuickFormLayout,
-        QuickPane,
-        QuickTitleField,
-        TaskCheckRow,
-        TaskSegmented;
+    show AutoExpand, QuickFormLayout, QuickPane, QuickTitleField;
 import '../application/table_create_job.dart';
 import '../application/tables_controller.dart';
 import '../application/tables_server.dart';
 import '../domain/table_document.dart';
 import '../domain/tables_repository.dart';
+import 'table_sharing_picker.dart';
 import 'table_sheet_host.dart';
 import 'table_texts.dart';
 
-/// Liste ekranının oluşturma taslağı. Paylaşım seçilmedikçe kişisel ve özeldir.
+/// Liste ekranının oluşturma taslağı. Erişim eklenmedikçe yalnız sahibine açıktır.
 /// Canlı kayıt adımları ve anahtarları aynı oturumda yeniden açılınca korunur.
 Future<void> showCreateTableSheet(
   BuildContext context,
   WidgetRef ref, {
   required ValueChanged<String> onCreated,
   TableTemplate initialTemplate = TableTemplate.blank,
+  String? initialDepartment,
 }) async {
   final l = context.l10n;
   final controller = ref.read(tablesControllerProvider.notifier);
@@ -45,11 +42,15 @@ Future<void> showCreateTableSheet(
   final program = ref.read(scopeStateProvider).programId ?? '';
   var job = controller.pendingCreateJob;
   var name = job?.title ?? '';
-  var template = job?.template ?? initialTemplate;
+  final template = job?.template ?? initialTemplate;
   String? unit =
       job?.proposalDepartment ??
-      (job?.location.personal == false ? job!.location.departmentId : null);
+      (job != null
+          ? (job.location.personal ? null : job.location.departmentId)
+          : initialDepartment);
   var teamAccess = job?.teamAccess ?? TableAccess.view;
+  var shareWholeTeam = job != null && job.teamAccess != TableAccess.off;
+  var teamQuery = '';
   var busy = false;
   ApiError? error;
   var query = '';
@@ -66,8 +67,46 @@ Future<void> showCreateTableSheet(
   }
 
   bool current() => ref.context.mounted && identical(lease, controller.lease);
+  Iterable<TablePersonId> teamIds(TableSharingChoices? choices) => unit == null
+      ? const <TablePersonId>[]
+      : repository == null
+      ? const [
+          TablePersonId('demo-1'),
+          TablePersonId('demo-2'),
+          TablePersonId('demo-3'),
+          TablePersonId('demo-4'),
+        ]
+      : choices?.teamPeopleIn(unit!).keys ?? <TablePersonId>[];
+  void selectTeam(TableSharingChoices? choices) {
+    for (final id in teamIds(choices)) {
+      people[id] = teamAccess;
+    }
+  }
+
+  void individualChange(TablePersonId id, TableAccess access) => update(() {
+    if (shareWholeTeam) selectTeam(ref.read(tableSharingChoicesProvider).value);
+    shareWholeTeam = false;
+    people[id] = access;
+  });
+  void individualRemove(TablePersonId id) => update(() {
+    if (shareWholeTeam) selectTeam(ref.read(tableSharingChoicesProvider).value);
+    shareWholeTeam = false;
+    people.remove(id);
+  });
+
   Future<void> submit(BuildContext sheet) async {
     if (busy || !current()) return;
+    final members = teamIds(
+      repository == null ? null : ref.read(tableSharingChoicesProvider).value,
+    ).toSet();
+    final sharedPeople = <TablePersonId, TableAccess>{
+      for (final entry in people.entries)
+        if (!shareWholeTeam || unit == null || !members.contains(entry.key))
+          entry.key: entry.value,
+    };
+    final sharedTeamAccess = unit != null && shareWholeTeam
+        ? teamAccess
+        : TableAccess.off;
     if (repository == null) {
       final id = controller.create(
         expectedLease: lease,
@@ -75,8 +114,8 @@ Future<void> showCreateTableSheet(
         fields: l.templateFields(template),
         area: unit == null ? TableArea.personal : TableArea.coord,
         unit: unit ?? 'DEMO-A',
-        teamAccess: unit == null ? TableAccess.off : teamAccess,
-        people: people,
+        teamAccess: sharedTeamAccess,
+        people: sharedPeople,
       );
       if (id == null) return;
       Navigator.of(sheet).pop();
@@ -91,9 +130,13 @@ Future<void> showCreateTableSheet(
     try {
       final choices = await ref.read(tableSharingChoicesProvider.future);
       if (!current() || !sheet.mounted) return;
-      final needsApproval = unit != null && !choices.canPublish(unit!);
-      if (needsApproval && people.isNotEmpty) {
-        throw ApiError('tables.input_invalid');
+      // Yeni koordinatörlük tablosunu kapsam üyesi doğrudan açabilir.
+      // Önceki sürümde başlamış bir öneri planı aynı anahtarlarla sürdürülür.
+      final needsApproval = job?.proposalDepartment != null;
+      if (job == null &&
+          unit != null &&
+          !choices.departments.containsKey(TableDepartmentId(unit!))) {
+        throw ApiError('tables.reference_unavailable');
       }
       job ??= TableCreateJob(
         repository: repository,
@@ -101,8 +144,8 @@ Future<void> showCreateTableSheet(
         title: name.trim(),
         template: template,
         fields: l.templateFields(template),
-        people: people,
-        teamAccess: unit == null ? TableAccess.off : teamAccess,
+        people: sharedPeople,
+        teamAccess: sharedTeamAccess,
         proposalDepartment: needsApproval ? unit : null,
       );
       controller.pendingCreateJob = job;
@@ -136,22 +179,6 @@ Future<void> showCreateTableSheet(
       if (current() && sheet.mounted) update(() => busy = false);
     }
   }
-
-  Widget permission(TableAccess value, ValueChanged<TableAccess> onChanged) =>
-      NzFormRows(
-        rows: [
-          NzFormRow.custom(
-            label: 'Yetki',
-            trailing: TaskSegmented(
-              compact: true,
-              labels: const ['Görüntüleme', 'Düzenleme'],
-              selected: value == TableAccess.edit ? 1 : 0,
-              onSelected: (i) =>
-                  onChanged(i == 0 ? TableAccess.view : TableAccess.edit),
-            ),
-          ),
-        ],
-      );
 
   await showTableSheet(
     ref,
@@ -190,7 +217,9 @@ Future<void> showCreateTableSheet(
             valueListenable: changes,
             builder: (context, _, _) {
               final selection = [
-                if (people.isNotEmpty) '${people.length} kişi',
+                if (people.isNotEmpty && (unit == null || !shareWholeTeam))
+                  '${people.length} kişi',
+                if (unit != null && shareWholeTeam) 'Tüm ekip',
                 if (unit != null)
                   choices?.departments[TableDepartmentId(unit!)] ??
                       l.tableUnit(unit!),
@@ -203,6 +232,7 @@ Future<void> showCreateTableSheet(
                   IgnorePointer(
                     ignoring: busy || job != null,
                     child: QuickTitleField(
+                      pill: true,
                       label: l.uiTablesName,
                       hint: 'Tabloya bir ad ver',
                       value: name,
@@ -225,27 +255,6 @@ Future<void> showCreateTableSheet(
                         icon: NzIcons.sheets,
                         value: l.tableTemplate(template),
                         valueSet: true,
-                        content: QuickPane(
-                          child: Column(
-                            children: [
-                              for (final t in TableTemplate.values)
-                                TaskCheckRow(
-                                  label: l.tableTemplate(t),
-                                  caption: l
-                                      .templateFields(t)
-                                      .map((f) => f.name)
-                                      .join(' · '),
-                                  radio: true,
-                                  selected: template == t,
-                                  onTap: () => update(() {
-                                    template = t;
-                                    pane = null;
-                                    auto.onPane(opened: false);
-                                  }),
-                                ),
-                            ],
-                          ),
-                        ),
                       ),
                       NzFormRow(
                         label: 'Paylaşım',
@@ -263,8 +272,11 @@ Future<void> showCreateTableSheet(
                                 ),
                               ),
                               const Gap(NizamioSpacing.space3),
-                              TaskSegmented(
-                                labels: const ['Kişiler', 'Koordinatörlük'],
+                              NzPillTabs(
+                                tabs: const [
+                                  NzPillTab(label: 'Kişiler'),
+                                  NzPillTab(label: 'Koordinatörlük'),
+                                ],
                                 selected: sharingTab,
                                 onSelected: (i) => update(() {
                                   sharingTab = i;
@@ -272,126 +284,148 @@ Future<void> showCreateTableSheet(
                                 }),
                               ),
                               const Gap(NizamioSpacing.space3),
-                              NzTextField(
-                                key: ValueKey(sharingTab),
-                                label: sharingTab == 0
-                                    ? l.uiTablesPersonSearch
-                                    : 'Koordinatörlük ara',
-                                labelAbove: false,
-                                onChanged: (v) => update(
-                                  () => query = v.trim().toLowerCase(),
+                              if (sharingTab == 0) ...[
+                                NzSearchField(
+                                  key: const ValueKey('people-search'),
+                                  label: 'Ad ile ara',
+                                  onChanged: (v) => update(
+                                    () => query = v.trim().toLowerCase(),
+                                  ),
                                 ),
-                              ),
-                              const Gap(NizamioSpacing.space2),
+                                const Gap(NizamioSpacing.space2),
+                              ],
                               if (candidates?.isLoading == true)
-                                const CircularProgressIndicator(),
+                                const NzLoader(),
                               if (candidates?.error case final e?) ...[
                                 Text(errorText(l, toApiError(e))),
-                                TextButton(
+                                NzButton.ghost(
                                   onPressed: () => controller.reloadServer(
                                     refreshChoices: true,
                                   ),
-                                  child: const Text('Yeniden dene'),
+                                  label: 'Yeniden dene',
                                 ),
                               ],
                               if (sharingTab == 0) ...[
-                                if (repository != null)
+                                if (unit != null && shareWholeTeam)
                                   Text(
-                                    'Kişiler erişebildiğin ekip kataloğuyla sınırlıdır.',
+                                    'Tüm ekip seçili. Bir kişinin yetkisini değiştirir veya kişiyi çıkarırsan paylaşım kişi bazına geçer.',
                                     style: context.text.caption,
                                   ),
-                                for (final id
-                                    in (repository == null
-                                        ? [
-                                            'demo-1',
-                                            'demo-2',
-                                            'demo-3',
-                                            'demo-4',
-                                          ]
-                                        : choices
-                                                  ?.peopleIn(unit)
-                                                  .keys
-                                                  .map((id) => id.value)
-                                                  .toList() ??
-                                              <String>[]))
-                                  if ((choices?.people[TablePersonId(id)] ??
-                                          l.tableDemoPerson(id))
-                                      .toLowerCase()
-                                      .contains(query)) ...[
-                                    TaskCheckRow(
-                                      label:
-                                          choices?.people[TablePersonId(id)] ??
-                                          l.tableDemoPerson(id),
-                                      selected: people.containsKey(
-                                        TablePersonId(id),
-                                      ),
-                                      onTap: () => update(() {
-                                        final key = TablePersonId(id);
-                                        if (people.containsKey(key)) {
-                                          people.remove(key);
-                                        } else {
-                                          people[key] = TableAccess.view;
-                                        }
-                                      }),
-                                    ),
-                                    if (people.containsKey(TablePersonId(id)))
-                                      permission(
-                                        people[TablePersonId(id)]!,
-                                        (v) => update(
-                                          () => people[TablePersonId(id)] = v,
-                                        ),
-                                      ),
-                                  ],
+                                TableSharingPeople(
+                                  choices: choices,
+                                  people: people,
+                                  query: query,
+                                  department: unit,
+                                  prototype: repository == null,
+                                  onChanged: individualChange,
+                                  onRemove: individualRemove,
+                                ),
                               ] else ...[
                                 Text(
-                                  'Seçtiğin koordinatörlüğün tüm güncel üyeleri erişir.',
+                                  'Tablonun bulunacağı koordinatörlüğü ve erişecek kişileri seç.',
                                   style: context.text.caption,
                                 ),
-                                TaskCheckRow(
-                                  label: 'Koordinatörlükle paylaşma',
-                                  radio: true,
-                                  selected: unit == null,
-                                  onTap: () => update(() => unit = null),
-                                ),
-                                for (final u
-                                    in (repository == null
-                                        ? tableDemoUnits
-                                        : choices?.departments.keys
-                                                  .map((id) => id.value)
-                                                  .toList() ??
-                                              <String>[]))
-                                  if ((choices?.departments[TableDepartmentId(
-                                            u,
-                                          )] ??
-                                          l.tableUnit(u))
-                                      .toLowerCase()
-                                      .contains(query)) ...[
-                                    TaskCheckRow(
-                                      label:
-                                          choices
-                                              ?.departments[TableDepartmentId(
-                                            u,
-                                          )] ??
-                                          l.tableUnit(u),
-                                      radio: true,
-                                      selected: unit == u,
-                                      onTap: () => update(() {
-                                        unit = u;
-                                        if (choices != null) {
-                                          people.removeWhere(
-                                            (id, _) => !choices
-                                                .peopleIn(u)
-                                                .containsKey(id),
-                                          );
-                                        }
-                                      }),
+                                NzSelect<String>(
+                                  label: 'Tablonun koordinatörlüğü',
+                                  value: unit ?? '',
+                                  items: [
+                                    const NzSelectItem(
+                                      value: '',
+                                      label: 'Koordinatörlükle paylaşma',
                                     ),
-                                    if (unit == u)
-                                      permission(
-                                        teamAccess,
-                                        (v) => update(() => teamAccess = v),
+                                    for (final u
+                                        in repository == null
+                                            ? tableDemoUnits
+                                            : choices?.departments.keys
+                                                      .map((id) => id.value)
+                                                      .toList() ??
+                                                  <String>[])
+                                      NzSelectItem(
+                                        value: u,
+                                        label:
+                                            choices
+                                                ?.departments[TableDepartmentId(
+                                              u,
+                                            )] ??
+                                            l.tableUnit(u),
                                       ),
                                   ],
+                                  onChanged: (value) => update(() {
+                                    final next = value == null || value.isEmpty
+                                        ? null
+                                        : value;
+                                    if (unit != next) {
+                                      shareWholeTeam = false;
+                                      teamQuery = '';
+                                      unit = next;
+                                      if (choices != null && next != null) {
+                                        people.removeWhere(
+                                          (id, _) => !choices
+                                              .peopleIn(next)
+                                              .containsKey(id),
+                                        );
+                                      }
+                                    }
+                                  }),
+                                ),
+                                if (unit case final u?) ...[
+                                  const Gap(NizamioSpacing.space4),
+                                  NzPillTabs(
+                                    semanticLabel: 'Koordinatörlük erişimi',
+                                    tabs: const [
+                                      NzPillTab(label: 'Seçtiğim kişiler'),
+                                      NzPillTab(label: 'Tüm ekip'),
+                                    ],
+                                    selected: shareWholeTeam ? 1 : 0,
+                                    onSelected: (i) => update(() {
+                                      if (shareWholeTeam || i == 1) {
+                                        selectTeam(choices);
+                                      }
+                                      shareWholeTeam = i == 1;
+                                    }),
+                                  ),
+                                  const Gap(NizamioSpacing.space3),
+                                  if (shareWholeTeam) ...[
+                                    TablePermissionControl(
+                                      value: teamAccess,
+                                      label: 'Koordinatörlük ekibinin erişim yetkisi',
+                                      onChanged: (v) => update(() {
+                                        teamAccess = v;
+                                        selectTeam(choices);
+                                      }),
+                                    ),
+                                    Text(
+                                      'Koordinatörlüğe sonradan katılanlar da bu yetkiyle erişir.',
+                                      style: context.text.caption,
+                                    ),
+                                  ],
+                                  const Gap(NizamioSpacing.space3),
+                                  Text(
+                                    shareWholeTeam
+                                        ? 'Kişiye özel değişiklik yaptığında mevcut ekip seçili kalır; sonradan katılanlar otomatik eklenmez.'
+                                        : 'Seçili kişilerin yetkilerini ayrı ayrı değiştirebilir veya kişileri çıkarabilirsin.',
+                                    style: context.text.caption,
+                                  ),
+                                  const Gap(NizamioSpacing.space3),
+                                  NzSearchField(
+                                    key: ValueKey('team-search:$u'),
+                                    label: 'Ekipte kişi ara',
+                                    onChanged: (v) => update(
+                                      () => teamQuery = v.trim().toLowerCase(),
+                                    ),
+                                  ),
+                                  const Gap(NizamioSpacing.space3),
+                                  TableSharingPeople(
+                                    choices: choices,
+                                    people: people,
+                                    query: teamQuery,
+                                    department: u,
+                                    prototype: repository == null,
+                                    groupByDepartment: false,
+                                    onChanged: individualChange,
+                                    onRemove: individualRemove,
+                                  ),
+                                ],
                               ],
                               const Gap(NizamioSpacing.space2),
                               Text(
@@ -408,13 +442,6 @@ Future<void> showCreateTableSheet(
                   ),
                 ),
                 footer: [
-                  if (unit != null &&
-                      choices != null &&
-                      !choices.canPublish(unit!))
-                    Text(
-                      'Bu koordinatörlüğe açmak için onay isteği gönderilecek. Onaylanana kadar tablo yalnız sana açıktır; ayrıca kişi ekleyemezsin.',
-                      style: context.text.caption,
-                    ),
                   if (job != null)
                     Text(
                       job!.tableId == null

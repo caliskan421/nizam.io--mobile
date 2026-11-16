@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart' show mapEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers.dart';
+import '../../../core/stale_clock.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../../tasks/tasks.dart' show taskCatalogControllerProvider;
@@ -9,17 +11,36 @@ import '../domain/tables_repository.dart';
 import 'table_create_job.dart';
 import 'tables_server.dart';
 
+part 'table_demo_fixtures.dart';
+
 final tablesControllerProvider =
-    NotifierProvider<TablesController, TablesState>(TablesController.new);
+    NotifierProvider<TablesController, TablesState>(
+      TablesController.new,
+      dependencies: [
+        sessionGenerationProvider,
+        scopeStateProvider,
+        tablesRepositoryProvider,
+        tableSharingChoicesProvider,
+        taskCatalogControllerProvider,
+      ],
+    );
 
 /// Canlı liste sunucudan okunur; prototip yalnız açık test geçersiz kılmasındadır.
 /// Hesap/oturum/kapsam değişimi bütün veri ve bekleyen kayıtları siler.
-class TablesController extends Notifier<TablesState> {
+class TablesController extends Notifier<TablesState> with _TableDemoFixtures {
   int _serial = 0;
   int _serverLoad = 0;
+  var _clock = StaleClock();
+  Future<void>? _refreshing;
+  Future<void>? _initialLoad;
+  Future<void> get ready => _initialLoad ?? Future.value();
+  void markServerChanged() => _clock = StaleClock();
   TableCreateJob? pendingCreateJob;
+  @override
   late bool _demoExtended = false;
+  @override
   late bool _referenceSampleReady = false;
+  @override
   Object _lease = Object();
   Object get lease => _lease;
   @override
@@ -31,15 +52,18 @@ class TablesController extends Notifier<TablesState> {
     _referenceSampleReady = false;
     _lease = Object();
     pendingCreateJob = null;
+    _clock = StaleClock();
+    _refreshing = null;
     if (ref.watch(tablesRepositoryProvider) != null) {
-      Future.microtask(reloadServer);
+      _initialLoad = Future.microtask(reloadServer);
       return TablesState(
         documents: const [],
-        area: TableArea.personal,
+        area: TableArea.coord,
         remote: true,
         loading: true,
       );
     }
+    _initialLoad = null;
     return TablesState(
       documents: [
         TableDocument(
@@ -147,180 +171,16 @@ class TablesController extends Notifier<TablesState> {
     );
   }
 
-  /// Genişletilmiş örnek seti mevcut oturumdaki düzenlemeleri silmeden ekler.
-  void ensureDemoFixtures() {
-    if (ref.read(tablesRepositoryProvider) != null) return;
-    _ensureReferenceSample();
-    if (_demoExtended) return;
-    _demoExtended = true;
-    TableDocument sample(
-      String id,
-      String title,
-      TableArea area, {
-      String unit = 'DEMO-A',
-      TableAccess access = TableAccess.owner,
-    }) => TableDocument(
-      id: 'demo-extra-$id-${identityHashCode(_lease)}',
-      title: title,
-      area: area,
-      unit: unit,
-      access: access,
-      fields: const [
-        TableField(id: 'name', name: 'İş'),
-        TableField(id: 'person', name: 'Sorumlu', type: TableFieldType.person),
-        TableField(id: 'done', name: 'Durum', type: TableFieldType.todo),
-      ],
-      rows: [
-        TableRecord(
-          id: '$id-1',
-          cells: {
-            const TableFieldId('name'): 'Hazırlık',
-            const TableFieldId('person'): 'demo-1',
-            const TableFieldId('done'): false,
-          },
-        ),
-        TableRecord(
-          id: '$id-2',
-          cells: {
-            const TableFieldId('name'): 'Kontrol',
-            const TableFieldId('person'): 'demo-2',
-            const TableFieldId('done'): true,
-          },
-        ),
-      ],
-    );
-    state = state.copyWith(
-      documents: [
-        ...state.documents,
-        sample('ops-1', 'Operasyon görevleri', TableArea.coord, unit: 'DEMO-C'),
-        sample('ops-2', 'Etkinlik planı', TableArea.coord, unit: 'DEMO-C'),
-        sample('ops-3', 'Malzeme takibi', TableArea.coord, unit: 'DEMO-C'),
-        sample('personal-2', 'Haftalık plan', TableArea.personal),
-        sample('personal-3', 'Yapılacaklar', TableArea.personal),
-        sample(
-          'shared-2',
-          'Ortak çalışma planı',
-          TableArea.shared,
-          access: TableAccess.view,
-        ),
-        sample(
-          'shared-3',
-          'Etkinlik takvimi',
-          TableArea.shared,
-          access: TableAccess.view,
-        ),
-      ],
-    );
-  }
-
-  void _ensureReferenceSample() {
-    if (_referenceSampleReady) return;
-    _referenceSampleReady = true;
-    final original = state.documents
-        .where((d) => d.id.startsWith('demo-plan-'))
-        .firstOrNull;
-    if (original == null ||
-        original.title != 'Atölye hazırlıkları' ||
-        original.fields.length != 4 ||
-        original.rows.length != 2 ||
-        original.rows.first.cells[const TableFieldId('name')] !=
-            'Örnek hazırlık' ||
-        original.rows.last.cells[const TableFieldId('name')] !=
-            'Örnek kontrol') {
-      return;
-    }
-    TableRecord row(
-      String id,
-      String name,
-      String person,
-      String task,
-      String date,
-      bool done, [
-      List<String> files = const [],
-    ]) => TableRecord(
-      id: id,
-      cells: {
-        const TableFieldId('name'): name,
-        const TableFieldId('person'): person,
-        const TableFieldId('task'): task,
-        const TableFieldId('date'): date,
-        const TableFieldId('file'): files,
-        const TableFieldId('done'): done,
-      },
-    );
-    final sample = original.copyWith(
-      title: 'Hidrofor montaj kontrol listesi',
-      fields: const [
-        TableField(id: 'name', name: 'Adım'),
-        TableField(id: 'person', name: 'Sorumlu', type: TableFieldType.person),
-        TableField(id: 'task', name: 'Görev', type: TableFieldType.task),
-        TableField(id: 'date', name: 'Son tarih', type: TableFieldType.date),
-        TableField(id: 'file', name: 'Kanıt', type: TableFieldType.file),
-        TableField(id: 'done', name: 'Tamam', type: TableFieldType.todo),
-      ],
-      rows: [
-        row(
-          'demo-r1',
-          'Pompaların sahaya teslimi',
-          'demo-1',
-          'demo-task-1',
-          '2026-10-28',
-          false,
-          ['Örnek belge.pdf'],
-        ),
-        row(
-          'demo-r2',
-          'Vinç ve elektrik bağlantısı',
-          'demo-2',
-          'demo-task-1',
-          '2026-10-27',
-          true,
-          ['Örnek görsel.jpg', 'Kontrol.pdf'],
-        ),
-        row(
-          'demo-r3',
-          'Montaj ekibinin saha planı',
-          'demo-3',
-          'demo-task-2',
-          '2026-10-26',
-          true,
-        ),
-        row(
-          'demo-r4',
-          'Basınç testi',
-          'demo-4',
-          'demo-task-2',
-          '2026-10-30',
-          false,
-        ),
-        row(
-          'demo-r5',
-          'Teslim tutanağı',
-          'demo-1',
-          'demo-task-3',
-          '2026-11-02',
-          false,
-        ),
-      ],
-      people: const {
-        TablePersonId('demo-1'): TableAccess.edit,
-        TablePersonId('demo-2'): TableAccess.edit,
-        TablePersonId('demo-3'): TableAccess.edit,
-      },
-    );
-    state = state.copyWith(
-      documents: [
-        for (final d in state.documents)
-          if (d.id == original.id) sample else d,
-      ],
-    );
-  }
-
   String _id(String prefix) =>
       '$prefix-${identityHashCode(_lease)}-${++_serial}';
   void setArea(TableArea area) =>
-      state = state.copyWith(area: area, unit: () => null);
-  void setUnit(String? unit) => state = state.copyWith(unit: () => unit);
+      state = state.copyWith(area: area, unit: () => null, project: () => null);
+  void setUnit(String? unit) =>
+      state = state.copyWith(unit: () => unit, project: () => null);
+  void setProject(String? project) =>
+      state = state.copyWith(project: () => project);
+  void setTemplatesOnly(bool value) =>
+      state = state.copyWith(templatesOnly: value);
   void markOpened(String id) {
     final d = state.document(id);
     if (d != null) _put(d);
@@ -335,7 +195,50 @@ class TablesController extends Notifier<TablesState> {
     if (d != null && d.editable) _put(change(d));
   }
 
-  Future<void> reloadServer({bool refreshChoices = false}) async {
+  Future<void> refresh() {
+    if (ref.read(tablesRepositoryProvider) == null) return Future.value();
+    if (_refreshing case final pending?) return pending;
+    late final Future<void> result;
+    result = reloadServer(refreshChoices: true, keepPrevious: true)
+        .whenComplete(() {
+          if (identical(_refreshing, result)) _refreshing = null;
+        });
+    _refreshing = result;
+    return result;
+  }
+
+  Future<void> refreshIfStale() {
+    if (state.loading ||
+        state.error != null ||
+        _refreshing != null ||
+        !state.remote) {
+      return Future.value();
+    }
+    return _clock.refreshIfStale(AsyncData(state), refresh);
+  }
+
+  bool _sameDocuments(List<TableDocument> before, List<TableDocument> after) {
+    if (before.length != after.length) return false;
+    final previous = {for (final d in before) TableDocumentId(d.id): d};
+    return after.every((d) {
+      final old = previous[TableDocumentId(d.id)];
+      return old != null &&
+          old.title == d.title &&
+          old.unit == d.unit &&
+          old.area == d.area &&
+          old.access == d.access &&
+          old.teamAccess == d.teamAccess &&
+          old.ownerId == d.ownerId &&
+          old.projectId == d.projectId &&
+          old.isTemplate == d.isTemplate &&
+          old.programId == d.programId;
+    });
+  }
+
+  Future<void> reloadServer({
+    bool refreshChoices = false,
+    bool keepPrevious = false,
+  }) async {
     final repository = ref.read(tablesRepositoryProvider);
     if (repository == null) return;
     final lease = _lease;
@@ -347,7 +250,9 @@ class TablesController extends Notifier<TablesState> {
     final program = ref.read(scopeStateProvider).programId ?? '';
     bool current() =>
         ref.mounted && identical(lease, _lease) && load == _serverLoad;
-    state = state.copyWith(documents: [], loading: true, error: () => null);
+    if (!keepPrevious) {
+      state = state.copyWith(documents: [], loading: true, error: () => null);
+    }
     try {
       final choices = await ref.read(tableSharingChoicesProvider.future);
       if (!current()) return;
@@ -361,8 +266,16 @@ class TablesController extends Notifier<TablesState> {
         documents.addAll(await repository.list(location, choices.accountId));
       }
       if (!current()) return;
+      _clock.markFresh();
+      final same = _sameDocuments(state.documents, documents);
+      if (keepPrevious &&
+          same &&
+          state.error == null &&
+          mapEquals(state.departmentNames, choices.departments)) {
+        return;
+      }
       state = state.copyWith(
-        documents: documents,
+        documents: same ? state.documents : documents,
         loading: false,
         departmentNames: choices.departments,
         error: () => null,
@@ -371,10 +284,11 @@ class TablesController extends Notifier<TablesState> {
       final error = toReportedApiError(e, st, source: ReportSource.provider);
       if (current()) {
         state = state.copyWith(
-          documents: [],
+          documents: keepPrevious ? null : [],
           loading: false,
           error: () => error,
         );
+        if (keepPrevious) Error.throwWithStackTrace(error, st);
       }
     }
   }

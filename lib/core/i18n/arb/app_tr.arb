@@ -5777,7 +5777,7 @@
   "@uiTablesOwner": {
     "description": "ui.tables.owner"
   },
-  "uiTablesAddPerson": "Demo kişi ekle",
+  "uiTablesAddPerson": "Kişi ekle",
   "@uiTablesAddPerson": {
     "description": "ui.tables.add_person"
   },
@@ -5785,7 +5785,7 @@
   "@uiTablesRemovePerson": {
     "description": "ui.tables.remove_person"
   },
-  "uiTablesDemoPerson": "Demo üye",
+  "uiTablesDemoPerson": "Kişi",
   "@uiTablesDemoPerson": {
     "description": "ui.tables.demo_person"
   },
@@ -5861,7 +5861,7 @@
   "@uiTablesLinkCopied": {
     "description": "ui.tables.link_copied"
   },
-  "uiTablesPersonSearch": "Demo kişilerde ara",
+  "uiTablesPersonSearch": "Ad ile ara",
   "@uiTablesPersonSearch": {
     "description": "ui.tables.person_search"
   },

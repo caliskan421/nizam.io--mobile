@@ -35,7 +35,7 @@ Future<void> showRecentTables(
           for (final d in state.documents)
             Material(
               type: MaterialType.transparency,
-              child: InkWell(
+              child: NzTap(
                 onTap: () {
                   ref.read(tablesControllerProvider.notifier).markOpened(d.id);
                   Navigator.of(sheet).pop();
@@ -230,7 +230,7 @@ class TableRelations extends ConsumerWidget {
                         padding: const EdgeInsets.only(
                           right: NizamioSpacing.space2,
                         ),
-                        child: InkWell(
+                        child: NzTap(
                           onTap: onOpen == null
                               ? null
                               : () {

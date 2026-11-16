@@ -4,7 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
-import '../../../core/ui/widgets/inputs/nz_text_field.dart';
+import '../../../core/ui/widgets/inputs/nz_search_field.dart';
 import '../../../core/ui/widgets/lists/nz_menu_group.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../application/tables_controller.dart';
@@ -33,9 +33,9 @@ class _TableShareCandidatesState extends ConsumerState<TableShareCandidates> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        NzTextField(
+        NzSearchField(
           label: l.uiTablesPersonSearch,
-          labelAbove: false,
+
           onChanged: (v) => setState(() => _query = v),
         ),
         const Gap(NizamioSpacing.space3),

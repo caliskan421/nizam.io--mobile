@@ -1,22 +1,36 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/api/generated/clients/program_client.dart';
 import '../../../core/api/generated/clients/tables_client.dart';
 import '../../../core/api/generated/export.dart' as api;
 import '../../../core/errors/api_error.dart';
 import '../../../core/http/interceptors.dart';
+import '../../../core/http/sse.dart';
+import '../../../core/http/table_numbers.dart';
 import '../../../core/http/table_wire.dart';
+import '../../../core/telemetry/report_source.dart';
 import '../domain/table_document.dart';
+import '../domain/table_edit.dart';
+import '../domain/table_workspace.dart';
 import '../domain/tables_repository.dart';
 
-class ApiTablesRepository implements TablesRepository {
+part 'tables_collaboration_api.dart';
+part 'tables_edit_api.dart';
+part 'tables_workspace_api.dart';
+
+class ApiTablesRepository
+    with _TableWorkspaceApi, _TableCollaborationApi
+    implements TablesRepository {
   ApiTablesRepository(this._dio);
   final Dio? Function() _dio;
+  @override
   Dio get _http {
     final dio = _dio();
     if (dio == null) throw ApiError('client.server_not_verified');
     return dio;
   }
 
+  @override
   TableApiExtras _scope(TableApiExtras meta, TableLocation scope) {
     if (scope.programId.isEmpty) throw ApiError('client.scope_missing');
     return scope.personal
@@ -92,6 +106,8 @@ class ApiTablesRepository implements TablesRepository {
       remote: true,
       programId: t.programId,
       ownerId: t.ownerId,
+      projectId: t.projectId,
+      isTemplate: t.isTemplate ?? false,
     );
   }
 
@@ -100,65 +116,7 @@ class ApiTablesRepository implements TablesRepository {
     TableLocation location,
     String id,
     String accountId,
-  ) async {
-    final wire = await getTableWirePreview(
-      _http,
-      id: id,
-      personal: location.personal,
-      extras: _scope(
-        location.personal
-            ? TablesClient.getPersonalTableOpenapiExtras
-            : TablesClient.getTableOpenapiExtras,
-        location,
-      ),
-    );
-    if (wire.id != id ||
-        wire.programId != location.programId ||
-        wire.departmentId != location.departmentId ||
-        !['personal', 'coordinatorship'].contains(wire.space) ||
-        (wire.space == 'personal') != wire.departmentId.isEmpty) {
-      throw invalidResponseError();
-    }
-    final fields = <TableField>[
-      for (final c in wire.columns)
-        if (_type(c.type) case final type?)
-          TableField(id: c.id, name: c.name, type: type),
-    ];
-    return TableDocument(
-      id: wire.id,
-      title: wire.name,
-      area: wire.ownerId != accountId
-          ? TableArea.shared
-          : location.personal
-          ? TableArea.personal
-          : TableArea.coord,
-      unit: wire.departmentId,
-      fields: const [],
-      remote: true,
-      programId: wire.programId,
-      ownerId: wire.ownerId,
-      access: wire.ownerId == accountId ? TableAccess.owner : TableAccess.view,
-      teamAccess: wire.teamRole == 'editor'
-          ? TableAccess.edit
-          : wire.teamRole == 'viewer'
-          ? TableAccess.view
-          : TableAccess.off,
-    ).copyWith(
-      fields: fields,
-      rows: [
-        for (final row in wire.rowIds)
-          TableRecord(
-            id: row,
-            cells: {
-              for (final cell in wire.cells)
-                if (cell.rowId == row && cell.value != null)
-                  TableFieldId(cell.columnId): cell.value!,
-            },
-          ),
-      ],
-      previewHasMore: wire.hasMore,
-    );
-  }
+  ) async => (await workspace(location, id, accountId)).document;
 
   static TableFieldType? _type(String? type) => switch (type) {
     'text' => TableFieldType.text,

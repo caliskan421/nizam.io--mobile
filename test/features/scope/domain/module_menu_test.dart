@@ -36,7 +36,13 @@ void main() {
         HomeModule.calendar,
         HomeModule.timeline,
       ],
-      [c, HomeModule.meetings, HomeModule.archive, HomeModule.messages],
+      [
+        c,
+        HomeModule.meetings,
+        HomeModule.archive,
+        HomeModule.messages,
+        HomeModule.sheets,
+      ],
       [ModuleGroupKind.team, HomeModule.team],
       [ModuleGroupKind.footer, HomeModule.help],
     ]);
@@ -93,6 +99,7 @@ void main() {
       HomeModule.meetings,
       HomeModule.archive,
       HomeModule.messages,
+      HomeModule.sheets,
       HomeModule.team,
     ]);
   });
@@ -105,6 +112,11 @@ void main() {
     for (final r in [null, ...EffectiveRole.values]) {
       expect(slotModulesFor(r), contains(defaultSlotFor(r)), reason: '$r');
       expect(slotModulesFor(r), isNot(contains(HomeModule.home)));
+    }
+    for (final role in [EffectiveRole.member, EffectiveRole.coordinator]) {
+      expect(menuModulesOf(role), contains(HomeModule.sheets));
+      expect(railModulesFor(role), contains(HomeModule.sheets));
+      expect(slotModulesFor(role), contains(HomeModule.sheets));
     }
     expect(
       slotModulesFor(EffectiveRole.coordinator),

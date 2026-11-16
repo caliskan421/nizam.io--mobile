@@ -96,6 +96,7 @@ abstract final class NzIcons {
   static const IconData timeline = Icons.view_timeline_outlined;
   static const IconData tune = Icons.tune_rounded;
   static const IconData unfold = Icons.unfold_more_rounded;
+  static const IconData undo = Icons.undo_rounded;
   static const IconData upload = Icons.upload_rounded;
   static const IconData uploadFile = Icons.upload_file_rounded;
   static const IconData video = Icons.videocam_outlined;

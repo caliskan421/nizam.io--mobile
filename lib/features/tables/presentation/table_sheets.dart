@@ -89,6 +89,8 @@ Future<void> tableRename(BuildContext context, WidgetRef ref, String id) async {
       mainAxisSize: MainAxisSize.min,
       children: [
         NzTextField(
+          pill: true,
+          labelAbove: false,
           label: l.uiTablesName,
           initialValue: d.title,
           onChanged: (v) => name = v,
@@ -148,7 +150,7 @@ Future<void> tableFields(
             for (final f in d.fields)
               Material(
                 type: MaterialType.transparency,
-                child: InkWell(
+                child: NzTap(
                   onTap: () {
                     Navigator.of(sheet).pop();
                     tableColumn(

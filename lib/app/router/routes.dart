@@ -558,6 +558,6 @@ Widget _keyedTablePage(String id) => Builder(
   builder: (context) => TablePage(
     key: ValueKey(id),
     id: id,
-    onOpenTable: context.appNav.openTable,
+    onOpenTable: context.appNav.openLinkedTable,
   ),
 );

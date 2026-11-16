@@ -252,6 +252,21 @@ SplitMove splitMove(
   return SplitGo(withTrail(uri, [...trail.take(at), target]));
 }
 
+/// Table references push exact records instead of replacing a same-kind record.
+/// Revisiting an earlier table unwinds the trail, so cyclic links cannot grow it.
+String linkedTableLocation(Uri uri, String id) {
+  final module = railModuleOf(uri.path);
+  final target = PaneEntry(PaneKind.table, id);
+  if (module == null) return TableRoute(id: id).location;
+  final base = baseEntryOf(uri, (_) => null);
+  final trail = parseTrail(uri.queryParametersAll['trail'] ?? const []);
+  if (base == target) return withTrail(uri, const []);
+  final previous = trail.indexOf(target);
+  if (previous >= 0) return withTrail(uri, trail.take(previous + 1).toList());
+  if (base == null && trail.isEmpty) return TableRoute(id: id).location;
+  return withTrail(uri, [...trail, target]);
+}
+
 /// İzin bir geri adımı (prototip `tback`); iz boşsa null.
 String? splitBack(Uri uri) {
   final trail = parseTrail(uri.queryParametersAll['trail'] ?? const []);
@@ -324,7 +339,7 @@ Widget paneEntryPage(PaneEntry e) => switch (e.kind) {
     builder: (context) => TablePage(
       key: ValueKey(e.id),
       id: e.id!,
-      onOpenTable: context.appNav.openTable,
+      onOpenTable: context.appNav.openLinkedTable,
     ),
   ),
 };
@@ -525,6 +540,13 @@ class _PaneStackState extends State<PaneStack> {
     final top = codes.length - 1;
     final pages = [widget.base, for (final e in _entries) paneEntryPage(e)];
     final hasTrail = _entries.isNotEmpty;
+    final baseKind = baseEntryOf(
+      GoRouterState.of(context).uri,
+      (_) => null,
+    )?.kind;
+    final returningToTable =
+        _motion == NzPaneMotion.pop &&
+        (top == 0 ? baseKind : _entries[top - 1].kind) == PaneKind.table;
     return PaneBackScope(
       hasTrail: hasTrail,
       owner: GoRouterState.of(context).uri.toString(),
@@ -543,7 +565,7 @@ class _PaneStackState extends State<PaneStack> {
                 child: TickerMode(
                   enabled: i == top,
                   child: NzPaneTransition(
-                    enabled: split,
+                    enabled: split && !returningToTable,
                     motion: _motion,
                     play: i == top ? _play : null,
                     child: KeyedSubtree(

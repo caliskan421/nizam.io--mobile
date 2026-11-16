@@ -8,6 +8,36 @@ SplitMove _move(String location, PaneEntry to) =>
     splitMove(Uri.parse(location), to, _none);
 
 void main() {
+  test('bağlı tablolar geçmişe eklenir; geri ve döngü kaynağı korur', () {
+    final b = linkedTableLocation(Uri.parse('/tables/a'), 'b');
+    expect(b, '/tables/a?trail=table%3Ab');
+    final c = linkedTableLocation(Uri.parse(b), 'c');
+    expect(parseTrail(Uri.parse(c).queryParametersAll['trail']!), [
+      const PaneEntry(PaneKind.table, 'b'),
+      const PaneEntry(PaneKind.table, 'c'),
+    ]);
+    expect(splitBack(Uri.parse(c)), b);
+    expect(splitBack(Uri.parse(b)), '/tables/a');
+    expect(linkedTableLocation(Uri.parse(c), 'a'), '/tables/a');
+    expect(linkedTableLocation(Uri.parse(c), 'b'), b);
+    expect(linkedTableLocation(Uri.parse(c), 'c'), c);
+    // Choosing a different record from the list still replaces the base.
+    expect(
+      (_move(
+        '/tables/a',
+        const PaneEntry(PaneKind.table, 'b'),
+      ) as SplitGo).location,
+      '/tables/b',
+    );
+  });
+  test('başka modülden açılan bağlı tablo zinciri modül bağlamını korur', () {
+    const source = '/users/person?trail=table%3Aa';
+    final target = linkedTableLocation(Uri.parse(source), 'b');
+    expect(splitBack(Uri.parse(target)), source);
+    expect(linkedTableLocation(Uri.parse(target), 'a'), source);
+    expect(splitBack(Uri.parse(source)), '/users/person');
+  });
+
   test(
     'kullanıcı ve tablo kökleri tam liste açar, kendi kaydı tabana gider',
     () {

@@ -36,6 +36,31 @@ class Server extends RecordingRepository {
   }
 }
 
+class SnapshotServer extends RecordingRepository {
+  String title = 'Tablo';
+  bool fail = false;
+  int reads = 0;
+  @override
+  Future<List<TableDocument>> list(
+    TableLocation location,
+    String account,
+  ) async {
+    reads++;
+    if (fail) throw ApiError('tables.forbidden');
+    return [
+      TableDocument(
+        id: 't1',
+        title: title,
+        area: TableArea.personal,
+        fields: const [],
+        remote: true,
+        programId: location.programId,
+        ownerId: account,
+      ),
+    ];
+  }
+}
+
 const emptyChoices = TableSharingChoices(
   accountId: 'me',
   people: {},
@@ -62,10 +87,15 @@ void main() {
       container.listen(tablesControllerProvider, (_, _) {});
       await container.pump();
       await server.started('old');
+      expect(container.read(tablesControllerProvider).area, TableArea.coord);
+      container
+          .read(tablesControllerProvider.notifier)
+          .setArea(TableArea.personal);
       expect(container.read(tablesControllerProvider).documents, isEmpty);
       container.read(selected.notifier).change();
       await container.pump();
       await server.started('new');
+      expect(container.read(tablesControllerProvider).area, TableArea.coord);
       server.responses['new']!.complete([
         TableDocument(
           id: 'new-table',
@@ -134,4 +164,47 @@ void main() {
     expect(state.loading, isFalse);
     expect(state.documents, isEmpty);
   });
+  test(
+    'yenileme aynı veriyi korur, değişikliği uygular ve hatada görünümü silmez',
+    () async {
+      final server = SnapshotServer();
+      final container = ProviderContainer(
+        overrides: [
+          tablesRepositoryProvider.overrideWithValue(server),
+          tableSharingChoicesProvider.overrideWith((ref) async => emptyChoices),
+          sessionGenerationProvider.overrideWith((ref) => 1),
+          scopeStateProvider.overrideWith(
+            (ref) => const ScopeSelection(programId: 'p1'),
+          ),
+        ],
+      );
+      addTearDown(container.dispose);
+      container.listen(tablesControllerProvider, (_, _) {});
+      await Future<void>.delayed(Duration.zero);
+      final ctl = container.read(tablesControllerProvider.notifier);
+      final before = container.read(tablesControllerProvider);
+      expect(before.loading, isFalse);
+      final first = ctl.refresh();
+      expect(identical(first, ctl.refresh()), isTrue);
+      await first;
+      expect(
+        identical(before, container.read(tablesControllerProvider)),
+        isTrue,
+      );
+      final reads = server.reads;
+      await ctl.refreshIfStale();
+      expect(server.reads, reads);
+      server.title = 'Yeni ad';
+      await ctl.refresh();
+      expect(
+        container.read(tablesControllerProvider).documents.single.title,
+        'Yeni ad',
+      );
+      server.fail = true;
+      await expectLater(ctl.refresh(), throwsA(isA<ApiError>()));
+      final failed = container.read(tablesControllerProvider);
+      expect(failed.documents.single.title, 'Yeni ad');
+      expect(failed.error?.code, 'tables.forbidden');
+    },
+  );
 }

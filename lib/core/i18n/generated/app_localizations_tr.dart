@@ -4582,13 +4582,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesOwner => 'Sahip';
 
   @override
-  String get uiTablesAddPerson => 'Demo kişi ekle';
+  String get uiTablesAddPerson => 'Kişi ekle';
 
   @override
   String get uiTablesRemovePerson => 'Erişimi kaldır';
 
   @override
-  String get uiTablesDemoPerson => 'Demo üye';
+  String get uiTablesDemoPerson => 'Kişi';
 
   @override
   String get uiTablesDemoNotice =>
@@ -4646,7 +4646,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiTablesLinkCopied => 'Tablo bağlantısı kopyalandı';
 
   @override
-  String get uiTablesPersonSearch => 'Demo kişilerde ara';
+  String get uiTablesPersonSearch => 'Ad ile ara';
 
   @override
   String get uiTablesPlace => 'Yer';

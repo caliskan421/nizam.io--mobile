@@ -37,6 +37,7 @@ class NzTextField extends StatefulWidget {
     this.readOnly = false,
     this.size = NzSize.md,
     this.pill = false,
+    this.keyboardType,
     this.labelAbove = true,
     this.leading,
     this.trailing,
@@ -64,6 +65,7 @@ class NzTextField extends StatefulWidget {
     this.readOnly = false,
     this.size = NzSize.md,
     this.pill = false,
+    this.keyboardType,
     this.labelAbove = true,
     this.leading,
     this.trailing,
@@ -90,6 +92,7 @@ class NzTextField extends StatefulWidget {
     this.readOnly = false,
     this.size = NzSize.md,
     this.pill = false,
+    this.keyboardType,
     this.labelAbove = true,
     this.leading,
     this.trailing,
@@ -118,6 +121,7 @@ class NzTextField extends StatefulWidget {
     this.readOnly = false,
     this.size = NzSize.md,
     this.pill = false,
+    this.keyboardType,
     this.labelAbove = true,
     this.leading,
     this.trailing,
@@ -148,6 +152,7 @@ class NzTextField extends StatefulWidget {
 
   /// Compact page-search appearance without changing the field's input behavior.
   final bool pill;
+  final TextInputType? keyboardType;
 
   /// true (varsayılan) → etiket alanın üstünde (prototip `rp-field` / `.t-label`: 13/600,
   /// altında 8 boşluk); okuyucuda etiket alanla birleşir. false → etiket görünmez, okuyucu
@@ -204,12 +209,14 @@ class _NzTextFieldState extends State<NzTextField> with NzServerFieldError {
       enabled: widget.enabled,
       readOnly: widget.readOnly,
       style: text,
-      keyboardType: switch (widget._kind) {
-        _TextFieldKind.email => TextInputType.emailAddress,
-        _TextFieldKind.multiline => TextInputType.multiline,
-        _TextFieldKind.number => TextInputType.number,
-        _TextFieldKind.text => TextInputType.text,
-      },
+      keyboardType:
+          widget.keyboardType ??
+          switch (widget._kind) {
+            _TextFieldKind.email => TextInputType.emailAddress,
+            _TextFieldKind.multiline => TextInputType.multiline,
+            _TextFieldKind.number => TextInputType.number,
+            _TextFieldKind.text => TextInputType.text,
+          },
       inputFormatters: number ? [FilteringTextInputFormatter.digitsOnly] : null,
       textInputAction: widget.textInputAction,
       autofillHints: widget.autofillHints,

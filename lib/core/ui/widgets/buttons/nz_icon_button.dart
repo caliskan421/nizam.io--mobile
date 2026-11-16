@@ -82,7 +82,6 @@ class NzIconButton extends StatelessWidget {
   final _IconVariant _variant;
 
   static const _disabledContentAlpha = 0.38;
-  static const _overlayAlpha = 0.12;
   static const _focusWidth = NizamioSize.focusRingWidth;
 
   double get _extent => size.pick(
@@ -112,13 +111,9 @@ class NzIconButton extends StatelessWidget {
             ? c.text.withValues(alpha: _disabledContentAlpha)
             : c.text,
       ),
-      overlayColor: WidgetStateProperty.resolveWith(
-        (s) =>
-            s.contains(WidgetState.hovered) ||
-                s.contains(WidgetState.pressed) ||
-                s.contains(WidgetState.focused)
-            ? c.text.withValues(alpha: _overlayAlpha)
-            : null,
+      splashFactory: NoSplash.splashFactory,
+      overlayColor: WidgetStatePropertyAll(
+        context.colors.text.withValues(alpha: 0),
       ),
       side: WidgetStateProperty.resolveWith(
         (s) => focusBorder && s.contains(WidgetState.focused)
@@ -145,15 +140,18 @@ class NzIconButton extends StatelessWidget {
         accent: _variant == _IconVariant.circleAccent,
         dot: dot,
       ),
-      _IconVariant.plain => IconButton(
-        onPressed: onPressed,
-        iconSize: _iconExtent,
-        style: _resolveStyle(context),
-        icon: glyph != null
-            ? NzGlyphIcon(glyph!)
-            : dot == null
-            ? NzIcon(icon)
-            : _Dotted(icon: icon!, dot: dot!),
+      _IconVariant.plain => NzPressable(
+        enabled: onPressed != null,
+        child: IconButton(
+          onPressed: onPressed,
+          iconSize: _iconExtent,
+          style: _resolveStyle(context),
+          icon: glyph != null
+              ? NzGlyphIcon(glyph!)
+              : dot == null
+              ? NzIcon(icon)
+              : _Dotted(icon: icon!, dot: dot!),
+        ),
       ),
     },
   );
@@ -211,7 +209,7 @@ class _SolidCircle extends StatelessWidget {
                   (s) =>
                       s.contains(WidgetState.focused) ||
                           s.contains(WidgetState.hovered)
-                      ? ink.withValues(alpha: NzIconButton._overlayAlpha)
+                      ? ink.withValues(alpha: 0.12)
                       : null,
                 ),
                 child: SizedBox.square(

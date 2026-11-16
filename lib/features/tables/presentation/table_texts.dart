@@ -7,7 +7,7 @@ extension TableTexts on AppLocalizations {
     'demo-2' => 'Reha Koçak',
     'demo-3' => 'Ali Avcı',
     'demo-4' => 'Abdullah Ateş',
-    _ => '$uiTablesDemoPerson ${id.split('-').last}',
+    _ => uiTablesPerson,
   };
   String tableUnitCode(String id) => switch (id) {
     'DEMO-A' => 'ALT',

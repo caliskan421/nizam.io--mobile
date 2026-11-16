@@ -468,6 +468,8 @@ class _SplitAppNav implements NzAppNav {
   @override
   void openTable(String id) => _pane(PaneEntry(PaneKind.table, id));
   @override
+  void openLinkedTable(String id) => _base.openLinkedTable(id);
+  @override
   void openProfile() => _base.openProfile();
 
   @override

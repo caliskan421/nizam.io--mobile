@@ -122,6 +122,10 @@ class GoRouterAppNav implements NzAppNav {
   void openTables() => _router.go(const TablesRoute().location);
   @override
   void openTable(String id) => _record(PaneEntry(PaneKind.table, id));
+  @override
+  void openLinkedTable(String id) => _router.go(
+    linkedTableLocation(_router.routeInformationProvider.value.uri, id),
+  );
 
   @override
   void openMenu(BuildContext context) {

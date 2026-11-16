@@ -86,17 +86,24 @@ void main() {
           if (share) {
             await tester.tap(find.text('Paylaşım'));
             await settle(tester);
+            expect(find.text('Kadir Özbek'), findsNothing);
+            await tester.ensureVisible(find.text('Altyapı ve tesisat').last);
+            await tester.tap(find.text('Altyapı ve tesisat').last);
+            await settle(tester);
             await tester.ensureVisible(find.text('Kadir Özbek').last);
             await tester.tap(find.text('Kadir Özbek').last);
             await settle(tester);
             await tester.ensureVisible(find.text('Düzenleme').last);
             await tester.tap(find.text('Düzenleme').last);
+            await tester.ensureVisible(find.text('Koordinatörlük').last);
             await tester.tap(find.text('Koordinatörlük').last);
+            await settle(tester);
+            await tester.ensureVisible(find.text('Tablonun koordinatörlüğü'));
+            await tester.tap(find.text('Tablonun koordinatörlüğü'));
             await settle(tester);
             await tester.ensureVisible(find.text('Altyapı ve tesisat').last);
             await tester.tap(find.text('Altyapı ve tesisat').last);
             await settle(tester);
-            expect(find.text('Yetki'), findsOneWidget);
           }
           if (const bool.fromEnvironment('NIZAMIO_TABLET_HOST_SHOTS')) {
             File('/tmp/nizam-table-create-${size.width.toInt()}-$share.png')
@@ -110,10 +117,7 @@ void main() {
               .documents
               .firstWhere((d) => d.title == 'Yeni özel tablo');
           expect(created.area, share ? TableArea.coord : TableArea.personal);
-          expect(
-            created.teamAccess,
-            share ? TableAccess.view : TableAccess.off,
-          );
+          expect(created.teamAccess, TableAccess.off);
           expect(
             created.people,
             share ? {const TablePersonId('demo-1'): TableAccess.edit} : isEmpty,

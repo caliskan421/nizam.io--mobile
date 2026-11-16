@@ -11,6 +11,7 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../application/tables_controller.dart';
 import '../domain/table_document.dart';
+import 'table_grid_value.dart';
 import 'table_sheet_host.dart';
 import 'table_texts.dart';
 
@@ -72,6 +73,8 @@ Future<void> tableColumn(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           NzTextField(
+            pill: true,
+            labelAbove: false,
             label: l.uiTablesFieldName,
             initialValue: name,
             enabled: d.editable,
@@ -86,7 +89,11 @@ Future<void> tableColumn(
             value: type,
             items: [
               for (final t in TableFieldType.values)
-                NzSelectItem(value: t, label: l.tableType(t)),
+                NzSelectItem(
+                  value: t,
+                  label: l.tableType(t),
+                  glyph: tableFieldTypeGlyph(t),
+                ),
             ],
             onChanged: !d.editable
                 ? null

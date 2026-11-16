@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 15 |
 | istisna | 59 |
-| rapor | 177 |
+| rapor | 196 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -261,8 +261,26 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/scope/application/scope_selection_controller.dart` | `ScopeSelectionController.select` | guard | istisna | 1 |
 | `features/scope/application/scope_service.dart` | `ScopeService.restoreLast` | catch | rapor | 1 |
 | `features/server/application/server_connect_controller.dart` | `ServerConnectController.connect` | guard | istisna | 1 |
+| `features/tables/application/table_attachment_flow.dart` | `uploadTableSource` | catch | rapor | 1 |
+| `features/tables/application/table_attachment_flow.dart` | `uploadTableSource` | handleError | rapor | 1 |
+| `features/tables/application/table_detail_controller.dart` | `TableDetailController._sendPending` | catch | rapor | 1 |
+| `features/tables/application/table_detail_controller.dart` | `TableDetailController.active` | catchError | rapor | 1 |
+| `features/tables/application/table_detail_controller.dart` | `TableDetailController.refresh` | catch | rapor | 1 |
+| `features/tables/application/table_detail_live.dart` | `_TableDetailLive._connect` | onError | rapor | 1 |
+| `features/tables/application/table_detail_live.dart` | `_TableDetailLive._publishPresence` | catch | rapor | 1 |
+| `features/tables/application/table_detail_live.dart` | `_TableDetailLive._sync` | catch | rapor | 1 |
+| `features/tables/application/table_folder_pages.dart` | `<top>` | catch | rapor | 1 |
+| `features/tables/application/table_library_controller.dart` | `TableLibraryWrites.retry` | catch | rapor | 1 |
 | `features/tables/application/tables_controller.dart` | `TablesController.reloadServer` | catch | rapor | 1 |
+| `features/tables/data/tables_collaboration_api.dart` | `_TableCollaborationApi.download` | catch | rapor | 1 |
+| `features/tables/data/tables_collaboration_api.dart` | `_TableCollaborationApi.watch` | catch | rapor | 1 |
 | `features/tables/presentation/table_create_sheet.dart` | `showCreateTableSheet` | catch | rapor | 1 |
+| `features/tables/presentation/table_library_tools.dart` | `_LibraryPagesState._load` | catch | rapor | 1 |
+| `features/tables/presentation/table_project_picker.dart` | `_TableProjectPickerState._load` | catch | rapor | 1 |
+| `features/tables/presentation/table_workspace_attachments.dart` | `workspaceAttachment` | catch | rapor | 2 |
+| `features/tables/presentation/table_workspace_comments.dart` | `_CommentsPanelState._load` | catch | rapor | 1 |
+| `features/tables/presentation/table_workspace_forms.dart` | `tableActionForm` | catch | rapor | 1 |
+| `features/tables/presentation/table_workspace_forms.dart` | `tableUiAction` | catch | rapor | 1 |
 | `features/tasks/application/invite_form_controller.dart` | `InviteFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/meeting_form_controller.dart` | `MeetingFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/quick_forms_controller.dart` | `NewTaskFormController.submit` | catch | rapor | 3 |

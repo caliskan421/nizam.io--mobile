@@ -4,9 +4,9 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/nz_menu_group.dart';
-import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../domain/table_document.dart';
+import 'table_choice_row.dart';
 import 'table_sheets.dart' show tableCellText;
 
 class TableCellEditor extends StatelessWidget {
@@ -75,16 +75,16 @@ class TableCellEditor extends StatelessWidget {
         children: [
           Text(f.name, style: context.text.labelMd),
           if (target != null) ...[
-            TextButton(
+            NzButton.ghost(
               onPressed: onOpenTable == null
                   ? null
                   : () => onOpenTable!(target.id),
-              child: Text(target.title),
+              label: target.title,
             ),
             NzMenuGroup(
               rows: [
                 for (final row in target.rows)
-                  NzCheckbox(
+                  TableChoiceRow(
                     label: target.fields.isEmpty
                         ? row.id
                         : tableCellText(
@@ -161,15 +161,10 @@ class TableCellEditor extends StatelessWidget {
                 ? () async {
                     final initial =
                         DateTime.tryParse('$value') ?? DateTime(2026, 11, 9);
-                    final picked = await showDatePicker(
-                      switchToInputEntryModeIcon: const NzIcon(NzIcons.edit),
-                      switchToCalendarEntryModeIcon: const NzIcon(
-                        NzIcons.calendar,
-                      ),
-                      context: context,
-                      initialDate: initial,
-                      firstDate: DateTime(2000),
-                      lastDate: DateTime(2100),
+                    final picked = await showNzDateSheet(
+                      context,
+                      title: f.name,
+                      initial: initial,
                     );
                     if (picked != null) {
                       onChanged(picked.toIso8601String().substring(0, 10));
@@ -187,6 +182,8 @@ class TableCellEditor extends StatelessWidget {
     }
     if (f.type == TableFieldType.number) {
       return NzTextField.number(
+        pill: true,
+        labelAbove: false,
         label: f.name,
         initialValue: value == null ? '' : '$value',
         enabled: editable,
@@ -195,6 +192,8 @@ class TableCellEditor extends StatelessWidget {
     }
     if (f.type == TableFieldType.email) {
       return NzTextField.email(
+        pill: true,
+        labelAbove: false,
         label: f.name,
         initialValue: value == null ? '' : '$value',
         enabled: editable,
@@ -202,6 +201,8 @@ class TableCellEditor extends StatelessWidget {
       );
     }
     return NzTextField(
+      pill: true,
+      labelAbove: false,
       label: f.name,
       initialValue: value == null ? '' : '$value',
       enabled: editable,

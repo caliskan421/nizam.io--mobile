@@ -20,10 +20,10 @@ import '../application/tables_controller.dart';
 import '../domain/table_document.dart';
 import 'table_cell_value.dart';
 import 'table_navigation_sheets.dart';
-import 'table_server_preview.dart';
 import 'table_sheet_host.dart';
 import 'table_sheets.dart';
 import 'table_texts.dart';
+import 'table_workspace_page.dart';
 
 part 'table_page_actions.dart';
 
@@ -62,14 +62,15 @@ class _TablePageState extends ConsumerState<TablePage> {
 
   String? _sort;
   bool _descending = false;
-  int _filter = 0;
   TablesController get _controller =>
       ref.read(tablesControllerProvider.notifier);
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final tables = ref.watch(tablesControllerProvider);
-    if (tables.remote) return TableServerPreview(id: widget.id);
+    if (tables.remote) {
+      return TableWorkspacePage(id: widget.id, onOpenTable: widget.onOpenTable);
+    }
     final d = tables.document(widget.id);
     if (d == null) {
       return NzPage(
@@ -77,22 +78,15 @@ class _TablePageState extends ConsumerState<TablePage> {
         body: Center(child: Text(l.uiTablesTableMissing)),
       );
     }
-    final todo = d.fields
-        .where((f) => f.type == TableFieldType.todo)
-        .firstOrNull;
     final rows = d.rows
         .where(
-          (r) =>
-              (_filter == 0 ||
-                  todo == null ||
-                  (r.cells[TableFieldId(todo.id)] == true) == (_filter == 2)) &&
-              d.fields.any(
-                (f) => tableCellText(
-                  context,
-                  f,
-                  r.cells[TableFieldId(f.id)],
-                ).toLowerCase().contains(_query.toLowerCase()),
-              ),
+          (r) => d.fields.any(
+            (f) => tableCellText(
+              context,
+              f,
+              r.cells[TableFieldId(f.id)],
+            ).toLowerCase().contains(_query.toLowerCase()),
+          ),
         )
         .toList();
     final sortField = d.fields.where((f) => f.id == _sort).firstOrNull;
@@ -113,7 +107,7 @@ class _TablePageState extends ConsumerState<TablePage> {
     return NzPage.fill(
       topBar: NzTopBar.detail(
         actions: [
-          InkWell(
+          NzTap(
             onTap: () => tableSharing(context, ref, d.id),
             child: NzAvatarStack(
               colored: true,
@@ -173,7 +167,7 @@ class _TablePageState extends ConsumerState<TablePage> {
                     style: context.text.monoSm,
                   ),
                   const Gap(6),
-                  InkWell(
+                  NzTap(
                     onTap: d.editable
                         ? () => tableRename(context, ref, d.id)
                         : null,
@@ -191,34 +185,6 @@ class _TablePageState extends ConsumerState<TablePage> {
                   const Gap(10),
                   LayoutBuilder(
                     builder: (context, constraints) {
-                      final completed = todo == null
-                          ? 0
-                          : d.rows
-                                .where(
-                                  (r) => r.cells[TableFieldId(todo.id)] == true,
-                                )
-                                .length;
-                      final filters = todo == null
-                          ? null
-                          : NzPillTabs(
-                              compact: true,
-                              selected: _filter,
-                              onSelected: (i) => setState(() => _filter = i),
-                              tabs: [
-                                NzPillTab(
-                                  label: l.uiTablesAll,
-                                  count: d.rows.length,
-                                ),
-                                NzPillTab(
-                                  label: l.uiTablesOpen,
-                                  count: d.rows.length - completed,
-                                ),
-                                NzPillTab(
-                                  label: l.uiTablesDone,
-                                  count: completed,
-                                ),
-                              ],
-                            );
                       final actions = Row(
                         children: [
                           Expanded(
@@ -279,23 +245,7 @@ class _TablePageState extends ConsumerState<TablePage> {
                           ],
                         ],
                       );
-                      if (constraints.maxWidth >= 700) {
-                        return Row(
-                          children: [
-                            if (filters != null) ...[
-                              SizedBox(width: 360, child: filters),
-                              const Gap(12),
-                            ],
-                            Expanded(child: actions),
-                          ],
-                        );
-                      }
-                      return Column(
-                        children: [
-                          if (filters != null) ...[filters, const Gap(10)],
-                          actions,
-                        ],
-                      );
+                      return actions;
                     },
                   ),
                   NzReveal(
@@ -380,7 +330,7 @@ class _TablePageState extends ConsumerState<TablePage> {
                                     for (final f in d.fields)
                                       SizedBox(
                                         width: cellWidth,
-                                        child: InkWell(
+                                        child: NzTap(
                                           onTap: () => tableColumn(
                                             context,
                                             ref,
@@ -514,7 +464,7 @@ class _TablePageState extends ConsumerState<TablePage> {
                                                 for (final field in d.fields)
                                                   SizedBox(
                                                     width: cellWidth,
-                                                    child: InkWell(
+                                                    child: NzTap(
                                                       onTap: () => tableRow(
                                                         context,
                                                         ref,

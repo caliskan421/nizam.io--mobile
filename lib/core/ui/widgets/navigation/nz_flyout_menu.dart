@@ -5,6 +5,8 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
+import '../buttons/nz_tap.dart';
+import '../nz_glyph.dart';
 import '../nz_icon.dart';
 import '../surfaces/nz_glass.dart';
 import 'nz_floating_nav.dart';
@@ -27,16 +29,23 @@ class NzFlyoutItem extends NzFlyoutEntry {
     required this.label,
     required this.onSelected,
     this.icon,
+    this.glyph,
     this.dot,
     this.caption,
     this.accent = false,
     this.count,
     this.selected = false,
-  }) : assert(icon == null || dot == null, 'ikon ya da nokta');
+  }) : assert(
+         (icon == null || glyph == null) &&
+             (icon == null || dot == null) &&
+             (glyph == null || dot == null),
+         'ikon, SVG ya da nokta',
+       );
 
   final String label;
   final VoidCallback onSelected;
   final IconData? icon;
+  final NzGlyph? glyph;
 
   /// Durum noktası rengi (ör. onay bekliyor `warning`).
   final Color? dot;
@@ -290,7 +299,7 @@ class _Row extends StatelessWidget {
         ),
         child: Material(
           type: MaterialType.transparency,
-          child: InkWell(
+          child: NzTap(
             onTap: select,
             borderRadius: BorderRadius.circular(NizamioRadius.group),
             child: ConstrainedBox(
@@ -307,7 +316,15 @@ class _Row extends StatelessWidget {
                     SizedBox(
                       width: NizamioSpacing.space6,
                       child: Center(
-                        child: icon != null
+                        child: item.glyph != null
+                            ? NzGlyphIcon(
+                                item.glyph!,
+                                size: NizamioSize.iconSizeSm,
+                                color: item.accent
+                                    ? c.accentText
+                                    : c.glassInkFaint,
+                              )
+                            : icon != null
                             ? NzIcon(
                                 icon,
                                 size: NizamioSize.iconSizeSm,

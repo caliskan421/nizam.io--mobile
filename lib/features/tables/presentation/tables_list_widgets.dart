@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/widgets/buttons/nz_pressable.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 
 class TablesUnitTile extends StatelessWidget {
@@ -37,89 +38,95 @@ class TablesUnitTile extends StatelessWidget {
         ),
       ),
     );
-    return Semantics(
-      button: true,
-      label: '$name, ${empty ? 'boş' : '$count $caption'}',
-      child: SizedBox(
-        height: 132,
-        child: Stack(
-          clipBehavior: Clip.none,
-          children: [
-            if (count >= 3) layer(10, c.surface),
-            if (count >= 2) layer(5, c.surfaceRaised),
-            Positioned.fill(
-              child: Material(
-                color: empty ? c.surface.withValues(alpha: 0) : c.surface,
-                shape: RoundedRectangleBorder(
-                  borderRadius: radius,
-                  side: empty ? BorderSide.none : BorderSide(color: c.border),
-                ),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: onTap,
-                  child: CustomPaint(
-                    painter: _TableTilePainter(
-                      grid: c.text.withValues(alpha: .06),
-                      border: c.border,
-                      tint: Color.lerp(c.surfaceRaised, c.success, .26)!,
-                      surface: c.surface,
-                      empty: empty,
+    return NzPressable.card(
+      child: Semantics(
+        button: true,
+        label: '$name, ${empty ? 'boş' : '$count $caption'}',
+        child: SizedBox(
+          height: 132,
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              if (count >= 3) layer(10, c.surface),
+              if (count >= 2) layer(5, c.surfaceRaised),
+              Positioned.fill(
+                child: Material(
+                  color: empty ? c.surface.withValues(alpha: 0) : c.surface,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: radius,
+                    side: empty ? BorderSide.none : BorderSide(color: c.border),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    splashFactory: NoSplash.splashFactory,
+                    overlayColor: WidgetStatePropertyAll(
+                      context.colors.text.withValues(alpha: 0),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(14, 40, 14, 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(minHeight: 42),
-                            child: Text(
-                              name,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: context.text.bodyMd.copyWith(
-                                fontSize: 15,
-                                height: 1.4,
-                                fontWeight: FontWeight.w600,
-                                color: empty ? c.textMuted : c.text,
-                              ),
-                            ),
-                          ),
-                          const Gap(12),
-                          Row(
-                            children: [
-                              Text(
-                                empty ? 'boş' : '$count $caption',
-                                style: context.text.monoSm.copyWith(
-                                  fontSize: 12,
+                    onTap: onTap,
+                    child: CustomPaint(
+                      painter: _TableTilePainter(
+                        grid: c.text.withValues(alpha: .06),
+                        border: c.border,
+                        tint: Color.lerp(c.surfaceRaised, c.success, .26)!,
+                        surface: c.surface,
+                        empty: empty,
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(14, 40, 14, 12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(minHeight: 42),
+                              child: Text(
+                                name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: context.text.bodyMd.copyWith(
+                                  fontSize: 15,
+                                  height: 1.4,
+                                  fontWeight: FontWeight.w600,
                                   color: empty ? c.textMuted : c.text,
                                 ),
                               ),
-                              if (!empty && when != null) ...[
-                                const Gap(8),
-                                Expanded(
-                                  child: Text(
-                                    when!,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    textAlign: TextAlign.right,
-                                    style: context.text.monoSm.copyWith(
-                                      fontSize: 11,
-                                      color: c.textFaint,
-                                    ),
+                            ),
+                            const Gap(12),
+                            Row(
+                              children: [
+                                Text(
+                                  empty ? 'boş' : '$count $caption',
+                                  style: context.text.monoSm.copyWith(
+                                    fontSize: 12,
+                                    color: empty ? c.textMuted : c.text,
                                   ),
                                 ),
+                                if (!empty && when != null) ...[
+                                  const Gap(8),
+                                  Expanded(
+                                    child: Text(
+                                      when!,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.right,
+                                      style: context.text.monoSm.copyWith(
+                                        fontSize: 11,
+                                        color: c.textFaint,
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ],
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -227,47 +234,55 @@ class TablesTemplateTile extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => Material(
-    color: context.colors.surface,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(18),
-      side: BorderSide(color: context.colors.border),
-    ),
-    clipBehavior: Clip.antiAlias,
-    child: InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: context.colors.surfaceRaised,
-                borderRadius: BorderRadius.circular(10),
+  Widget build(BuildContext context) => NzPressable.card(
+    child: Material(
+      color: context.colors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(18),
+        side: BorderSide(color: context.colors.border),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        splashFactory: NoSplash.splashFactory,
+        overlayColor: WidgetStatePropertyAll(
+          context.colors.text.withValues(alpha: 0),
+        ),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                decoration: BoxDecoration(
+                  color: context.colors.surfaceRaised,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: NzIcon(icon, size: 18, color: context.colors.textMuted),
               ),
-              child: NzIcon(icon, size: 18, color: context.colors.textMuted),
-            ),
-            const Gap(6),
-            Text(
-              name,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: context.text.caption.copyWith(fontWeight: FontWeight.w600),
-            ),
-            const Gap(4),
-            Text(
-              caption,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: context.text.caption.copyWith(
-                color: context.colors.textMuted,
-                fontSize: 11,
+              const Gap(6),
+              Text(
+                name,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.caption.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+              const Gap(4),
+              Text(
+                caption,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.caption.copyWith(
+                  color: context.colors.textMuted,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     ),

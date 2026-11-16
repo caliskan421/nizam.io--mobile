@@ -3,6 +3,7 @@ import 'package:gap/gap.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../buttons/nz_tap.dart';
 import '../nz_icon.dart';
 
 /// Gruplu menü (README: çekmece grupları `m-r-group`, satır 48): `bg-raised` kart içinde
@@ -10,17 +11,23 @@ import '../nz_icon.dart';
 /// genellikle [NzMenuRow]'dur; aynı yüzeyi paylaşan bilgi/kişi satırları da verilebilir
 /// (prototip `bg-raised` satır grubu: toplantı Bilgi ve Kişiler bölümleri).
 class NzMenuGroup extends StatelessWidget {
-  const NzMenuGroup({super.key, required this.rows, this.label});
+  const NzMenuGroup({
+    super.key,
+    required this.rows,
+    this.label,
+    this.radius = NizamioRadius.group,
+  });
 
   final List<Widget> rows;
   final String? label;
+  final double radius;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final label = this.label;
     final group = ClipRRect(
-      borderRadius: BorderRadius.circular(NizamioRadius.group),
+      borderRadius: BorderRadius.circular(radius),
       child: ColoredBox(
         color: c.surfaceRaised,
         child: Column(
@@ -100,7 +107,7 @@ class NzMenuRow extends StatelessWidget {
         color: current
             ? c.text.withValues(alpha: _currentAlpha)
             : c.surfaceRaised,
-        child: InkWell(
+        child: NzTap(
           onTap: onTap,
           child: ConstrainedBox(
             constraints: const BoxConstraints(

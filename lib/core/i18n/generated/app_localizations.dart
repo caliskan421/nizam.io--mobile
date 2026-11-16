@@ -8761,7 +8761,7 @@ abstract class AppLocalizations {
   /// ui.tables.add_person
   ///
   /// In tr, this message translates to:
-  /// **'Demo kişi ekle'**
+  /// **'Kişi ekle'**
   String get uiTablesAddPerson;
 
   /// ui.tables.remove_person
@@ -8773,7 +8773,7 @@ abstract class AppLocalizations {
   /// ui.tables.demo_person
   ///
   /// In tr, this message translates to:
-  /// **'Demo üye'**
+  /// **'Kişi'**
   String get uiTablesDemoPerson;
 
   /// ui.tables.demo_notice
@@ -8887,7 +8887,7 @@ abstract class AppLocalizations {
   /// ui.tables.person_search
   ///
   /// In tr, this message translates to:
-  /// **'Demo kişilerde ara'**
+  /// **'Ad ile ara'**
   String get uiTablesPersonSearch;
 
   /// ui.tables.place

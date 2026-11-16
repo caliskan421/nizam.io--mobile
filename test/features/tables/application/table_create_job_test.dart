@@ -7,7 +7,11 @@ import 'package:nizamio/features/tables/domain/table_document.dart';
 import 'package:nizamio/features/tables/domain/tables_repository.dart';
 
 class RecordingRepository implements TablesRepository {
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
   final calls = <(String, String)>[];
+  final grants =
+      <({TableLocation location, String person, TableAccess access})>[];
   bool failGrant = true;
   bool failCreate = false;
   Completer<void>? gate;
@@ -47,6 +51,7 @@ class RecordingRepository implements TablesRepository {
     String key,
   ) async {
     calls.add(('grant', key));
+    grants.add((location: l, person: person, access: a));
     if (failGrant) {
       failGrant = false;
       throw ApiError('client.timeout');

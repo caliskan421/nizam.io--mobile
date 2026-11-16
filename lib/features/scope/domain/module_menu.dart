@@ -98,6 +98,7 @@ List<ModuleGroup> modulesFor(EffectiveRole? role) => switch (role) {
       HomeModule.meetings,
       HomeModule.archive,
       HomeModule.messages,
+      HomeModule.sheets,
     ]),
     ModuleGroup(ModuleGroupKind.team, [HomeModule.team]),
     ModuleGroup(ModuleGroupKind.footer, [HomeModule.help]),

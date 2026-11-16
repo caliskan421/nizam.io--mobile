@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 import '../../../errors/api_error.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
-import '../nz_icon.dart';
-import '../nz_icons.dart';
+import '../navigation/nz_flyout_menu.dart';
+import '../nz_glyph.dart';
 import '../nz_size.dart';
 import 'nz_field_errors.dart';
+import 'nz_form_rows.dart';
 import 'nz_validators.dart';
 
 /// [NzSelect] seçeneği: değer ve kullanıcıya görünen etiket (çağıran ARB'den verir).
@@ -16,11 +17,13 @@ class NzSelectItem<T> {
     required this.value,
     required this.label,
     this.enabled = true,
+    this.glyph,
   });
 
   final T value;
   final String label;
   final bool enabled;
+  final NzGlyph? glyph;
 }
 
 /// Açılır liste seçimi. Denetimli bileşendir ([value] çağıranındır); `NzForm` içinde
@@ -110,59 +113,86 @@ class _NzSelectState<T> extends State<NzSelect<T>> with NzServerFieldError {
       validator: (_) => widget.validator
           ?.call(_latest == null ? widget.value : _latest!.value)
           ?.text(l),
-      builder: (field) => MergeSemantics(
-        child: InputDecorator(
-          isEmpty: widget.value == null && hint == null,
-          isFocused: _focus.hasFocus,
-          decoration: InputDecoration(
-            labelText: widget.label,
-            helperText: widget.helper,
-            helperMaxLines: 4,
-            errorText: field.errorText,
-            errorMaxLines: 4,
-            enabled: onChanged != null,
-            prefixIcon: widget.leading,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: NizamioSpacing.space4,
-              vertical: style.vertical,
+      builder: (field) {
+        final selected = widget.items.where((i) => i.value == widget.value);
+        void open() {
+          if (onChanged == null) return;
+          final box = context.findRenderObject()! as RenderBox;
+          final anchor = box.localToGlobal(Offset.zero) & box.size;
+          _focus.requestFocus();
+          NzFlyoutMenu.show(
+            context,
+            semanticLabel: widget.label,
+            anchor: anchor,
+            below: anchor.center.dy < MediaQuery.sizeOf(context).height / 2,
+            entries: [
+              NzFlyoutSection(widget.label),
+              for (final item in widget.items.where((i) => i.enabled))
+                NzFlyoutItem(
+                  label: item.label,
+                  glyph: item.glyph,
+                  selected: item.value == widget.value,
+                  onSelected: () {
+                    if (!mounted ||
+                        widget.onChanged == null ||
+                        !widget.items.any(
+                          (i) => i.enabled && i.value == item.value,
+                        )) {
+                      return;
+                    }
+                    dismissServerError();
+                    _latest = (value: item.value);
+                    field.didChange(item.value);
+                    widget.onChanged!(item.value);
+                  },
+                ),
+            ],
+          );
+        }
+
+        return FocusableActionDetector(
+          enabled: onChanged != null,
+          focusNode: _focus,
+          actions: {
+            ActivateIntent: CallbackAction<ActivateIntent>(
+              onInvoke: (_) {
+                open();
+                return null;
+              },
             ),
-            constraints: const BoxConstraints(
-              minHeight: NizamioSpacing.space12,
-            ),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              icon: const NzIcon(NzIcons.chevronDown),
-              value: widget.value,
-              isExpanded: true,
-              focusNode: _focus,
-              style: style.text.copyWith(color: context.colors.text),
-              dropdownColor: context.colors.surface,
-              borderRadius: BorderRadius.circular(NizamioRadius.group),
-              itemHeight: null,
-              hint: hint == null
-                  ? null
-                  : Text(hint, overflow: TextOverflow.ellipsis),
-              items: [
-                for (final item in widget.items)
-                  DropdownMenuItem<T>(
-                    value: item.value,
-                    enabled: item.enabled,
-                    child: Text(item.label, overflow: TextOverflow.ellipsis),
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              NzFormRows(
+                radius: NizamioRadius.pill,
+                rows: [
+                  NzFormRow(
+                    label: widget.label,
+                    leading: widget.leading,
+                    value: selected.isEmpty ? hint : selected.first.label,
+                    valueSet: selected.isNotEmpty,
+                    onTap: onChanged == null ? null : open,
                   ),
-              ],
-              onChanged: onChanged == null
-                  ? null
-                  : (v) {
-                      dismissServerError();
-                      _latest = (value: v);
-                      field.didChange(v);
-                      onChanged(v);
-                    },
-            ),
+                ],
+              ),
+              if (field.errorText ?? widget.helper case final message?)
+                Padding(
+                  padding: const EdgeInsets.only(top: NizamioSpacing.space2),
+                  child: Text(
+                    message,
+                    style: style.text.copyWith(
+                      color: field.hasError
+                          ? context.colors.danger
+                          : context.colors.textMuted,
+                    ),
+                  ),
+                ),
+            ],
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

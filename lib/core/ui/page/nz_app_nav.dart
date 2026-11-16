@@ -55,6 +55,9 @@ abstract interface class NzAppNav {
   void openTables();
   void openTable(String id);
 
+  /// Follow a table reference while keeping the source table in back history.
+  void openLinkedTable(String id);
+
   /// Sağdan açılan uygulama menüsü (tüm modüller, kapsam, çıkış); kök sayfaların üst çubuğundaki
   /// cam menü dairesi çağırır.
   void openMenu(BuildContext context);

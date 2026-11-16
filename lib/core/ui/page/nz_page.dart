@@ -317,12 +317,24 @@ class NzPage extends ConsumerWidget {
                               if (offline) SliverToBoxAdapter(child: banner),
                               SliverPadding(
                                 padding: EdgeInsets.fromLTRB(
-                                  side,
+                                  0,
                                   top,
-                                  side,
+                                  0,
                                   pinned == null && after.isEmpty ? bottom : 0,
                                 ),
-                                sliver: SliverList.list(children: children),
+                                sliver: SliverList.list(
+                                  children: [
+                                    for (final child in children)
+                                      child is NzPageBleed
+                                          ? child
+                                          : Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: side,
+                                              ),
+                                              child: child,
+                                            ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -477,4 +489,13 @@ class _LoadingScrim extends StatelessWidget {
       child: const NzLoader.page(),
     ),
   );
+}
+
+/// Feed content that reaches the pane edges, such as a horizontal card rail.
+/// The rail supplies its own initial and final content inset.
+class NzPageBleed extends StatelessWidget {
+  const NzPageBleed({super.key, required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => child;
 }

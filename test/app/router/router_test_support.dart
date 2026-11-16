@@ -26,6 +26,7 @@ Future<GoRouter> pumpRouter(
   double height = 1200,
   List<Override> overrides = const [],
   bool tablePrototype = true,
+  bool dark = false,
 }) async {
   tester.view.devicePixelRatio = 1;
   tester.view.physicalSize = Size(width, height);
@@ -37,6 +38,7 @@ Future<GoRouter> pumpRouter(
     router,
     overrides: overrides,
     tablePrototype: tablePrototype,
+    dark: dark,
   );
   return router;
 }
@@ -49,6 +51,7 @@ Future<void> pumpRouterWidget(
   Harness? harness,
   List<Override> overrides = const [],
   bool tablePrototype = true,
+  bool dark = false,
 }) async {
   // Kapı rotaları gerçek feature sayfalarıdır (sunucu, giriş, kapsam…): sayfalar gerçek bileşim
   // kökünün portlarını okur. Sahte ağ her isteğe 404 verir; faz ValueNotifier'ı testin
@@ -70,7 +73,7 @@ Future<void> pumpRouterWidget(
         ],
         child: Consumer(
           builder: (context, ref, _) => MaterialApp.router(
-            theme: theme(false),
+            theme: theme(dark),
             locale: const Locale('tr'),
             supportedLocales: AppLocalizations.supportedLocales,
             localizationsDelegates: testLocalizationDelegates,

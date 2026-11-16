@@ -49,5 +49,4 @@ final portProviders = <String, ProviderBase<Object?>>{
   'archiveRepositoryProvider': archiveRepositoryProvider,
   'chatRepositoryProvider': chatRepositoryProvider,
   'notificationRepositoryProvider': notificationRepositoryProvider,
-  'conferenceLinkFactoryProvider': conferenceLinkFactoryProvider,
 };

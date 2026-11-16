@@ -103,29 +103,15 @@ extension TimelineTexts on AppLocalizations {
         '${TimelineSelection.weeks(s.draft)} $uiTimelineWeekShort';
   }
 
-  /// Kayıt bildirimi: "“Başlık” 3 gün ileri kaydırıldı" / "“Başlık” süresi 2 gün uzatıldı"
-  /// (başlık [v]'deki görevden; kimlik gösterilmez).
+  /// Kayıt bildiriminde yalnız görev başlığı; tarih değişimi alttaki aralıkta gösterilir.
   String undoTitle(TimelineUndo u, TimelineView v) {
     final title = v.shown
         .where((t) => t.code == u.code)
         .firstOrNull
         ?.item
         .title;
-    final who = title == null ? '' : '“$title” ';
-    if (u.isShift) {
-      return '$who${u.startDelta.abs()} '
-          '${u.startDelta > 0 ? uiTimelineShiftedForward : uiTimelineShiftedBack}';
-    }
-    final dl = u.to.length - u.from.length;
-    return '$who$uiTimelineDurationOf ${dl.abs()} '
-        '${dl > 0 ? uiTimelineExtended : uiTimelineShortened}';
+    return title ?? uiTimelineDates;
   }
-
-  /// "başlangıç +3 gün · bitiş +3 gün".
-  String undoDelta(TimelineUndo u) => [
-    if (u.startDelta != 0) '$uiTimelineStart ${signedDays(u.startDelta)}',
-    if (u.endDelta != 0) '$uiTimelineEnd ${signedDays(u.endDelta)}',
-  ].join(' · ');
 
   /// "06 Haz – 15 Tem".
   String rangeText(DayRange r, int year) =>

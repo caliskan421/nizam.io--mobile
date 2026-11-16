@@ -60,7 +60,7 @@ class TimelineSelectionCard extends StatelessWidget {
   /// Tarih talebi; argüman gerekçe (koordinatör formunda zorunlu).
   final ValueChanged<String> onRequest;
 
-  /// "Süre uzat +7": taslağı 7 gün ileri alır.
+  /// Ortak süre uzatma penceresini açar.
   final VoidCallback onExtendDraft;
 
   /// "Bitişi bugüne çek"; koşul yoksa null.

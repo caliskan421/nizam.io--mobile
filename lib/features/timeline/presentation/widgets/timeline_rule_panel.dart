@@ -8,16 +8,15 @@ import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/nz_size.dart';
-import '../../../tasks/tasks.dart' show TaskStatus;
+import '../../../tasks/tasks.dart' show TaskStatus, showTaskDateRequestSheet;
 import '../../domain/timeline.dart';
 import '../../domain/timeline_rules.dart';
-import '../timeline_texts.dart';
 
 /// Seçili görev kartının kural ve komut bölümü (prototip `gantt` koordinatör dalı): bekleyen
-/// talep notu, hızlı komutlar (Süre uzat +7, Bitişi bugüne çek), kural satırı, gerekçe alanı
+/// talep girişi, hızlı komutlar (Süre uzat, Bitişi bugüne çek), kural satırı, gerekçe alanı
 /// ve birincil komut. Yol [TimelineDateChange]'ten okunur; telefon ve tablet aynı bölümü
-/// kullanır. Koordinatör kendi talebini onaylayamaz: bekleyen talep salt okunur "yöneticide
-/// bekliyor" olarak görünür.
+/// kullanır. Talep girişi ayrıntıdaki ortak gerekçe/karar kartını açar; koordinatör
+/// kendi talebini onaylayamaz.
 class TimelineRulePanel extends StatefulWidget {
   const TimelineRulePanel({
     super.key,
@@ -86,8 +85,8 @@ class _TimelineRulePanelState extends State<TimelineRulePanel> {
     final request = change is TimelineRequest;
     final quick = [
       if (widget.canSave && !done)
-        NzButton.secondary(
-          label: l.uiTimelineExtendSeven,
+        NzButton.primary(
+          label: l.uiTasksExtend,
           icon: NzIcons.add,
           size: NzSize.sm,
           onPressed: busy ? null : widget.onExtendDraft,
@@ -113,22 +112,40 @@ class _TimelineRulePanelState extends State<TimelineRulePanel> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (pending) ...[
+        if (pending || quick.isNotEmpty) ...[
           const Gap(NizamioSpacing.space3),
-          note(
-            '${l.uiTimelinePendingHead} '
-            '${s.task.request == null ? '' : l.fullDay(s.task.request!, widget.year)}'
-            ' · ${l.uiTimelinePendingTail}',
-            c.warning,
-            NzIcons.clock,
-          ),
-        ],
-        if (quick.isNotEmpty) ...[
-          const Gap(NizamioSpacing.space3),
-          Wrap(
-            spacing: NizamioSpacing.space2,
-            runSpacing: NizamioSpacing.space2,
-            children: quick,
+          Container(
+            padding: const EdgeInsets.all(NizamioSpacing.space2),
+            decoration: BoxDecoration(
+              color: c.surfaceRaised,
+              borderRadius: BorderRadius.circular(NizamioRadius.group),
+              border: Border.all(color: c.borderStrong),
+            ),
+            child: Row(
+              children: [
+                if (pending)
+                  Expanded(
+                    child: TextButton.icon(
+                      onPressed: busy
+                          ? null
+                          : () =>
+                                showTaskDateRequestSheet(context, s.task.code),
+                      icon: NzIcon(
+                        NzIcons.clock,
+                        size: NizamioSize.iconSizeSm,
+                        color: c.warning,
+                      ),
+                      label: Text(l.uiTasksViewRequest),
+                      style: TextButton.styleFrom(foregroundColor: c.warning),
+                    ),
+                  )
+                else
+                  const Spacer(),
+                if (pending && quick.isNotEmpty)
+                  const Gap(NizamioSpacing.space2),
+                ...quick,
+              ],
+            ),
           ),
         ],
         if (widget.directRule) ...[
@@ -205,8 +222,7 @@ class _TimelineRulePanelState extends State<TimelineRulePanel> {
     }
     return NzButton.primary(
       label: switch (change) {
-        TimelineExtend(:final days) =>
-          '${l.uiTimelineExtendGo} ${l.signedDays(days)}',
+        TimelineExtend() => l.uiTasksExtend,
         _ => l.uiTimelineSave,
       },
       expand: true,

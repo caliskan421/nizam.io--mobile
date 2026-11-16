@@ -158,7 +158,7 @@ class _TimelineSelectionHostState extends ConsumerState<TimelineSelectionHost> {
       onReset: ctrl.resetDraft,
       onSave: () => _save(directRule),
       onRequest: _request,
-      onExtendDraft: ctrl.extendDraft,
+      onExtendDraft: () => showTaskExtendSheet(context, ref, s.task.code),
       onPull: pull ? _pull : null,
       onRemind: null,
       directRule: directRule,

@@ -559,7 +559,6 @@ class _TimelinePageState extends ConsumerState<TimelinePage> {
                 title: l.undoTitle(undo, v),
                 from: l.rangeText(undo.from, v.year),
                 to: l.rangeText(undo.to, v.year),
-                delta: l.undoDelta(undo),
                 onUndo: _undo,
                 onExpired: ctrl.dismissUndo,
               ),

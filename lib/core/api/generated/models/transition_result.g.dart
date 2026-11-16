@@ -39,6 +39,7 @@ const _$TransitionResultActorEnumMap = {
   TransitionResultActor.uye: 'uye',
   TransitionResultActor.koordinator: 'koordinator',
   TransitionResultActor.koordinatorKendiGorevi: 'koordinator_kendi_gorevi',
+  TransitionResultActor.sirketYoneticisi: 'sirket_yoneticisi',
   TransitionResultActor.$unknown: r'$unknown',
 };
 

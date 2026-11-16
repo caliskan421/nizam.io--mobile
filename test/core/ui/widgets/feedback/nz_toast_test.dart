@@ -342,7 +342,10 @@ Color? _fill(WidgetTester tester) {
 }
 
 Icon _icon(WidgetTester tester) => tester.widget<Icon>(
-  find.descendant(of: find.byType(NzToastBubble), matching: find.byType(Icon)),
+  find.descendant(
+    of: find.byType(NzToastBubble),
+    matching: find.byWidgetPredicate((w) => w is Icon),
+  ),
 );
 
 class _NoContext implements BuildContext {

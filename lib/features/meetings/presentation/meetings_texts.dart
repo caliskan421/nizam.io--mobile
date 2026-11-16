@@ -147,6 +147,16 @@ extension MeetingsTexts on AppLocalizations {
     return "${meetingTime(at)}'$suffix $uiMeetingsSinceTail";
   }
 
+  /// Görüşme üst satırı: "14:02'te başladı · 25 dakikadır sürüyor" (bulunma eki ayrılma
+  /// ekinden: -den → -de, -ten → -te …).
+  String meetingStartedLine(DateTime at, DateTime now) {
+    final since = meetingSince(at);
+    final head = since.substring(0, since.indexOf(' '));
+    final minutes = now.difference(at).inMinutes.clamp(0, 100000);
+    return '${head.substring(0, head.length - 1)} $uiMeetingsCallStartedTail · '
+        '$minutes $uiMeetingsCallRunningTail';
+  }
+
   /// Kart sayaçları: "2 not" / "not yok", "3 kişi".
   String meetingNotesStat(int n) =>
       n == 0 ? uiMeetingsNoNotes : '$n $uiMeetingsNoteTail';

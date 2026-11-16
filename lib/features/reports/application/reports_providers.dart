@@ -15,7 +15,7 @@ final reportsProvider = FutureProvider((ref) async {
   ref.watch(sessionGenerationProvider);
   ref.watch(scopeStateProvider);
   final catalog = await ref.watch(taskCatalogControllerProvider.future);
-  if (catalog.access?.companyAdmin != true) {
+  if (!catalog.viewIn(ref.read(scopeStateProvider)).canAdminister) {
     throw ApiError('reporting.not_authorized');
   }
   final repository = ref.watch(reportsRepositoryProvider);

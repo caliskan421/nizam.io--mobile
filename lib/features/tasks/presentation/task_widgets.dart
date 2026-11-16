@@ -5,6 +5,7 @@ import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_pane.dart';
 import '../../../core/ui/theme/nz_motion.dart';
+import '../../../core/ui/widgets/inputs/nz_date_sheet.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
@@ -478,7 +479,7 @@ class TaskFieldLabel extends StatelessWidget {
   );
 }
 
-/// Tarih alanı: dokununca tarih seçici açılır (prototip `input type=date`).
+/// Tarih alanı: dokununca uygulamanın takvim alt sayfası açılır ([showNzDateSheet]).
 class TaskDateField extends StatelessWidget {
   const TaskDateField({
     super.key,
@@ -510,13 +511,11 @@ class TaskDateField extends StatelessWidget {
       child: InkWell(
         borderRadius: BorderRadius.circular(NizamioRadius.tile),
         onTap: () async {
-          final now = value ?? DateTime.now();
-          final first = firstDate ?? DateTime(now.year - 2);
-          final picked = await showDatePicker(
-            context: context,
-            initialDate: now.isBefore(first) ? first : now,
-            firstDate: first,
-            lastDate: DateTime(now.year + 3),
+          final picked = await showNzDateSheet(
+            context,
+            title: label,
+            initial: value,
+            firstDate: firstDate,
           );
           if (picked != null) onChanged(picked);
         },

@@ -28,6 +28,7 @@ _ChatSummary _$ChatSummaryFromJson(Map<String, dynamic> json) => _ChatSummary(
   lastMessage: json['last_message'] == null
       ? null
       : ChatLastMessage.fromJson(json['last_message'] as Map<String, dynamic>),
+  autoDepartmentId: json['auto_department_id'] as String?,
   role: json['role'] == null ? null : ChatRole.fromJson(json['role'] as String),
   peerOnline: json['peer_online'] as bool?,
   peerLastSeenAt: json['peer_last_seen_at'] == null
@@ -52,6 +53,7 @@ Map<String, dynamic> _$ChatSummaryToJson(_ChatSummary instance) =>
       'unread_count': instance.unreadCount,
       'mentioned': instance.mentioned,
       'last_message': ?instance.lastMessage?.toJson(),
+      'auto_department_id': ?instance.autoDepartmentId,
       'role': ?_$ChatRoleEnumMap[instance.role],
       'peer_online': ?instance.peerOnline,
       'peer_last_seen_at': ?instance.peerLastSeenAt?.toIso8601String(),

@@ -60,6 +60,13 @@ class UserAccountDraft {
       (value.email == base.email ||
           value.email != null &&
               RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$').hasMatch(value.email!));
+
+  /// En az bir rol: Admin ya da bu programda bir koordinatörlükte Koordinatör/Üye. Admin
+  /// bilgisi bilinmiyorsa (null) engellenmez; sunucu bugün rolsüz hesabı reddetmez.
+  bool get hasRole => value.companyAdmin != false || value.teams.isNotEmpty;
+
+  /// Kaydet açık mı: alanlar geçerli ve en az bir rol var.
+  bool get savable => valid && hasRole;
   UserAccountDraft copyWith({
     AccountDraftValues? base,
     AccountDraftValues? value,

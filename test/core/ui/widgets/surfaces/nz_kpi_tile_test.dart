@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
+import 'package:nizamio/core/ui/widgets/nz_glyph.dart';
 import 'package:nizamio/core/ui/widgets/surfaces/nz_kpi_tile.dart';
 
 import '../feedback/feedback_test_support.dart';
@@ -28,7 +29,7 @@ void main() {
         testApp(SizedBox(width: 180, child: _tile(onTap: () => n++))),
       );
       expect(find.text('15'), findsOneWidget);
-      expect(find.byIcon(Icons.north_east_rounded), findsOneWidget);
+      expect(find.byType(NzGlyphIcon), findsOneWidget);
       await t.tap(find.text('15'));
       expect(n, 1);
       expect(
@@ -36,7 +37,7 @@ void main() {
         NizamioColors.light.danger,
       );
       await t.pumpWidget(testApp(SizedBox(width: 180, child: _tile())));
-      expect(find.byIcon(Icons.north_east_rounded), findsNothing);
+      expect(find.byType(NzGlyphIcon), findsNothing);
     },
   );
 

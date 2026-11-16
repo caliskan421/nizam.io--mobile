@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
@@ -25,6 +26,26 @@ Widget _variants(BuildContext context) => const Column(
 );
 
 void main() {
+  for (final platform in [TargetPlatform.android, TargetPlatform.iOS]) {
+    testWidgets('gösterge platforma uyarlanır: $platform', (tester) async {
+      await tester.pumpWidget(
+        testApp(
+          Builder(
+            builder: (context) => Theme(
+              data: Theme.of(context).copyWith(platform: platform),
+              child: const NzLoader(),
+            ),
+          ),
+        ),
+      );
+      expect(
+        find.byType(CupertinoActivityIndicator),
+        platform == TargetPlatform.iOS ? findsOneWidget : findsNothing,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+
   setUpFonts();
 
   testWidgets('boyutlar sm 24 · md 32 · lg 48; page alanı ortalar', (
@@ -85,9 +106,10 @@ void main() {
     tester,
   ) async {
     await pumpSheet(tester, _variants);
+    // Gösterge accentText ile çizilir (açık temada okunur lime; koyuda accent ile aynı).
     await expectSheetPixels(tester, [
-      NizamioColors.light.primary,
-      NizamioColors.dark.primary,
+      NizamioColors.light.accentText,
+      NizamioColors.dark.accentText,
     ]);
   });
 

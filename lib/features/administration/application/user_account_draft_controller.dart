@@ -184,7 +184,7 @@ class UserAccountDraftController extends Notifier<UserAccountDraft?> {
     if (initial == null ||
         !initial.dirty ||
         initial.busy ||
-        !initial.valid ||
+        !initial.savable ||
         ref.read(adminCommandProvider)) {
       return AccountSaveResult.unchanged;
     }

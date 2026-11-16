@@ -167,6 +167,8 @@ class _SharedState extends ConsumerState<_Shared> {
             ChatRefTile(
               refId: item.refId,
               kind: item.kind,
+              targetId: item.targetId,
+              onBeforeOpen: () => Navigator.of(context).pop(),
               onFile: (refId, name) {
                 Navigator.of(context).pop();
                 widget.onFile(refId, name);

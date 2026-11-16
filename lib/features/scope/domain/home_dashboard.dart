@@ -62,6 +62,8 @@ final class TaskTotals {
     required this.late,
     required this.awaitingApproval,
     this.inProgressOnTime,
+    this.notStarted = 0,
+    this.dateRequests,
   });
 
   final int total;
@@ -73,6 +75,13 @@ final class TaskTotals {
   final int? inProgressOnTime;
   final int late;
   final int awaitingApproval;
+
+  /// Başlanmamış görevler.
+  final int notStarted;
+
+  /// Bekleyen tarih talepleri; yalnız yönetici özetinde bilinir (sunucu `pending_date_changes`),
+  /// diğerlerinde null.
+  final int? dateRequests;
 
   /// Tamamlanmamış görevler.
   int get open => total - done;

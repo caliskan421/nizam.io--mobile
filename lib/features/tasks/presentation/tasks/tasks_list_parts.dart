@@ -14,6 +14,7 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../application/tasks_list_controller.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_query.dart';
+import '../decision/coordinator_sheets.dart';
 import '../task_texts.dart';
 import 'task_card_grid.dart';
 import 'task_filter_groups.dart';
@@ -35,13 +36,19 @@ List<Widget> tasksListChildren(
   required VoidCallback onClearAll,
   required void Function(TaskFilterGroup?) onFilter,
   required ValueChanged<String> onOpen,
+  TaskSort? sortOverride,
+  List<TaskView>? views,
+  bool coordinator = false,
+  bool member = false,
   int columns = 1,
 }) {
   final l = context.l10n;
   final c = context.colors;
   final t = context.text;
   final r = result;
-  final byCoord = state.sort == TaskSort.coordinatorship;
+  // Geçerli ölçüt (etkin rolün varsayılanıyla çözülmüş); verilmezse durumdaki seçim.
+  final sort = sortOverride ?? state.sort;
+  final byCoord = sort.grouped;
   final list = r.tasks;
 
   final rows = <Widget>[];
@@ -79,13 +86,17 @@ List<Widget> tasksListChildren(
     ),
   );
   void card(TaskItem task, int index) {
-    final view = TaskCardView(
-      task: task,
-      catalog: catalog,
-      showGroup: !byCoord,
-      onTap: () => onOpen(task.code),
-      fill: columns > 1,
-    );
+    // Koordinatörde atanmamış görev Üstlen / Ata satırıdır (ana sayfayla aynı bileşen).
+    final view = coordinator && TaskView.unassigned.matches(task)
+        ? TaskUnassignedRow(task: task, today: catalog.today)
+        : TaskCardView(
+            task: task,
+            catalog: catalog,
+            showGroup: sort != TaskSort.coordinatorship,
+            onTap: () => onOpen(task.code),
+            fill: columns > 1,
+            member: member,
+          );
     final key = ValueKey('task:${task.code}');
     final child = NzEntrance(
       replay: (order, task.code),
@@ -103,7 +114,11 @@ List<Widget> tasksListChildren(
   if (byCoord) {
     for (var gi = 0; gi < r.groups.length; gi++) {
       final g = r.groups[gi];
-      final open = state.isGroupOpen(g.coordinatorship);
+      // Kişi grupları açık başlar (dokunuş kapatır); koordinatörlük grupları kapalı.
+      final person = TaskPersonGroup.personOf(g.coordinatorship);
+      final open = person == null
+          ? state.isGroupOpen(g.coordinatorship)
+          : !state.isGroupOpen(g.coordinatorship);
       flush();
       rows.add(
         item(
@@ -111,10 +126,14 @@ List<Widget> tasksListChildren(
           _GroupHead(
             group: g,
             truncated: catalog.truncated,
-            name:
+            name: switch (person) {
+              null =>
                 catalog.coordinatorship(g.coordinatorship)?.name ??
-                g.coordinatorship,
-            code: _groupCode(catalog, g.coordinatorship),
+                    g.coordinatorship,
+              '' => l.uiTasksGroupUnassigned,
+              final id => catalog.nameOf(id) ?? l.uiTasksUnknownPerson,
+            },
+            code: person != null ? '' : _groupCode(catalog, g.coordinatorship),
             open: open,
             onTap: () => ctl.toggleGroup(g.coordinatorship),
           ),
@@ -140,6 +159,7 @@ List<Widget> tasksListChildren(
       truncated: catalog.truncated,
       selected: state.view,
       onSelected: ctl.selectView,
+      views: views,
     ),
     if (state.filter.hasExtra) ...[
       const Gap(20),
@@ -155,6 +175,9 @@ List<Widget> tasksListChildren(
       const Gap(20),
     TaskListToolbar(
       state: state,
+      sort: sort,
+      coordinator: coordinator,
+      member: member,
       onFilter: () => onFilter(null),
       controller: ctl,
     ),
@@ -183,16 +206,14 @@ List<Widget> tasksListChildren(
       ),
     ],
     const Gap(NizamioSpacing.space3),
-    Text(
-      byCoord
-          ? l.groupedCountLine(list.length, r.groups.length)
-          : l.countLine(
-              state.limit < list.length ? state.limit : list.length,
-              list.length,
-            ),
-      textAlign: TextAlign.center,
-      style: t.caption.copyWith(color: c.textMuted),
-    ),
+    if (coordinator && r.counts[TaskView.unassigned] != 0) ...[
+      const Gap(NizamioSpacing.space2),
+      Text(
+        l.uiTasksUnassignedRule,
+        textAlign: TextAlign.center,
+        style: t.caption.copyWith(color: c.textMuted),
+      ),
+    ],
   ];
 }
 
@@ -302,6 +323,7 @@ class TaskCardView extends StatelessWidget {
     required this.onTap,
     this.showGroup = true,
     this.fill = false,
+    this.member = false,
   });
 
   final TaskItem task;
@@ -312,15 +334,21 @@ class TaskCardView extends StatelessWidget {
   /// Izgara satırında satır boyuna uzar ([NzTaskCard.fill]).
   final bool fill;
 
+  /// Üye görünümü: atanan (kendisi) yerine "Atayan · Ad" (oluşturan; bilinmiyorsa alan yok).
+  final bool member;
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final names = [
-      for (final a in task.assignees)
-        catalog.nameOf(a) ?? l.uiTasksUnknownPerson,
-    ];
+    final creator = task.creator;
+    final names = member
+        ? [?(creator == null ? null : catalog.nameOf(creator))]
+        : [
+            for (final a in task.assignees)
+              catalog.nameOf(a) ?? l.uiTasksUnknownPerson,
+          ];
     final late = !task.isDone && task.isOverdue;
     final req = task.dateRequest;
     final subTotal = task.subtaskTotal;
@@ -363,6 +391,8 @@ class TaskCardView extends StatelessWidget {
       assignees: names.take(3).toList(),
       assigneeText: names.isEmpty
           ? null
+          : member
+          ? '${l.uiTasksCardAssignedBy} · ${names.first}'
           : names.length > 1
           ? '${names.first} +${names.length - 1}'
           : names.first,

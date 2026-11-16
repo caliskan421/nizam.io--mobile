@@ -1,12 +1,20 @@
 part of 'task_detail_writes_p3_test.dart';
 
+/// Talep formunu açar ve zorunlu sebebi yazar (sebepsiz talep gönderilmez).
+void openWithReason(TaskDetailController ctl, ProviderContainer c) {
+  ctl.openDateRequest();
+  final d = c.read(taskDetailControllerProvider('w1')).dateDraft!;
+  ctl.updateDateDraft(d.copyWith(reason: 'Tedarik gecikti'));
+}
+
 void dateRequestCases() {
+  dateRequestReasonCases();
   for (final change in ['program', 'department', 'session']) {
     test(
       'geciken conflict_retry ve $change değişiminde ikinci POST gönderilmez',
       () async {
         final s = _Server();
-        final (h, _, ctl) = await _open(s);
+        final (h, c, ctl) = await _open(s);
         final arrived = Completer<void>();
         final release = Completer<void>();
         addTearDown(() {
@@ -20,7 +28,7 @@ void dateRequestCases() {
           }
           return s.handle(r);
         };
-        ctl.openDateRequest();
+        openWithReason(ctl, c);
         final request = ctl.submitDateRequest();
         await arrived.future.timeout(const Duration(seconds: 5));
         final scope = h.read(scopeControllerProvider);
@@ -41,7 +49,7 @@ void dateRequestCases() {
   }
   test('form açılışındaki sürüm katalog değişse de korunur', () async {
     final (h, c, ctl) = await _open(_Server());
-    ctl.openDateRequest();
+    openWithReason(ctl, c);
     c
         .read(taskCatalogControllerProvider.notifier)
         .applyItem('w1', _task(c).copyWith(datesRevision: 2));
@@ -56,7 +64,7 @@ void dateRequestCases() {
     'belirsiz sonuç aynı anahtar ve sürümle yinelenir; 200 başarıdır',
     () async {
       final s = _Server();
-      final (h, _, ctl) = await _open(s);
+      final (h, c, ctl) = await _open(s);
       var calls = 0;
       s.writes['POST /v1/date-change-requests'] = () {
         calls++;
@@ -66,7 +74,7 @@ void dateRequestCases() {
           s._writeBody(Seen('POST', '/v1/date-change-requests', {}, {})),
         );
       };
-      ctl.openDateRequest();
+      openWithReason(ctl, c);
       expect((await ctl.submitDateRequest()).kind, WriteKind.unknown);
       expect((await ctl.submitDateRequest()).ok, isTrue);
       final posts = h.backend.requests
@@ -89,7 +97,7 @@ void dateRequestCases() {
     final (h, c, ctl) = await _open(s);
     s.writes['POST /v1/date-change-requests'] = () =>
         envelope(409, 'work.edit_conflict');
-    ctl.openDateRequest();
+    openWithReason(ctl, c);
     expect((await ctl.submitDateRequest()).error?.code, 'work.edit_conflict');
     expect(h.backend.count('POST', '/v1/date-change-requests'), 1);
     expect(h.backend.count('GET', '/v1/work-items/w1'), greaterThan(0));
@@ -98,11 +106,22 @@ void dateRequestCases() {
   });
   test('başarılı yazma sonrası okuma hatası başarıyı gizlemez', () async {
     final s = _Server();
-    final (h, _, ctl) = await _open(s);
-    ctl.openDateRequest();
+    final (h, c, ctl) = await _open(s);
+    openWithReason(ctl, c);
     s.failDetails = true;
     expect((await ctl.submitDateRequest()).ok, isTrue);
     expect(h.backend.count('POST', '/v1/date-change-requests'), 1);
     expect(h.backend.count('GET', '/v1/work-items/w1'), greaterThan(0));
+  });
+}
+
+/// Sebepsiz talep istek göndermez; form hatayı gösterir.
+void dateRequestReasonCases() {
+  test('sebepsiz tarih talebi gönderilmez (ürün kuralı)', () async {
+    final (h, c, ctl) = await _open(_Server());
+    ctl.openDateRequest();
+    expect((await ctl.submitDateRequest()).kind, WriteKind.invalid);
+    expect(c.read(taskDetailControllerProvider('w1')).showErrors, isTrue);
+    expect(h.backend.count('POST', '/v1/date-change-requests'), 0);
   });
 }

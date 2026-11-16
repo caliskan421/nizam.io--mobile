@@ -14,6 +14,21 @@ abstract class DepartmentLifecycleResult with _$DepartmentLifecycleResult {
   const factory DepartmentLifecycleResult({
     @JsonKey(name: 'department_id') required String departmentId,
     required DepartmentLifecycleResultStatus status,
+
+    /// `restored`: departmanla birlikte silinmiş ve geri gelen görev sayısı (ADR-0043).
+    @JsonKey(name: 'work_items_restored') int? workItemsRestored,
+
+    /// `purged`: kalıcı silinen görev sayısı.
+    @JsonKey(name: 'work_items_deleted') int? workItemsDeleted,
+
+    /// `purged`: kalıcı silinen dosya sayısı.
+    @JsonKey(name: 'files_deleted') int? filesDeleted,
+
+    /// `purged`: kaldırılan program bağı sayısı.
+    @JsonKey(name: 'program_links_removed') int? programLinksRemoved,
+
+    /// `purged`: departmanla silinen ekip satırı sayısı (bağ kaldırmada silinenler hariç).
+    @JsonKey(name: 'memberships_deleted') int? membershipsDeleted,
   }) = _DepartmentLifecycleResult;
 
   factory DepartmentLifecycleResult.fromJson(Map<String, Object?> json) =>

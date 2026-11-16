@@ -56,14 +56,13 @@ class _TimelineToastState extends State<TimelineToast>
 }
 
 /// Geri alınabilir kayıt bildirimi (prototip `rp-snack`, 5 sn): başlık, eski → yeni aralık,
-/// fark, "Geri al" ve kalan süre çubuğu.
+/// "Geri al" ve kalan süre çubuğu.
 class TimelineUndoSnack extends StatefulWidget {
   const TimelineUndoSnack({
     super.key,
     required this.title,
     required this.from,
     required this.to,
-    required this.delta,
     required this.onUndo,
     required this.onExpired,
   });
@@ -71,7 +70,6 @@ class TimelineUndoSnack extends StatefulWidget {
   final String title;
   final String from;
   final String to;
-  final String delta;
   final VoidCallback onUndo;
   final VoidCallback onExpired;
 
@@ -171,17 +169,12 @@ class _TimelineUndoSnackState extends State<TimelineUndoSnack>
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              Text(
-                                widget.delta,
-                                style: t.caption.copyWith(
-                                  color: fg.withValues(alpha: 0.75),
-                                ),
-                              ),
                             ],
                           ),
                         ],
                       ),
                     ),
+                    const Gap(NizamioSpacing.space6),
                     TextButton(
                       onPressed: widget.onUndo,
                       style: TextButton.styleFrom(

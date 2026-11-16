@@ -8,21 +8,21 @@ part of 'coordinatorship_form_controller.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
-/// Şirket yöneticisi mi: koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
+/// Yönetici görünümü mü ([EffectiveAccess.canAdminister]): koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
 /// (`createDepartment`, `updateDepartment`, `linkDepartment`, `renameDepartmentLink` yalnız
 /// şirket yöneticisine açık). Gizleme güvenlik değildir; sunucu her istekte denetler.
 
 @ProviderFor(canManageCoordinatorships)
 final canManageCoordinatorshipsProvider = CanManageCoordinatorshipsProvider._();
 
-/// Şirket yöneticisi mi: koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
+/// Yönetici görünümü mü ([EffectiveAccess.canAdminister]): koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
 /// (`createDepartment`, `updateDepartment`, `linkDepartment`, `renameDepartmentLink` yalnız
 /// şirket yöneticisine açık). Gizleme güvenlik değildir; sunucu her istekte denetler.
 
 final class CanManageCoordinatorshipsProvider
     extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
-  /// Şirket yöneticisi mi: koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
+  /// Yönetici görünümü mü ([EffectiveAccess.canAdminister]): koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
   /// (`createDepartment`, `updateDepartment`, `linkDepartment`, `renameDepartmentLink` yalnız
   /// şirket yöneticisine açık). Gizleme güvenlik değildir; sunucu her istekte denetler.
   CanManageCoordinatorshipsProvider._()
@@ -59,7 +59,7 @@ final class CanManageCoordinatorshipsProvider
 }
 
 String _$canManageCoordinatorshipsHash() =>
-    r'709e16b25376f3f84177a1967dbfb53c51ddf6fd';
+    r'98f2d67a999dccaa0aed8d9cb9930a6bdb88a289';
 
 /// Koordinatörlük ekle / bilgileri düzenle komutları. Uygulama ömrünce yaşar: oluşturulup
 /// bağlanamamış departman ([CoordinatorshipFormState.pending]) form kapanıp açılsa da
@@ -121,7 +121,7 @@ final class CoordinatorshipFormControllerProvider
 }
 
 String _$coordinatorshipFormControllerHash() =>
-    r'0837ec0b062af081edf882139eb5214d1d12b94a';
+    r'322c3b8402f28a7fcbd630715a0262d4c2b53398';
 
 /// Koordinatörlük ekle / bilgileri düzenle komutları. Uygulama ömrünce yaşar: oluşturulup
 /// bağlanamamış departman ([CoordinatorshipFormState.pending]) form kapanıp açılsa da

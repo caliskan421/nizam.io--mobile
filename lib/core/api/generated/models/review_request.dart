@@ -14,6 +14,9 @@ abstract class ReviewRequest with _$ReviewRequest {
   const factory ReviewRequest({
     /// `approved` ya da `rejected`.
     required ReviewRequestDecision decision,
+
+    /// İsteğe bağlı karar gerekçesi; kırpılır, en çok 500 karakter. Talep listelerinde `review_reason` olarak döner.
+    String? reason,
   }) = _ReviewRequest;
 
   factory ReviewRequest.fromJson(Map<String, Object?> json) =>

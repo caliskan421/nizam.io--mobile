@@ -131,7 +131,7 @@ class AdminUserActions extends ConsumerWidget {
               secret: true,
               required: false,
             ),
-          ]);
+          ], confirmSecret: true);
           if (values != null && context.mounted) {
             await run(
               () => command.run((o, p) async {

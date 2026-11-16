@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/coordinatorships/application/coord_member_controller.dart';
+import 'package:nizamio/features/coordinatorships/domain/department.dart';
+import 'package:nizamio/features/scope/scope.dart' show DepartmentRole;
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/fake_backend.dart';
@@ -62,6 +64,42 @@ Future<Harness> _ready(_Backend b) async {
 }
 
 void main() {
+  group('aday süzgeci', () {
+    final pool = [
+      AssignableAccount(
+        accountId: 'a',
+        fullName: 'A',
+        roles: const ['ele:koordinator', 'egi:uye'],
+      ),
+      AssignableAccount(
+        accountId: 'b',
+        fullName: 'B',
+        roles: const ['egi:koordinator'],
+      ),
+      AssignableAccount(accountId: 'c', fullName: 'C', roles: const []),
+    ];
+    List<String> ids(String? co, DepartmentRole? role) => [
+      for (final p in filterMemberCandidates(
+        pool,
+        coordinatorship: co,
+        role: role,
+      ))
+        p.accountId,
+    ];
+    test('süzgeç yoksa bağsız aday dahil hepsi', () {
+      expect(ids(null, null), ['a', 'b', 'c']);
+    });
+    test('koordinatörlük ve rol aynı bağda sağlanır', () {
+      expect(ids('egi', null), ['a', 'b']);
+      expect(ids(null, DepartmentRole.coordinator), ['a', 'b']);
+      expect(ids('egi', DepartmentRole.coordinator), ['b']);
+      expect(ids('ele', DepartmentRole.member), isEmpty);
+    });
+    test('seçenekler adayların koordinatörlükleri', () {
+      expect(candidateCoordinatorships(pool), {'ele', 'egi'});
+    });
+  });
+
   test('admin başka ekip üyelerini listeler, hedeftekileri dışlar ve kaynağı korur', () async {
     final b = _Backend();
     final h = await _ready(b);

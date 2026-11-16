@@ -149,6 +149,7 @@ Map<String, Object?> subtaskWire(
   'work_item_id': 'w1',
   'title': 'Alt $id',
   'done': done,
+  'evidence_required': false,
   'created_by_account_id': 'acc-1',
   'created_at': '2026-10-02T08:00:00Z',
   'updated_at': '2026-10-02T08:00:00Z',

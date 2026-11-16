@@ -48,7 +48,7 @@ final class TasksListPrefsStoreProvider
 }
 
 String _$tasksListPrefsStoreHash() =>
-    r'7aab44e6e7f49a35372e1c3b7ee5914166b7bf69';
+    r'cd53d23888ad6ce28addcf0d55e0f10abb8ad722';
 
 /// [TasksListPrefs] deposu: oturum boyunca yaşar; her yeni liste denetleyicisi (KPI kartı,
 /// ekip kutusu, çekmece rozeti `view`/`people` ile açılan liste) buradan başlar.
@@ -134,7 +134,7 @@ final class TasksListControllerProvider
 }
 
 String _$tasksListControllerHash() =>
-    r'e54b434a141292a13189c2bf241303dd924d9e95';
+    r'c3c53699957cd9ad1198da935f3695d7344e5804';
 
 /// Görevler listesi denetleyicisi. [view] ve [people] (virgülle ayrılmış kişi kimlikleri)
 /// başlangıç süzgecidir (ana sayfa özet/ekip kutuları, çekmece rozetleri). Ömür: uygulama
@@ -201,6 +201,10 @@ abstract class _$TasksListController extends $Notifier<TasksListState> {
 /// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
 /// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır
 /// (arama alanını açmak, sayfalamak, grup açmak hesaplamaz). Katalog yokken null.
+///
+/// Etkin görünüm süzer ([scopedTasks]): Koordinatör/Üye görünümünde yalnız etkin
+/// koordinatörlüğün görevleri (Üye'de ayrıca kendine atananlar); sıralama rolün varsayılanıyla
+/// ([resolveTaskSort]). Durum ve gecikme süzgeci sunucuda yok: istemcide süzülür.
 
 @ProviderFor(tasksListResult)
 final tasksListResultProvider = TasksListResultFamily._();
@@ -208,6 +212,10 @@ final tasksListResultProvider = TasksListResultFamily._();
 /// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
 /// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır
 /// (arama alanını açmak, sayfalamak, grup açmak hesaplamaz). Katalog yokken null.
+///
+/// Etkin görünüm süzer ([scopedTasks]): Koordinatör/Üye görünümünde yalnız etkin
+/// koordinatörlüğün görevleri (Üye'de ayrıca kendine atananlar); sıralama rolün varsayılanıyla
+/// ([resolveTaskSort]). Durum ve gecikme süzgeci sunucuda yok: istemcide süzülür.
 
 final class TasksListResultProvider
     extends
@@ -220,6 +228,10 @@ final class TasksListResultProvider
   /// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
   /// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır
   /// (arama alanını açmak, sayfalamak, grup açmak hesaplamaz). Katalog yokken null.
+  ///
+  /// Etkin görünüm süzer ([scopedTasks]): Koordinatör/Üye görünümünde yalnız etkin
+  /// koordinatörlüğün görevleri (Üye'de ayrıca kendine atananlar); sıralama rolün varsayılanıyla
+  /// ([resolveTaskSort]). Durum ve gecikme süzgeci sunucuda yok: istemcide süzülür.
   TasksListResultProvider._({
     required TasksListResultFamily super.from,
     required (TaskView, String) super.argument,
@@ -271,11 +283,15 @@ final class TasksListResultProvider
   }
 }
 
-String _$tasksListResultHash() => r'd90b00ec30e7f8abed89a0f281d873eb4c818fdd';
+String _$tasksListResultHash() => r'b2aa0432aa96ee08892418951a03644f1003967e';
 
 /// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
 /// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır
 /// (arama alanını açmak, sayfalamak, grup açmak hesaplamaz). Katalog yokken null.
+///
+/// Etkin görünüm süzer ([scopedTasks]): Koordinatör/Üye görünümünde yalnız etkin
+/// koordinatörlüğün görevleri (Üye'de ayrıca kendine atananlar); sıralama rolün varsayılanıyla
+/// ([resolveTaskSort]). Durum ve gecikme süzgeci sunucuda yok: istemcide süzülür.
 
 final class TasksListResultFamily extends $Family
     with $FunctionalFamilyOverride<TaskQueryResult?, (TaskView, String)> {
@@ -291,6 +307,10 @@ final class TasksListResultFamily extends $Family
   /// Seçili görünümün süzülmüş/sıralı listesi ve görünüm sayıları; yalnız sorguyu etkileyen
   /// alanlar (görünüm, sıralama, yön, süzgeç) ya da katalog değişince yeniden hesaplanır
   /// (arama alanını açmak, sayfalamak, grup açmak hesaplamaz). Katalog yokken null.
+  ///
+  /// Etkin görünüm süzer ([scopedTasks]): Koordinatör/Üye görünümünde yalnız etkin
+  /// koordinatörlüğün görevleri (Üye'de ayrıca kendine atananlar); sıralama rolün varsayılanıyla
+  /// ([resolveTaskSort]). Durum ve gecikme süzgeci sunucuda yok: istemcide süzülür.
 
   TasksListResultProvider call(TaskView view, String people) =>
       TasksListResultProvider._(argument: (view, people), from: this);

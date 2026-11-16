@@ -19,11 +19,15 @@ class AdminUserTaskRow extends StatelessWidget {
     required this.first,
     required this.last,
     this.coordinatorship,
+    this.showCode = false,
   });
   final TaskItem task;
 
   /// Koordinatörlük adı (alt satırın başı; görev kimliği gösterilmez).
   final String? coordinatorship;
+
+  /// Ekibim (tek koordinatörlük): alt satır koordinatörlük adı yerine görev kodu ile başlar.
+  final bool showCode;
   final DateTime today;
   final bool first;
   final bool last;
@@ -45,7 +49,8 @@ class AdminUserTaskRow extends StatelessWidget {
         ? '$days ${context.l10n.uiUsersTaskRemainingDays}'
         : '';
     final subtitle = [
-      ?coordinatorship, userTaskStatusLabel(context, task.status),
+      ?(showCode ? task.displayCode : coordinatorship),
+      userTaskStatusLabel(context, task.status),
       // Liste ucu dosya sayısı taşımaz. Yalnız ayrıntıdan gerçekten okunan pozitif
       // kayıtları göster; varsayılan `files: 0` kullanıcıya olgu diye sunulmaz.
       if (task.fileEntries.isNotEmpty)

@@ -19,6 +19,7 @@ final class ArchiveFolderViewState {
     this.uploader,
     this.mimeCategory,
     this.sort = ArchiveSort.recent,
+    this.reversed = false,
     this.query = '',
   });
 
@@ -32,6 +33,10 @@ final class ArchiveFolderViewState {
   final String? uploader;
   final ArchiveMimeCategory? mimeCategory;
   final ArchiveSort sort;
+
+  /// Sunucu sırasının tersi (yalnız istemcide; sunucu yön almaz). Bütün sayfalar yüklüyken
+  /// uygulanır, yoksa ters sıra eksik listeyi yanlış gösterirdi.
+  final bool reversed;
   final String query;
 
   bool get hasFileFilters =>
@@ -62,6 +67,7 @@ final class ArchiveFolderViewState {
     String? Function()? uploader,
     ArchiveMimeCategory? Function()? mimeCategory,
     ArchiveSort? sort,
+    bool? reversed,
     String? query,
   }) => ArchiveFolderViewState(
     tab: tab ?? this.tab,
@@ -70,6 +76,7 @@ final class ArchiveFolderViewState {
     uploader: uploader == null ? this.uploader : uploader(),
     mimeCategory: mimeCategory == null ? this.mimeCategory : mimeCategory(),
     sort: sort ?? this.sort,
+    reversed: reversed ?? this.reversed,
     query: query ?? this.query,
   );
 }
@@ -107,9 +114,13 @@ class ArchiveFolderController extends _$ArchiveFolderController {
     mimeCategory: () => null,
   );
 
-  /// Son yükleme → Ada göre → Boyuta göre → …
+  /// Son yükleme → Ada göre → Boyuta göre → …; eksen değişince yön varsayılana döner.
   void cycleSort() => state = state.copyWith(
     sort:
         ArchiveSort.values[(state.sort.index + 1) % ArchiveSort.values.length],
+    reversed: false,
   );
+
+  /// Sıralama okunun yönü (artan/azalan) değişir.
+  void toggleDirection() => state = state.copyWith(reversed: !state.reversed);
 }

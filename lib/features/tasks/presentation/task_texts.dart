@@ -44,21 +44,25 @@ extension TaskTexts on AppLocalizations {
   String viewLabel(TaskView v) => switch (v) {
     TaskView.all => uiTasksViewAll,
     TaskView.late => uiTasksViewLate,
+    TaskView.returned => uiTasksViewReturned,
     TaskView.inProgress => uiTasksViewDoing,
     TaskView.review => uiTasksViewReview,
     TaskView.dateRequest => uiTasksViewRequest,
     TaskView.notStarted => uiTasksViewTodo,
     TaskView.done => uiTasksViewDone,
+    TaskView.unassigned => uiTasksViewUnassigned,
   };
 
   String viewListTitle(TaskView v) => switch (v) {
     TaskView.all => uiTasksListAll,
     TaskView.late => uiTasksListLate,
+    TaskView.returned => uiTasksListReturned,
     TaskView.inProgress => uiTasksListDoing,
     TaskView.review => uiTasksListReview,
     TaskView.dateRequest => uiTasksListRequest,
     TaskView.notStarted => uiTasksListTodo,
     TaskView.done => uiTasksListDone,
+    TaskView.unassigned => uiTasksListUnassigned,
   };
 
   String sortLabel(TaskSort s) => switch (s) {
@@ -66,6 +70,7 @@ extension TaskTexts on AppLocalizations {
     TaskSort.due => uiTasksSortDue,
     TaskSort.start => uiTasksSortStart,
     TaskSort.coordinatorship => uiTasksSortCoord,
+    TaskSort.person => uiTasksSortPerson,
   };
 
   String sortShort(TaskSort s) => switch (s) {
@@ -73,6 +78,7 @@ extension TaskTexts on AppLocalizations {
     TaskSort.due => uiTasksSortDueShort,
     TaskSort.start => uiTasksSortStartShort,
     TaskSort.coordinatorship => uiTasksSortCoordShort,
+    TaskSort.person => uiTasksSortPersonShort,
   };
 
   String sortDirection(TaskSort s, {required bool descending}) =>
@@ -83,7 +89,7 @@ extension TaskTexts on AppLocalizations {
         (TaskSort.due, true) => uiTasksDirDueDesc,
         (TaskSort.start, false) => uiTasksDirStartAsc,
         (TaskSort.start, true) => uiTasksDirStartDesc,
-        (TaskSort.coordinatorship, _) => '',
+        (TaskSort.coordinatorship || TaskSort.person, _) => '',
       };
 
   String tagLabel(EvidenceTag t) => switch (t) {
@@ -135,14 +141,6 @@ extension TaskTexts on AppLocalizations {
   /// Aktarım teklifi: "Bu e-posta var olan bir hesaba ait: Ad. “Ekle” bu hesabı ekibe ekler."
   String inviteExisting(String name) =>
       '$uiTasksIvExisting $name. $uiTasksIvExistingTail';
-
-  /// "76 görev" ya da "8 / 76 görev".
-  String countLine(int shown, int total) => shown == total
-      ? '$total $uiTasksTasksLc'
-      : '$shown / $total $uiTasksTasksLc';
-
-  String groupedCountLine(int tasks, int groups) =>
-      '$tasks $uiTasksTasksLc · $groups $uiTasksCoordsLc';
 
   String lateBadge(int days) => '$days $uiTasksLateTail';
 

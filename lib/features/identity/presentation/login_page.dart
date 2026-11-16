@@ -162,7 +162,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             NzTextField.email(
               label: l.uiIdentityLoginEmail,
               hint: l.uiIdentityLoginEmailHint,
-              labelAbove: true,
               size: NzSize.lg,
               name: 'email',
               controller: _email,
@@ -179,7 +178,6 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               key: ValueKey(_passwordGeneration),
               label: l.uiIdentityLoginPassword,
               hint: l.uiIdentityLoginPasswordHint,
-              labelAbove: true,
               size: NzSize.lg,
               name: 'password',
               controller: _password,

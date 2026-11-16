@@ -4,6 +4,7 @@ import 'package:meta/meta.dart';
 
 import '../../tasks/tasks.dart';
 import 'timeline.dart';
+import 'timeline_rules.dart';
 
 /// Yatay çizelgenin ölçeği: [week] günlük, [month] haftalık, [monthly] aylık. Gün
 /// başına piksel görünüm geometrisidir (presentation).
@@ -377,10 +378,14 @@ HashMap<String, int> taskNumbers(List<TaskItem> tasks) {
 /// Prototip `S_hgantt.renderVals` mantığı: süzgeç, gruplama (başlangıca göre kararlı sıra),
 /// kapalı gruplar, sayılar, çipler ve seçili kart. Girdi, Gantt görünür görev kümesi ve
 /// katalog metaverisinin birleşimidir; bağımlılıklar Gantt bağlantılarından gelir.
+/// [rangeOf] bir görevin kayıtlı tarihinin yerine çizilecek aralığı verir (kaydedilmiş
+/// düzenleme ya da seçili görevin +/- taslağı); null → katalogdaki başlangıç/bitiş.
 GanttView buildGanttView(
   TaskCatalog catalog,
   GanttState s, {
   Set<String> dependent = const {},
+  DayRange? Function(String code)? rangeOf,
+  bool byStatus = false,
 }) {
   final year = catalog.today.year;
   final today = seasonDay(catalog.today, year);
@@ -391,10 +396,9 @@ GanttView buildGanttView(
       GanttTask(
         TimelineTask(
           item: item,
-          range: DayRange(
-            seasonDay(item.start, year),
-            seasonDay(item.due, year),
-          ),
+          range:
+              rangeOf?.call(item.code) ??
+              DayRange(seasonDay(item.start, year), seasonDay(item.due, year)),
           doneAt: item.completedAt == null
               ? null
               : seasonDay(item.completedAt!, year),
@@ -414,16 +418,7 @@ GanttView buildGanttView(
   };
   bool coordOk(GanttTask t) =>
       s.coords.isEmpty || s.coords.contains(t.item.coordinatorship);
-  final q = s.query.trim().toLowerCase();
-  bool queryOk(GanttTask t) {
-    if (q.isEmpty) return true;
-    bool has(String? s) => s != null && s.toLowerCase().contains(q);
-    final c = catalog.coordinatorship(t.item.coordinatorship);
-    return has(t.item.title) ||
-        has(c?.label) ||
-        has(c?.name) ||
-        t.item.assignees.any((id) => has(catalog.nameOf(id)));
-  }
+  bool queryOk(GanttTask t) => taskMatchesQuery(t.item, catalog, s.query);
 
   final visible = [
     for (final t in tasks)
@@ -438,10 +433,25 @@ GanttView buildGanttView(
   final coords = catalog.coordinatorships;
   final numbers = taskNumbers(catalog.tasks);
   final rows = <GanttRow>[];
-  for (final c in coords) {
+  // Kilitli görünüm ([byStatus]: tek koordinatörlük) durum grupları: açık, tamamlanan.
+  final groups = byStatus
+      ? [
+          for (final code in [timelineOpenGroup, timelineDoneGroup])
+            CoordinatorshipRef(
+              code: code,
+              name: code,
+              leads: const [],
+              members: const [],
+            ),
+        ]
+      : coords;
+  bool inGroup(GanttTask t, String code) => byStatus
+      ? (t.status == TaskStatus.done) == (code == timelineDoneGroup)
+      : t.item.coordinatorship == code;
+  for (final c in groups) {
     final indexed = [
       for (final (i, t) in visible.indexed)
-        if (t.item.coordinatorship == c.code) (i, t),
+        if (inGroup(t, c.code)) (i, t),
     ];
     if (indexed.isEmpty) continue;
     // JS `sort` kararlıdır; eşit başlangıçta katalog sırası korunur.
@@ -469,7 +479,9 @@ GanttView buildGanttView(
           GanttTaskRow(
             task: t,
             selected: s.selected == t.code,
-            label: c.label,
+            label:
+                catalog.coordinatorship(t.item.coordinatorship)?.label ??
+                c.label,
             number: numbers[t.code]!,
           ),
         );

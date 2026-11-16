@@ -48,7 +48,20 @@ Her açılış girişle başlar (kayıtlı oturum sunucuda kapatılır); çıkı
 Yerel geliştirme backend'i (örnek verili): `../program/araclar/agir-is.sh "mobil dev backend" -- test_integration/backend/dev-up.sh`
 — `up.sh` (pin etiketi, `127.0.0.1:18140`) ve ardından `seed_dev.py`: prototip kataloğu (16 kişi, 11 koordinatörlük,
 76 görev, dosya/not/alt görev, mesaj, toplantı) yalnız API ile basılır; tarihler bugüne kaydırılır. Giriş
-`admin@nizam.local` (dev ön dolgusu), diğerleri `<ad.soyad>@nizam.local`, aynı parola. Baştan kurmak: `down.sh`
+`admin@nizam.local` (dev ön dolgusu), diğerleri `<ad.soyad>@nizam.local`, aynı parola. İkinci program
+(İstanbul Teknofest 2027; 6 koordinatörlük, her durumdan görev, alt görev, tarih talebi), farklı tür/boyda arşiv
+dosyaları (bütün etiketler), iki programda tablolar (her sütun türü, paylaşımlı), silinenler (görev, toplantı,
+görevleriyle silinen koordinatörlük, `deniz.arslan@`), grup sohbetleri ve anketler de basılır. Rol tanıkları:
+
+| Hesap | Roller |
+|---|---|
+| `admin@nizam.local` | şirket yöneticisi + Şanlıurfa'da SİS koordinatörü + OPE üyesi |
+| `kadir.ozbek@nizam.local` | Şanlıurfa'da ALT koordinatörü, İstanbul'da ALT üyesi |
+| `gokce.nur.usta@nizam.local` | Şanlıurfa'da EĞİ üyesi, İstanbul'da LOJ koordinatörü + ALT üyesi |
+| `abdullah.ates@nizam.local` | saf koordinatör (yalnız Şanlıurfa ALT) |
+| `bahar.kilic@nizam.local` | saf üye (yalnız Şanlıurfa İDA) |
+
+Baştan kurmak: `down.sh`
 sonra yeniden `dev-up.sh`. `make integration` boş kurulum bekler: önce `down.sh` + `up.sh`. Android emülatöründen
 adres `http://10.0.2.2:18140`.
 
@@ -68,6 +81,28 @@ giriş noktasıyla seçilir.
 Dev prototipi login ekranında açılır. Alanlar boşken **Giriş yap** örnek verili ana sayfayı
 açar; kimlik doğrulama isteği göndermez ve oturum oluşturmaz. Prod giriş doğrulaması korunur.
 iOS simülatörü: `flutter run -d <simulator-id> --flavor dev -t lib/main_dev.dart`.
+
+Tablolar listeleme/oluşturma, sütun kurulumu ve paylaşım için pinli backend uçlarını kullanır.
+Başlangıç düzeni liste ekranındaki şablon kartından seçilir; oluşturma formunda yalnız
+seçilen düzen gösterilir. Paylaşımda kişiler başlangıçta kapalı koordinatörlük gruplarında, koordinatörler üyelerden önce gösterilir.
+Liste ortak aşağı çekerek yenileme ve bayat veri mekanizmasını kullanır; değişmeyen veri
+mevcut görünümü korur.
+Yeni tablo varsayılan yalnız sahibine açıktır. Kişi başına görüntüleme/düzenleme ve tek
+koordinatörlük için erişim seçilir; konum paylaşım seçiminden türetilir. Koordinatörlük
+seçildiğinde varsayılan yalnız sahip ve açıkça seçilen kişilerdir (`grant`); ekip erişimi
+kapalı kalır. "Tüm ekip" ayrıca seçilirse dinamik `team_role` açılır ve kişi seçimleri
+kayda gönderilmez. Yeni koordinatörlük tablosunu kapsam üyesi doğrudan oluşturabilir;
+kişisel tabloyu sonradan taşıma/öneri onayı bundan ayrıdır.
+Kişiler mevcut yetkili görev/ekip kataloğuyla sınırlıdır; herkese açık genel kişi seçici ucu yoktur.
+Oluşturma, sütun ve paylaşım ayrı isteklerdir: form aynı oturumda kapanıp açılsa da kalan
+adımlar aynı işlem anahtarlarıyla sürer. Hesap/kapsam değişimi taslağı siler. Canlı listede
+örnek veri yoktur; hata demo veriye düşmez. Canlı detay; sayfalı satır/hücre düzenleme,
+sütun yönetimi, yorumlar, dosyalar, projeler, paylaşım, kopya/taşıma/öneri, şablon,
+filtre/sıralama ve geri alma uçlarını kullanır. Hücre/şema çakışmalarında taslak korunur;
+belirsiz yazımlar aynı anahtarla sürdürülür. SSE değişiklikleri ve görünürlükle sınırlı presence
+aktiftir. Snapshot mevcut kişi yetkilerini ve okuyanın etkin rolünü vermediği için mevcut
+grant listesi gösterilmez; içerik yazım yetkisini sunucu doğrular. Ayrıntı ve doğrulama:
+[tablo çalışma notu](docs/yurutme/tablo-workspace-calisma.md).
 
 ## Uygulama kimliği ve imzalama
 

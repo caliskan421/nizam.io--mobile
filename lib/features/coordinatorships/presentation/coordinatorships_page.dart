@@ -70,6 +70,15 @@ class CoordinatorshipsPage extends ConsumerWidget {
               NzPageHeader(
                 title: context.l10n.uiCoordTitle,
                 subtitle: context.l10n.coordListSubtitle(items),
+                actions: [
+                  // Koordinatörlük ekleme yalnız şirket yöneticisinin yüzüdür.
+                  if (ref.watch(canManageCoordinatorshipsProvider))
+                    NzIconButton.circleAccent(
+                      icon: NzIcons.add,
+                      semanticLabel: context.l10n.uiCoordFlyAdd,
+                      onPressed: () => showCoordinatorshipForm(context, ref),
+                    ),
+                ],
               ),
               const Gap(NizamioSpacing.space5),
               Align(
@@ -209,7 +218,16 @@ class CoordinatorshipCard extends StatelessWidget {
             ],
           ),
           const Gap(NizamioSpacing.gapMd),
-          NzProgressBar(value: s.ratio, color: c.taskDone),
+          // Ana sayfa koordinatörlük kartıyla aynı çok renkli durum çubuğu.
+          NzProgressBar.segments(
+            separated: true,
+            segments: [
+              NzBarSegment(s.done, c.taskDone),
+              NzBarSegment(s.inProgress, c.inProgress),
+              NzBarSegment(s.inReview, c.warning),
+              NzBarSegment(s.todo, c.textFaint),
+            ],
+          ),
         ],
       ),
     );

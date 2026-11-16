@@ -56,6 +56,9 @@ class RecordingAppNav implements NzAppNav {
   void openMeeting(String id) => calls.add('meeting:$id');
 
   @override
+  void openConference(String meetingId) => calls.add('conference:$meetingId');
+
+  @override
   void openMessages() => calls.add('messages');
 
   @override
@@ -72,6 +75,8 @@ class RecordingAppNav implements NzAppNav {
   void openTables() => calls.add('tables');
   @override
   void openTable(String id) => calls.add('table:$id');
+  @override
+  void openLinkedTable(String id) => calls.add('linked-table:$id');
 
   @override
   void openMenu(BuildContext context) => calls.add('menu');

@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/domain/turkish_collation.dart';
-import '../../../core/errors/api_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
@@ -19,17 +18,16 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../application/archive_actions_controller.dart';
 import '../application/archive_controller.dart';
-import '../application/archive_files_controller.dart';
 import '../application/archive_folder_controller.dart';
 import '../application/archive_folder_sources.dart';
 import '../application/archive_folders_controller.dart';
 import '../domain/archive.dart';
 import '../domain/records.dart';
+import 'archive/archive_file_list.dart';
 import 'archive/archive_filter_sheet.dart';
 import 'archive/archive_folder_grid.dart';
 import 'archive/archive_folder_parts.dart';
 import 'archive/archive_outcome.dart';
-import 'archive/archive_preview_sheet.dart';
 import 'archive/archive_texts.dart';
 import 'archive/archive_upload.dart';
 
@@ -196,9 +194,9 @@ class ArchiveFolderPage extends ConsumerWidget {
             },
           )
         else ...[
-          _Filters(code: code, view: view),
+          ArchiveFileFilters(code: code, view: view),
           const Gap(NizamioSpacing.space3),
-          _Files(code: code),
+          ArchiveFileList(code: code),
         ],
       ],
       children: [
@@ -374,121 +372,6 @@ class _HeaderState extends ConsumerState<_Header> {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Dosyalar sekmesinin süzgeçleri: etiket rayı, seçili görev, yükleyen ve sıralama.
-class _Filters extends ConsumerWidget {
-  const _Filters({required this.code, required this.view});
-
-  final String code;
-  final ArchiveFolderViewState view;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final ctrl = ref.read(archiveFolderControllerProvider(code).notifier);
-    final task = view.task;
-    final taskTitle = task == null
-        ? null
-        : ref
-              .watch(archiveFolderTasksProvider(code))
-              .value
-              ?.where((t) => t.workItemId == task)
-              .firstOrNull
-              ?.title;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Align(
-          alignment: Alignment.centerRight,
-          child: NzSplitButton(
-            flexibleLabel: true,
-            label: l.sortLabel(view.sort),
-            semanticLabel: '${l.uiHomeSortChange}: ${l.sortLabel(view.sort)}',
-            onPressed: ctrl.cycleSort,
-            icon: NzIcons.chevronDown,
-            iconTurns: view.sort == ArchiveSort.name ? 0.5 : 0,
-            iconSemanticLabel: view.sort == ArchiveSort.name
-                ? l.uiHomeSortAscending
-                : l.uiHomeSortDescending,
-            onIconPressed: null,
-          ),
-        ),
-        if (task != null) ...[
-          const Gap(NizamioSpacing.space3),
-          ArchiveTaskFilter(
-            title: taskTitle ?? l.uiArchiveFactTask,
-            onClear: ctrl.clearTask,
-          ),
-        ],
-      ],
-    );
-  }
-}
-
-/// İmleçli dosya listesi + "daha fazla yükle" (otomatik yeniden deneme yok).
-class _Files extends ConsumerWidget {
-  const _Files({required this.code});
-
-  final String code;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l = context.l10n;
-    final files = ref.watch(archiveFilesControllerProvider(code));
-    final titles = {
-      for (final t
-          in ref.watch(archiveFolderTasksProvider(code)).value ??
-              const <ArchiveTaskSummary>[])
-        t.workItemId: t.title,
-    };
-    final ctrl = ref.read(archiveFilesControllerProvider(code).notifier);
-    if (files.hasError && !files.isLoading) {
-      return NzErrorState(
-        error: toApiError(files.error!),
-        onRetry: () => ref.invalidate(archiveFilesControllerProvider(code)),
-      );
-    }
-    return NzAsyncView<ArchiveFilesState>(
-      value: files,
-      skeletonOnReload: true,
-      onRetry: () => ref.invalidate(archiveFilesControllerProvider(code)),
-      data: (s) {
-        final list = s.items;
-        final moreError = s.moreError;
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (list.isEmpty && !s.hasMore) _Empty(l.uiArchiveEmptyFiles),
-            for (var i = 0; i < list.length; i++)
-              ArchiveFileRow(
-                key: ValueKey(list[i].id),
-                file: list[i],
-                taskTitle: titles[list[i].workItemId],
-                first: i == 0,
-                last: i == list.length - 1,
-                onTap: () => showArchivePreview(
-                  context,
-                  code: code,
-                  taskTitle: (id) => titles[id],
-                  fileId: list[i].id,
-                ),
-              ),
-            if (moreError != null)
-              NzErrorState.inline(error: moreError, onRetry: ctrl.loadMore)
-            else if (s.hasMore) ...[
-              const Gap(NizamioSpacing.space3),
-              NzButton.secondary(
-                label: l.uiArchiveLoadMore,
-                expand: true,
-                onPressed: s.loadingMore ? null : ctrl.loadMore,
-              ),
-            ],
-          ],
-        );
-      },
     );
   }
 }

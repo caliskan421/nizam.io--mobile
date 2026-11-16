@@ -15,7 +15,8 @@ class NzBanner extends StatelessWidget {
     required String this.message,
     this.actionLabel,
     this.onAction,
-  }) : _tone = _BannerTone.info,
+  }) : unreachable = false,
+       _tone = _BannerTone.info,
        assert(
          (actionLabel == null) == (onAction == null),
          'actionLabel ve onAction birlikte verilir',
@@ -26,7 +27,8 @@ class NzBanner extends StatelessWidget {
     required String this.message,
     this.actionLabel,
     this.onAction,
-  }) : _tone = _BannerTone.warning,
+  }) : unreachable = false,
+       _tone = _BannerTone.warning,
        assert(
          (actionLabel == null) == (onAction == null),
          'actionLabel ve onAction birlikte verilir',
@@ -37,15 +39,17 @@ class NzBanner extends StatelessWidget {
     required String this.message,
     this.actionLabel,
     this.onAction,
-  }) : _tone = _BannerTone.danger,
+  }) : unreachable = false,
+       _tone = _BannerTone.danger,
        assert(
          (actionLabel == null) == (onAction == null),
          'actionLabel ve onAction birlikte verilir',
        );
 
-  /// Çevrimdışı şeridi: metin `ui.feedback.offline`; [onAction] varsa `ui.common.retry` düğmesi.
-  /// Yeniden deneme yalnız kullanıcı dokunuşuyla (A3b).
-  const NzBanner.offline({super.key, this.onAction})
+  /// Bağlantı şeridi: başlık internete bağlı değil (`ui.feedback.offline`) ya da [unreachable]
+  /// ise sunucuya ulaşılamıyor (`ui.feedback.unreachable`); altında son verinin gösterildiği ve
+  /// bağlantı gelince yenileneceği notu. [onAction] varsa `ui.common.retry` düğmesi.
+  const NzBanner.offline({super.key, this.onAction, this.unreachable = false})
     : message = null,
       actionLabel = null,
       _tone = _BannerTone.offline;
@@ -56,6 +60,9 @@ class NzBanner extends StatelessWidget {
   /// Offline'da null (`ui.common.retry`).
   final String? actionLabel;
   final VoidCallback? onAction;
+
+  /// Yalnız bağlantı şeridinde: arayüz var ama sunucuya ulaşılamıyor.
+  final bool unreachable;
   final _BannerTone _tone;
 
   static const _tintAlpha = 0.12;
@@ -70,7 +77,10 @@ class NzBanner extends StatelessWidget {
       _BannerTone.danger => (colors.danger, NzIcons.error),
       _BannerTone.offline => (colors.warning, NzIcons.offline),
     };
-    final shownMessage = message ?? l.uiFeedbackOffline;
+    final offline = _tone == _BannerTone.offline;
+    final shownMessage =
+        message ??
+        (unreachable ? l.uiFeedbackUnreachable : l.uiFeedbackOffline);
     final shownAction =
         actionLabel ?? (onAction == null ? null : l.uiCommonRetry);
 
@@ -105,7 +115,26 @@ class NzBanner extends StatelessWidget {
                     padding: const EdgeInsets.symmetric(
                       vertical: NizamioSpacing.space2,
                     ),
-                    child: Text(shownMessage, style: context.text.bodyMd),
+                    child: offline
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                shownMessage,
+                                style: context.text.bodyMd.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              Text(
+                                l.uiFeedbackStaleData,
+                                style: context.text.caption.copyWith(
+                                  color: colors.textMuted,
+                                ),
+                              ),
+                            ],
+                          )
+                        : Text(shownMessage, style: context.text.bodyMd),
                   ),
                 ),
               ],

@@ -12,6 +12,7 @@ import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
+import 'package:nizamio/features/archive/application/archive_folder_controller.dart';
 import 'package:nizamio/features/archive/archive.dart';
 import 'package:nizamio/features/archive/domain/archive.dart';
 import 'package:nizamio/features/archive/domain/records.dart';
@@ -80,6 +81,106 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
+
+  testWidgets('görev önizlemesi bütün sayfalarda ileri geri dolaşır', (
+    tester,
+  ) async {
+    final h = await real(
+      tester,
+      () => pilotHarness(archiveBackend(), signedIn: true),
+    );
+    final repo = FakeArchiveRepository()
+      ..pages = {
+        null: PageSlice(
+          items: [archiveFile('f1', type: 'application/octet-stream')],
+          nextCursor: 'next',
+        ),
+        'next': PageSlice(
+          items: [archiveFile('f2', type: 'application/octet-stream')],
+        ),
+      };
+    useArchiveFakes(h, repo, sink: RecordingSink(), picker: FakePicker());
+    h.read(scopeControllerProvider).selectProgram('prog-1');
+    // Arşivde kalmış başka bir görev seçimi bu önizlemeye sızmamalı.
+    final keep = h.container.listen(
+      archiveFolderControllerProvider('d1'),
+      (_, _) {},
+    );
+    addTearDown(keep.close);
+    h.container
+        .read(archiveFolderControllerProvider('d1').notifier)
+        .openTask('w2');
+    await pumpScreen(
+      tester,
+      h,
+      Builder(
+        builder: (context) => Scaffold(
+          body: TextButton(
+            onPressed: () => openTaskArchive(
+              context,
+              departmentId: 'd1',
+              workItemId: 'w1',
+              fileId: 'f1',
+              taskTitle: (_) => 'Saha keşfi',
+            ),
+            child: const Text('Görevi önizle'),
+          ),
+        ),
+      ),
+    );
+    await settle(tester);
+    await real(
+      tester,
+      () => h.container.read(taskCatalogControllerProvider.future),
+    );
+    await _tap(tester, find.text('Görevi önizle'));
+    expect(find.text('f1.pdf'), findsOneWidget);
+    expect(find.text('1 / 2'), findsOneWidget);
+    await _tap(tester, find.bySemanticsLabel(_l.uiArchiveNext));
+    expect(find.text('f2.pdf'), findsOneWidget);
+    await _tap(tester, find.bySemanticsLabel(_l.uiArchivePrev));
+    expect(find.text('f1.pdf'), findsOneWidget);
+    expect(repo.filters.every((f) => f.workItemId == 'w1'), isTrue);
+    expect(h.container.read(archiveFolderControllerProvider('d1')).task, 'w2');
+  });
+
+  testWidgets('arşive geçiş eski filtreleri temizleyip görevi seçer', (
+    tester,
+  ) async {
+    final (h, nav) = await _open(tester);
+    final provider = archiveFolderControllerProvider('d1');
+    final controller = h.container.read(provider.notifier);
+    controller.openTask('w2');
+    controller.setTag(RecordTag.sonuc);
+    controller.setQuery('eski arama');
+    await pumpScreen(
+      tester,
+      h,
+      Builder(
+        builder: (context) => Scaffold(
+          body: TextButton(
+            onPressed: () => openTaskArchive(
+              context,
+              departmentId: 'd1',
+              workItemId: 'w1',
+              taskTitle: (_) => 'Saha keşfi',
+            ),
+            child: const Text('Görev arşivine git'),
+          ),
+        ),
+      ),
+      nav: nav,
+    );
+    final keep = h.container.listen(provider, (_, _) {});
+    addTearDown(keep.close);
+    await _tap(tester, find.text('Görev arşivine git'));
+    expect(nav.calls.last, 'folder:d1');
+    final view = h.container.read(provider);
+    expect(view.tab, ArchiveFolderTab.files);
+    expect(view.task, 'w1');
+    expect(view.tag, isNull);
+    expect(view.query, isEmpty);
+  });
 
   testWidgets(
     'doğrudan açılış sonraki sayfadaki dosyanın önizlemesini gösterir',
@@ -203,7 +304,8 @@ void main() {
     expect(repo.filters.last.mimeCategory, ArchiveMimeCategory.tablo);
     expect(repo.filters.last.workItemId, 'w1');
     expect(repo.filters.last.search, 'rapor');
-    await _tap(tester, find.text(_l.uiTasksClearAll));
+    // Üstteki "Tümünü temizle" kalktı (iPad 34-35); temizleme alttaki "Temizle" düğmesinde.
+    await _tap(tester, find.text(_l.uiTasksClear));
     expect(repo.filters.last.mimeCategory, isNull);
     expect(repo.filters.last.workItemId, 'w1');
     expect(repo.filters.last.search, 'rapor');

@@ -1,5 +1,5 @@
 // BU DOSYA ÜRETİLMİŞTİR — elle düzenlenmez. `make gen` (tool/gen.dart) ile yeniden üretilir.
-// Kaynak: nizam.io--backend etiket v0.18.0-api (3b9d0446190bf57bf58c9ac5e4d777bcef3dfe57) — docs/api/error-codes.json
+// Kaynak: nizam.io--backend etiket v0.20.0-api (c577bdf33942036168ff5d0c3e025bbb35310f12) — docs/api/error-codes.json
 
 import '../api_meta.dart';
 
@@ -56,6 +56,21 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [500],
     fields: [],
     messageKey: 'errors.audit.entry_rejected',
+  ),
+  'audit.input_invalid': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['audit.input_invalid'],
+    messageKey: 'errors.audit.input_invalid',
+  ),
+  'audit.invalid_cursor': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['audit.invalid_cursor'],
+    messageKey: 'errors.audit.invalid_cursor',
+  ),
+  'audit.not_authorized': ErrorCatalogEntry(
+    statuses: [403],
+    fields: [],
+    messageKey: 'errors.audit.not_authorized',
   ),
   'collaboration.agenda_item_not_found': ErrorCatalogEntry(
     statuses: [404],
@@ -276,6 +291,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     fields: [],
     messageKey: 'errors.identity.unavailable',
   ),
+  'messaging.auto_group_protected': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.messaging.auto_group_protected',
+  ),
   'messaging.chat_deleted': ErrorCatalogEntry(
     statuses: [409],
     fields: [],
@@ -444,7 +464,7 @@ const errorCatalog = <String, ErrorCatalogEntry>{
   ),
   'organization.department_in_use': ErrorCatalogEntry(
     statuses: [409],
-    fields: [],
+    fields: ['organization.department_usage'],
     messageKey: 'errors.organization.department_in_use',
   ),
   'organization.department_not_found': ErrorCatalogEntry(
@@ -456,6 +476,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [422],
     fields: [],
     messageKey: 'errors.organization.department_not_linked',
+  ),
+  'organization.department_usage': ErrorCatalogEntry(
+    statuses: [409],
+    fields: [],
+    messageKey: 'errors.organization.department_usage',
   ),
   'organization.existing_department': ErrorCatalogEntry(
     statuses: [409],
@@ -1130,6 +1155,11 @@ const errorCatalog = <String, ErrorCatalogEntry>{
     statuses: [422],
     fields: ['work.subtask_assignee_not_assigned'],
     messageKey: 'errors.work.subtask_assignee_not_assigned',
+  ),
+  'work.subtask_attachment_required': ErrorCatalogEntry(
+    statuses: [422],
+    fields: ['work.subtask_attachment_required'],
+    messageKey: 'errors.work.subtask_attachment_required',
   ),
   'work.subtask_limit_reached': ErrorCatalogEntry(
     statuses: [409],

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart' show Icons;
 import 'package:flutter/widgets.dart';
 
-/// Uygulamanın tek ikon kaynağı (telefon tasarımı, Material). Ekranlar `Icons.*` yerine buradan
-/// okur; aynı anlam tek ada iner, telefon ve tablet aynı ikonu çizer. Dolu (`*Filled`) adlar
-/// seçili durum içindir.
+/// Anlamsal ikon kimlikleri. NzIcon mevcut özel SVG karşılığını öncelikli çizer;
+/// özel çizimi olmayan kimlikler Material olarak kalır. Ekranlar Icons.* yerine
+/// bu kataloğu kullanır; *Filled adları seçili durumu belirtir.
 abstract final class NzIcons {
   static const IconData add = Icons.add_rounded;
   static const IconData arrowDown = Icons.arrow_downward_rounded;
@@ -96,9 +96,16 @@ abstract final class NzIcons {
   static const IconData timeline = Icons.view_timeline_outlined;
   static const IconData tune = Icons.tune_rounded;
   static const IconData unfold = Icons.unfold_more_rounded;
+  static const IconData undo = Icons.undo_rounded;
   static const IconData upload = Icons.upload_rounded;
   static const IconData uploadFile = Icons.upload_file_rounded;
   static const IconData video = Icons.videocam_outlined;
+  static const IconData videoOff = Icons.videocam_off_outlined;
+  static const IconData mic = Icons.mic_none_rounded;
+  static const IconData micOff = Icons.mic_off_rounded;
+  static const IconData flipCamera = Icons.flip_camera_ios_outlined;
+  static const IconData callEnd = Icons.call_end_rounded;
+  static const IconData openFull = Icons.open_in_full_rounded;
   static const IconData viewList = Icons.view_list_rounded;
   static const IconData viewWeek = Icons.view_week_outlined;
   static const IconData visible = Icons.visibility;

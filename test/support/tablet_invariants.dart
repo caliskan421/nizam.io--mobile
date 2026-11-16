@@ -38,15 +38,17 @@ void expectModuleRoot(TabletSession s, TabletModule m) {
     reason: '${m.name} listesi',
   );
   switch (m) {
-    case TabletModule.tasks ||
+    case TabletModule.home ||
+        TabletModule.tasks ||
         TabletModule.calendar ||
-        TabletModule.coordinatorships:
+        TabletModule.coordinatorships ||
+        TabletModule.archive:
       expect(
         s.pane(NzPaneRole.detail),
         findsNothing,
         reason: '${m.name}: açık kayıt yok → liste tam genişlik, sağ bölme yok',
       );
-    case TabletModule.home || TabletModule.archive || TabletModule.messages:
+    case TabletModule.messages:
       expect(
         s.inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
         findsOneWidget,
@@ -84,7 +86,8 @@ void _expectTimelineOpen(TabletSession s) {
 }
 
 final tabletInvariantScenes = <TabletScene>[
-  // --- Modül değişimi: Arşiv/Mesajlar son yüklenen kaydı geri getirir, Koordinatörlükler getirmez
+  // --- Modül değişimi: Mesajlar son açılan sohbeti geri getirir; Arşiv ve Koordinatörlükler
+  // kökte tam genişlik liste açar (son kayıt geri gelmez, `restoresLastRecord`).
   TabletScene('nav-module-roundtrip-keeps-last-loaded-record', (s) async {
     await s.tapRail(TabletModule.archive);
     expectModuleRoot(s, TabletModule.archive);
@@ -94,13 +97,14 @@ final tabletInvariantScenes = <TabletScene>[
       findsWidgets,
       reason: 'seçilen klasör sağda',
     );
-    await s.tapRail(TabletModule.messages);
-    expectModuleRoot(s, TabletModule.messages);
+    await openTabletChat(s);
     await s.tapRail(TabletModule.archive);
+    expectModuleRoot(s, TabletModule.archive);
+    await s.tapRail(TabletModule.messages);
     expect(
-      s.inPane(NzPaneRole.detail, find.text('İdari işler')),
+      inChat(find.textContaining('trafo onayı')),
       findsWidgets,
-      reason: 'arşiv dönüşünde son yüklenen klasör (varsayılana sıfırlanmaz)',
+      reason: 'mesajlar dönüşünde son açılan sohbet (varsayılana sıfırlanmaz)',
     );
     expect(
       s.inPane(NzPaneRole.detail, find.byType(NzPickRecord)),
@@ -209,7 +213,7 @@ final tabletInvariantScenes = <TabletScene>[
       reason: 'Gantt etiket sütunu satırı',
     );
     expect(find.bySemanticsLabel(_l.uiTimelineSelectedTask), findsWidgets);
-    expect(find.text(_l.uiTimelineGanttOpenTask), findsWidgets);
+    expect(find.byTooltip(_l.uiTimelineOpenTask), findsWidgets);
   }),
   // --- Gantt kapat: modül ve sağ yığın aynı kalır
   TabletScene('gantt-close-keeps-module-and-selection', (s) async {
@@ -257,7 +261,7 @@ final tabletInvariantScenes = <TabletScene>[
     await s.tapRail(TabletModule.tasks);
     await openTimelineFromTasks(s);
     await tapGanttBar(s, tAltLate30);
-    await s.tapText(find.text(_l.uiTimelineGanttOpenTask));
+    await s.tapText(find.byTooltip(_l.uiTimelineOpenTask));
     expect(_gantt, findsNothing, reason: 'Gantt kapandı');
     expect(s.pane(NzPaneRole.master), findsOneWidget);
     expect(

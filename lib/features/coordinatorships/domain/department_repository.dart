@@ -36,12 +36,15 @@ abstract interface class DepartmentRepository {
   });
 
   /// `POST /v1/program/departments` (S2, program [programId] açık): departmanı programa bağlar.
-  /// [displayName] verilmezse katalog adı kopyalanır. Bağ zaten varsa sunucu var olan bağı
-  /// döndürür (aynı çağrı tekrarlanabilir). Yalnız şirket yöneticisi.
+  /// [displayName] verilmezse katalog adı kopyalanır. [copyMembersFromProgramId] verilirse o
+  /// programdaki aynı departmanın ekibi rolleriyle kopyalanır. Bağ zaten varsa sunucu var olan
+  /// bağı döndürür (aynı çağrı tekrarlanabilir; ekip yeniden kopyalanmaz). Yalnız şirket
+  /// yöneticisi.
   Future<DepartmentLink> linkDepartment(
     String programId,
     String departmentId, {
     String? displayName,
+    String? copyMembersFromProgramId,
     String? requestKey,
   });
 

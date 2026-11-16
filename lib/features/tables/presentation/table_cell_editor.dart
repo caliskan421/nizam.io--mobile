@@ -3,114 +3,210 @@ import 'package:flutter/material.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
-import '../application/table_view.dart';
-import '../domain/table_models.dart';
-import 'table_texts.dart';
+import '../../../core/ui/widgets/lists/nz_menu_group.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
+import '../domain/table_document.dart';
+import 'table_choice_row.dart';
+import 'table_sheets.dart' show tableCellText;
 
-/// Tipe göre hücre düzenleyici. Değer sunucu tel biçiminde verilir: metin/telefon/e-posta/
-/// tarih (`YYYY-MM-DD`) String, sayı num, onay kutusu bool; boş → null. Referans ve ek
-/// sütunları burada düzenlenmez (seçiciler henüz bağlanmadı); değer salt okunur gösterilir.
 class TableCellEditor extends StatelessWidget {
   const TableCellEditor({
     super.key,
-    required this.view,
-    required this.column,
-    required this.data,
+    required this.field,
+    required this.value,
+    required this.editable,
     required this.onChanged,
+    required this.documents,
+    this.onOpenTable,
+    this.onOpenRow,
   });
-  final TableView view;
-  final TableColumnSpec column;
-  final TableCellData data;
-  final ValueChanged<Object?> onChanged;
-
+  final TableField field;
+  final Object? value;
+  final bool editable;
+  final ValueChanged<Object> onChanged;
+  final List<TableDocument> documents;
+  final ValueChanged<String>? onOpenTable;
+  final void Function(String, String)? onOpenRow;
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final c = column;
-    final value = data.value;
-    final editable =
-        view.editable && !data.redacted && editableColumnKinds.contains(c.kind);
-    if (!editableColumnKinds.contains(c.kind) || data.redacted) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(c.name, style: context.text.labelMd),
-          Text(l.tableCellText(view, c, data), style: context.text.bodySm),
-          Text(
-            data.redacted ? l.uiTablesRedacted : l.uiTablesNotEditable,
-            style: context.text.caption.copyWith(
-              color: context.colors.textMuted,
-            ),
+    final f = field;
+    if (f.type == TableFieldType.todo) {
+      return NzFormRows(
+        rows: [
+          NzFormRow.toggle(
+            label: f.name,
+            value: value == true,
+            onChanged: editable ? onChanged : null,
           ),
         ],
       );
     }
-    switch (c.kind) {
-      case TableColumnKind.checkbox:
-        return NzFormRows(
-          rows: [
-            NzFormRow.toggle(
-              label: c.name,
-              value: value == true,
-              onChanged: editable ? onChanged : null,
-            ),
-          ],
-        );
-      case TableColumnKind.date:
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(c.name, style: context.text.labelMd),
-            NzButton.secondary(
-              label: value == null ? l.uiTablesDate : '$value',
-              onPressed: editable
-                  ? () async {
-                      final now = DateTime.now();
-                      final picked = await showDatePicker(
-                        context: context,
-                        initialDate: DateTime.tryParse('$value') ?? now,
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2200),
-                      );
-                      if (picked != null) {
-                        onChanged(picked.toIso8601String().substring(0, 10));
-                      }
-                    }
-                  : null,
-            ),
-            if (editable && value != null)
-              NzButton.ghost(
-                label: l.uiTablesClear,
-                onPressed: () => onChanged(null),
-              ),
-          ],
-        );
-      case TableColumnKind.number:
-        return NzTextField.number(
-          label: c.name,
-          initialValue: value == null ? '' : '$value',
-          enabled: editable,
-          onChanged: (v) {
-            final t = v.trim();
-            if (t.isEmpty) return onChanged(null);
-            final n = num.tryParse(t.replaceAll(',', '.'));
-            if (n != null) onChanged(n);
-          },
-        );
-      case TableColumnKind.email:
-        return NzTextField.email(
-          label: c.name,
-          initialValue: value == null ? '' : '$value',
-          enabled: editable,
-          onChanged: (v) => onChanged(v.trim().isEmpty ? null : v.trim()),
-        );
-      default:
-        return NzTextField(
-          label: c.name,
-          initialValue: value == null ? '' : '$value',
-          enabled: editable,
-          onChanged: (v) => onChanged(v.isEmpty ? null : v),
-        );
+    if (f.type == TableFieldType.person ||
+        f.type == TableFieldType.unit ||
+        f.type == TableFieldType.task) {
+      final pool = switch (f.type) {
+        TableFieldType.person => ['demo-1', 'demo-2', 'demo-3', 'demo-4'],
+        TableFieldType.unit => tableDemoUnits,
+        _ => ['demo-task-1', 'demo-task-2', 'demo-task-3'],
+      };
+      return NzSelect<String>(
+        label: f.name,
+        value: pool.contains(value) ? value as String : null,
+        items: [
+          const NzSelectItem(value: '', label: '—'),
+          for (final v in pool)
+            NzSelectItem(value: v, label: tableCellText(context, f, v)),
+        ],
+        onChanged: editable
+            ? (v) {
+                if (v != null) onChanged(v);
+              }
+            : null,
+      );
     }
+    if (f.type == TableFieldType.link) {
+      final target = documents.where((d) => d.id == f.target).firstOrNull;
+      final selected = value is List<Object>
+          ? value as List<Object>
+          : const <Object>[];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(f.name, style: context.text.labelMd),
+          if (target != null) ...[
+            NzButton.ghost(
+              onPressed: onOpenTable == null
+                  ? null
+                  : () => onOpenTable!(target.id),
+              label: target.title,
+            ),
+            NzMenuGroup(
+              rows: [
+                for (final row in target.rows)
+                  TableChoiceRow(
+                    label: target.fields.isEmpty
+                        ? row.id
+                        : tableCellText(
+                            context,
+                            target.fields.first,
+                            row.cells[TableFieldId(target.fields.first.id)],
+                          ),
+                    trailing: NzIconButton(
+                      icon: NzIcons.openExternal,
+                      semanticLabel: l.uiTablesEditRow,
+                      onPressed: onOpenRow == null
+                          ? null
+                          : () => onOpenRow!(target.id, row.id),
+                    ),
+                    value: selected.contains(row.id),
+                    onChanged: !editable
+                        ? null
+                        : (v) => onChanged(
+                            v
+                                ? [...selected, row.id]
+                                : selected.where((id) => id != row.id).toList(),
+                          ),
+                  ),
+              ],
+            ),
+          ] else
+            Text(l.uiTablesTableMissing),
+        ],
+      );
+    }
+    if (f.type == TableFieldType.file) {
+      final files = value is List<Object>
+          ? value as List<Object>
+          : const <Object>[];
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(f.name, style: context.text.labelMd),
+          NzMenuGroup(
+            rows: [
+              for (final file in files)
+                NzMenuRow(
+                  icon: NzIcons.file,
+                  label: '$file',
+                  onTap: () {},
+                  trailing: editable
+                      ? NzIconButton(
+                          icon: NzIcons.close,
+                          semanticLabel: '${l.uiTablesDelete}: $file',
+                          onPressed: () =>
+                              onChanged(files.where((f) => f != file).toList()),
+                        )
+                      : null,
+                ),
+            ],
+          ),
+          if (editable)
+            NzButton.secondary(
+              label: l.uiTablesAttachment,
+              onPressed: () =>
+                  onChanged([...files, 'demo-${files.length + 1}.txt']),
+            ),
+        ],
+      );
+    }
+    if (f.type == TableFieldType.date) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(f.name, style: context.text.labelMd),
+          NzButton.secondary(
+            label: value == null || value == '' ? l.uiTablesDate : '$value',
+            onPressed: editable
+                ? () async {
+                    final initial =
+                        DateTime.tryParse('$value') ?? DateTime(2026, 11, 9);
+                    final picked = await showNzDateSheet(
+                      context,
+                      title: f.name,
+                      initial: initial,
+                    );
+                    if (picked != null) {
+                      onChanged(picked.toIso8601String().substring(0, 10));
+                    }
+                  }
+                : null,
+          ),
+          if (editable)
+            NzButton.ghost(
+              label: l.uiTablesClear,
+              onPressed: () => onChanged(''),
+            ),
+        ],
+      );
+    }
+    if (f.type == TableFieldType.number) {
+      return NzTextField.number(
+        pill: true,
+        labelAbove: false,
+        label: f.name,
+        initialValue: value == null ? '' : '$value',
+        enabled: editable,
+        onChanged: (v) => onChanged(num.tryParse(v) ?? ''),
+      );
+    }
+    if (f.type == TableFieldType.email) {
+      return NzTextField.email(
+        pill: true,
+        labelAbove: false,
+        label: f.name,
+        initialValue: value == null ? '' : '$value',
+        enabled: editable,
+        onChanged: onChanged,
+      );
+    }
+    return NzTextField(
+      pill: true,
+      labelAbove: false,
+      label: f.name,
+      initialValue: value == null ? '' : '$value',
+      enabled: editable,
+      onChanged: onChanged,
+    );
   }
 }

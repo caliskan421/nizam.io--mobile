@@ -12,6 +12,7 @@ extension ArchiveTexts on AppLocalizations {
 
   /// Boyut: ≥ 1 MB "205,1 MB", altı "300 KB" (en az 1 KB).
   String size(int bytes) {
+    if (bytes <= 0) return '0 $uiArchiveKb';
     final mb = bytes / (1024 * 1024);
     return mb >= 1
         ? '${decimal1(mb)} $uiArchiveMb'
@@ -20,9 +21,11 @@ extension ArchiveTexts on AppLocalizations {
 
   String files(int n) => '$n $uiArchiveFilesLc';
 
-  /// "227 dosya · 11 klasör".
-  String storageCaption(int files, int folders) =>
-      '$files $uiArchiveFilesLc · $folders $uiArchiveFoldersLc';
+  /// 0–1 pay → "%37" (sıfırdan büyük ama yuvarlanınca 0 olan pay "<%1").
+  String percentShare(double r) {
+    final p = (r * 100).round();
+    return p == 0 && r > 0 ? '<%1' : '%$p';
+  }
 
   String sortLabel(ArchiveSort s) => switch (s) {
     ArchiveSort.recent => uiArchiveSortRecent,

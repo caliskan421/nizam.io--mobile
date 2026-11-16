@@ -1,6 +1,7 @@
 // Yalnız okunmamış sayısını yanıtlayan sahte bildirim kaynağı (rozet testleri).
 import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/features/notifications/domain/app_notification.dart';
+import 'package:nizamio/features/notifications/domain/notification_preferences.dart';
 import 'package:nizamio/features/notifications/domain/notification_repository.dart';
 
 class NotificationCountStub implements NotificationRepository {
@@ -37,4 +38,12 @@ class NotificationCountStub implements NotificationRepository {
 
   @override
   Future<PushPublicKeyInfo> pushPublicKey() => throw UnimplementedError();
+
+  @override
+  Future<NotificationPreferences> preferences() => throw UnimplementedError();
+
+  @override
+  Future<NotificationPreferences> updatePreferences(
+    NotificationPreferences changes,
+  ) => throw UnimplementedError();
 }

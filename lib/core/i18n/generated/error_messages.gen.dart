@@ -15,6 +15,9 @@ const localizedErrorCodes = <String>{
   'assistant.quota_exceeded',
   'assistant.refused',
   'audit.entry_rejected',
+  'audit.input_invalid',
+  'audit.invalid_cursor',
+  'audit.not_authorized',
   'collaboration.agenda_item_not_found',
   'collaboration.agenda_limit_reached',
   'collaboration.conference_disabled',
@@ -67,6 +70,7 @@ const localizedErrorCodes = <String>{
   'identity.session_invalid',
   'identity.unavailable',
   'identity.weak_password',
+  'messaging.auto_group_protected',
   'messaging.chat_deleted',
   'messaging.chat_not_found',
   'messaging.edit_conflict',
@@ -106,6 +110,7 @@ const localizedErrorCodes = <String>{
   'organization.department_in_use',
   'organization.department_not_found',
   'organization.department_not_linked',
+  'organization.department_usage',
   'organization.existing_department',
   'organization.idempotency_key_reused',
   'organization.input_invalid',
@@ -269,6 +274,7 @@ const localizedErrorCodes = <String>{
   'work.stale_completion',
   'work.stale_transition',
   'work.subtask_assignee_not_assigned',
+  'work.subtask_attachment_required',
   'work.subtask_limit_reached',
   'work.subtask_not_found',
   'work.subtasks_open',
@@ -276,6 +282,9 @@ const localizedErrorCodes = <String>{
   'work.transition_not_allowed',
   'client.camera_permission_denied',
   'client.camera_unavailable',
+  'client.conference_connect_failed',
+  'client.conference_insecure_url',
+  'client.conference_token_expired',
   'client.file_unreadable',
   'client.insecure_server',
   'client.invalid_response',
@@ -324,6 +333,12 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errAssistantRefused;
     case 'audit.entry_rejected':
       return l.errAuditEntryRejected;
+    case 'audit.input_invalid':
+      return l.errAuditInputInvalid;
+    case 'audit.invalid_cursor':
+      return l.errAuditInvalidCursor;
+    case 'audit.not_authorized':
+      return l.errAuditNotAuthorized;
     case 'collaboration.agenda_item_not_found':
       return l.errCollaborationAgendaItemNotFound;
     case 'collaboration.agenda_limit_reached':
@@ -428,6 +443,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errIdentityUnavailable;
     case 'identity.weak_password':
       return l.errIdentityWeakPassword;
+    case 'messaging.auto_group_protected':
+      return l.errMessagingAutoGroupProtected;
     case 'messaging.chat_deleted':
       return l.errMessagingChatDeleted;
     case 'messaging.chat_not_found':
@@ -506,6 +523,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errOrganizationDepartmentNotFound;
     case 'organization.department_not_linked':
       return l.errOrganizationDepartmentNotLinked;
+    case 'organization.department_usage':
+      return l.errOrganizationDepartmentUsage;
     case 'organization.existing_department':
       return l.errOrganizationExistingDepartment;
     case 'organization.idempotency_key_reused':
@@ -832,6 +851,8 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errWorkStaleTransition;
     case 'work.subtask_assignee_not_assigned':
       return l.errWorkSubtaskAssigneeNotAssigned;
+    case 'work.subtask_attachment_required':
+      return l.errWorkSubtaskAttachmentRequired;
     case 'work.subtask_limit_reached':
       return l.errWorkSubtaskLimitReached;
     case 'work.subtask_not_found':
@@ -846,6 +867,12 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errClientCameraPermissionDenied;
     case 'client.camera_unavailable':
       return l.errClientCameraUnavailable;
+    case 'client.conference_connect_failed':
+      return l.errClientConferenceConnectFailed;
+    case 'client.conference_insecure_url':
+      return l.errClientConferenceInsecureUrl;
+    case 'client.conference_token_expired':
+      return l.errClientConferenceTokenExpired;
     case 'client.file_unreadable':
       return l.errClientFileUnreadable;
     case 'client.insecure_server':

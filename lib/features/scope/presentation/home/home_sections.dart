@@ -6,6 +6,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/layout/nz_uniform_grid.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
+import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
@@ -47,7 +48,10 @@ class HomeGreeting extends StatelessWidget {
       children: [
         Text(
           l.dateKicker(today),
-          style: t.kicker.copyWith(color: context.colors.textMuted),
+          style: t.kicker.copyWith(
+            color: context.colors.textMuted,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const Gap(NizamioSpacing.space1 + NizamioSpacing.space1 / 2),
         Semantics(
@@ -72,117 +76,168 @@ class HomeGreeting extends StatelessWidget {
   }
 }
 
-/// Özet kutuları (tamamlanma, devam eden, gecikmede, onay bekleyen): 2×2, geniş ana sayfada
-/// tek satır ([columns] 4).
+/// Ana sayfa özet kutusu türü.
+enum HomeKpi { done, inProgress, review, notStarted, late, dateRequest }
+
+/// Telefon sırası (2 sütun): gecikme ve tarih talebi üstte; tarih talebi yalnız sayı bilinirken
+/// (yönetici özeti).
+List<HomeKpi> homeKpisNarrow(TaskTotals t) => [
+  HomeKpi.late,
+  if (t.dateRequests != null) HomeKpi.dateRequest,
+  HomeKpi.notStarted,
+  HomeKpi.review,
+  HomeKpi.done,
+  HomeKpi.inProgress,
+];
+
+/// Tek özet kutusu; dokunma → görev listesi o kutunun görünümüyle.
+Widget homeKpiTile(
+  BuildContext context,
+  HomeKpi kpi,
+  TaskTotals t,
+  ValueChanged<NzTaskView> onOpen,
+) {
+  final l = context.l10n;
+  final c = context.colors;
+  double ratio(int a, int b) => b == 0 ? 0 : a / b;
+  final (view, glyph, tone, label, value, progress) = switch (kpi) {
+    HomeKpi.done => (
+      NzTaskView.done,
+      NzGlyphs.done,
+      c.taskDone,
+      l.uiHomeKpiDone,
+      l.percent(ratio(t.done, t.total)),
+      ratio(t.done, t.total),
+    ),
+    HomeKpi.inProgress => (
+      NzTaskView.inProgress,
+      NzGlyphs.inProgress,
+      c.inProgress,
+      l.uiHomeKpiDoing,
+      '${t.inProgress}',
+      ratio(t.inProgress, t.total),
+    ),
+    HomeKpi.review => (
+      NzTaskView.review,
+      NzGlyphs.review,
+      c.warning,
+      l.uiHomeKpiReview,
+      '${t.awaitingApproval}',
+      ratio(t.awaitingApproval, t.open),
+    ),
+    HomeKpi.notStarted => (
+      NzTaskView.notStarted,
+      NzGlyphs.notStarted,
+      c.textMuted,
+      l.uiTasksStatusTodo,
+      '${t.notStarted}',
+      ratio(t.notStarted, t.total),
+    ),
+    HomeKpi.late => (
+      NzTaskView.late,
+      NzGlyphs.late,
+      c.danger,
+      l.uiHomeKpiLate,
+      '${t.late}',
+      ratio(t.late, t.open),
+    ),
+    HomeKpi.dateRequest => (
+      NzTaskView.dateRequest,
+      NzGlyphs.dateRequest,
+      c.warning,
+      l.uiHomeKpiDateRequest,
+      '${t.dateRequests ?? 0}',
+      ratio(t.dateRequests ?? 0, t.open),
+    ),
+  };
+  return NzKpiTile(
+    glyph: glyph,
+    tone: tone,
+    label: label,
+    value: value,
+    valueColor: kpi == HomeKpi.late ? c.danger : null,
+    progress: progress,
+    onTap: () => onOpen(view),
+    semanticLabel: '$label: $value. ${l.uiHomeOpenList}',
+  );
+}
+
+/// Özet kutuları ızgarası ([kpis] sırasıyla, eşit yükseklikte).
 class HomeKpiGrid extends StatelessWidget {
   const HomeKpiGrid({
     super.key,
     required this.tasks,
+    required this.kpis,
     required this.onOpen,
     this.columns = 2,
   });
 
   final TaskTotals tasks;
+  final List<HomeKpi> kpis;
   final int columns;
-
-  /// Kutuya dokunma → görev listesi o kutunun görünümüyle (prototip `go.done/doing/late/review`).
   final ValueChanged<NzTaskView> onOpen;
 
   @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = tasks;
-    double ratio(int a, int b) => b == 0 ? 0 : a / b;
-    NzKpiTile tile({
-      required NzTaskView view,
-      required IconData icon,
-      required Color tone,
-      required String label,
-      required String value,
-      required double progress,
-      required String caption,
-      Color? valueColor,
-    }) => NzKpiTile(
-      icon: icon,
-      tone: tone,
-      label: label,
-      value: value,
-      valueColor: valueColor,
-      progress: progress,
-      caption: caption,
-      onTap: () => onOpen(view),
-      semanticLabel: '$label: $value. $caption. ${l.uiHomeOpenList}',
-    );
-    return Semantics(
-      container: true,
-      label: l.uiHomeSummaryLabel,
-      child: HomeGrid(
-        columns: columns,
-        gap: NizamioSpacing.gapMd,
-        children: [
-          tile(
-            view: NzTaskView.done,
-            icon: NzIcons.check,
-            tone: c.taskDone,
-            label: l.uiHomeKpiDone,
-            value: '${t.done}',
-            progress: ratio(t.done, t.total),
-            caption: l.kpiDoneCaption(t),
-          ),
-          tile(
-            view: NzTaskView.inProgress,
-            icon: NzIcons.bolt,
-            tone: c.inProgress,
-            label: l.uiHomeKpiDoing,
-            value: '${t.inProgress}',
-            progress: ratio(t.inProgress, t.total),
-            caption: l.kpiDoingCaption(t),
-          ),
-          tile(
-            view: NzTaskView.late,
-            icon: NzIcons.warning,
-            tone: c.danger,
-            label: l.uiHomeKpiLate,
-            value: '${t.late}',
-            valueColor: c.danger,
-            progress: ratio(t.late, t.open),
-            caption: l.kpiLateCaption(t),
-          ),
-          tile(
-            view: NzTaskView.review,
-            icon: NzIcons.clock,
-            tone: c.warning,
-            label: l.uiHomeKpiReview,
-            value: '${t.awaitingApproval}',
-            progress: ratio(t.awaitingApproval, t.open),
-            caption: l.uiHomeKpiReviewCaption,
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Semantics(
+    container: true,
+    label: context.l10n.uiHomeSummaryLabel,
+    child: HomeGrid(
+      columns: columns,
+      gap: NizamioSpacing.gapMd,
+      children: [for (final k in kpis) homeKpiTile(context, k, tasks, onOpen)],
+    ),
+  );
 }
 
-/// Hızlı işlem türü (kutucuk ve kısayol menüsü aynı listeyi kullanır). Görev açma Görevler
-/// sayfasının "+" düğmesindedir; işlem geçmişi buradan açılır (ayrı kartı yok).
-enum HomeQuickAction { history, meeting, deleted, report }
+/// Hızlı işlem türü (kutucuk ve kısayol menüsü aynı listeyi kullanır). İşlem geçmişi buradan
+/// açılır (ayrı kartı yok). Yeni görev ve üye ekle yalnız koordinatör görünümünde (yönetici
+/// görünümünde görev açma Görevler sayfasının "+" düğmesindedir).
+enum HomeQuickAction { history, meeting, deleted, report, newTask, member }
 
-List<HomeQuickAction> homeQuickActions({required bool isAdmin}) => [
-  for (final action in HomeQuickAction.values)
-    if (action != HomeQuickAction.deleted || isAdmin) action,
-];
+/// Rapor telefonda üretilmez: rapor oluşturucu gelene dek kısayol (yönetici ve koordinatör
+/// görünümü) "yakında" bildirimi gösterir; üye görünümünde yoktur. İşlem geçmişi ve
+/// silinenler yalnız şirket yöneticisine (AUDIT-K10); toplantı yalnız açabilen etkin role
+/// ([EffectiveAccess.canCreateMeeting]). [coordinator] (koordinatör görünümü) prototip sırasını
+/// kullanır: Yeni görev ([canCreateTask]), Toplantı, Üye ekle ([canManageTeam]), Rapor. Liste boşsa
+/// bölüm çizilmez.
+List<HomeQuickAction> homeQuickActions({
+  required bool isAdmin,
+  required bool canMeet,
+  bool coordinator = false,
+  bool canCreateTask = false,
+  bool canManageTeam = false,
+}) => coordinator
+    ? [
+        if (canCreateTask) HomeQuickAction.newTask,
+        if (canMeet) HomeQuickAction.meeting,
+        if (canManageTeam) HomeQuickAction.member,
+        if (isAdmin) HomeQuickAction.history,
+        HomeQuickAction.report,
+      ]
+    : [
+        for (final action in HomeQuickAction.values)
+          if (switch (action) {
+            HomeQuickAction.newTask || HomeQuickAction.member => false,
+            HomeQuickAction.meeting => canMeet,
+            HomeQuickAction.history ||
+            HomeQuickAction.deleted ||
+            HomeQuickAction.report => isAdmin,
+          })
+            action,
+      ];
 
 /// Hızlı işlemler: başlık + ayraçlı tek kart ([HomeQuickActionsBar]).
 class HomeQuickActions extends StatelessWidget {
   const HomeQuickActions({
     super.key,
     required this.onAction,
-    required this.isAdmin,
+    required this.actions,
   });
 
   final ValueChanged<HomeQuickAction> onAction;
-  final bool isAdmin;
+
+  /// [homeQuickActions] sonucu (boş olmamalı).
+  final List<HomeQuickAction> actions;
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +252,7 @@ class HomeQuickActions extends StatelessWidget {
           child: HomeQuickActionsBar(
             onAction: onAction,
             compact: true,
-            isAdmin: isAdmin,
+            actions: actions,
           ),
         ),
       ],
@@ -205,11 +260,23 @@ class HomeQuickActions extends StatelessWidget {
   }
 }
 
+/// Dokunaç ikonu (tasarım çizgi ikonları); kısayol menüsü [quickActionIcon] kullanır.
+NzGlyph quickActionGlyph(HomeQuickAction a) => switch (a) {
+  HomeQuickAction.history => NzGlyphs.history,
+  HomeQuickAction.meeting => NzGlyphs.meeting,
+  HomeQuickAction.deleted => NzGlyphs.deleted,
+  HomeQuickAction.report => NzGlyphs.report,
+  HomeQuickAction.newTask => NzGlyphs.add,
+  HomeQuickAction.member => NzGlyphs.personAdd,
+};
+
 IconData quickActionIcon(HomeQuickAction a) => switch (a) {
   HomeQuickAction.history => NzIcons.history,
   HomeQuickAction.meeting => NzIcons.video,
   HomeQuickAction.deleted => NzIcons.delete,
   HomeQuickAction.report => NzIcons.document,
+  HomeQuickAction.newTask => NzIcons.add,
+  HomeQuickAction.member => NzIcons.personAdd,
 };
 
 String quickActionLabel(AppLocalizations l, HomeQuickAction a) => switch (a) {
@@ -217,6 +284,8 @@ String quickActionLabel(AppLocalizations l, HomeQuickAction a) => switch (a) {
   HomeQuickAction.meeting => l.uiHomeQaMeeting,
   HomeQuickAction.deleted => l.uiHomeDeletedShortcut,
   HomeQuickAction.report => l.uiHomeQaReport,
+  HomeQuickAction.newTask => l.uiHomeQaNewTask,
+  HomeQuickAction.member => l.uiHomeQaMember,
 };
 
 /// Kısayol menüsündeki uzun ad ("Toplantı oluştur").
@@ -226,19 +295,15 @@ String quickActionLongLabel(AppLocalizations l, HomeQuickAction a) =>
       HomeQuickAction.meeting => l.uiHomeQaMeetingLong,
       HomeQuickAction.deleted => l.uiHomeDeletedRecords,
       HomeQuickAction.report => l.uiHomeQaReportLong,
+      HomeQuickAction.newTask => l.uiHomeQaNewTask,
+      HomeQuickAction.member => l.uiHomeQaMemberLong,
     };
 
 /// Ekip: rol başına [HomeTeamTile] (rol rengi işaret ve pay çubuğudur). Yalnız [team]
 /// bilinirken (yönetici özeti) kurulur.
 class HomeTeam extends StatelessWidget {
-  const HomeTeam({
-    super.key,
-    required this.dashboard,
-    required this.team,
-    required this.onOpen,
-  });
+  const HomeTeam({super.key, required this.team, required this.onOpen});
 
-  final HomeDashboard dashboard;
   final TeamTotals team;
 
   /// Kutuya dokunma → görev listesi o ekip rolündeki kişilerle süzülmüş (koordinatör/üye).
@@ -251,7 +316,7 @@ class HomeTeam extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        NzKicker(l.uiHomeTeam, trailing: l.teamSummary(dashboard, team)),
+        NzKicker(l.uiHomeTeam),
         const Gap(NizamioSpacing.gapMd),
         HomeGrid(
           columns: 3,

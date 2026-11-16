@@ -7,6 +7,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
+import 'package:nizamio/core/session/session_controller.dart';
+import 'package:nizamio/core/session/token_store.dart';
+import 'package:nizamio/core/storage/secure_store.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 import 'package:nizamio/features/timeline/application/gantt_provider.dart';
 import 'package:nizamio/features/timeline/application/horizontal_timeline_controller.dart';
@@ -75,6 +78,13 @@ void main() {
           (ref) async => GanttSchedule(tasks: const [], links: const []),
         ),
         scopeControllerProvider.overrideWithValue(scope),
+        // Yerleşim seçim kartının tarih taslağını izler; denetleyici oturum neslini okur.
+        sessionControllerProvider.overrideWithValue(
+          SessionController(
+            TokenStore(MemorySecureStore()),
+            (_, _) => throw StateError('yok'),
+          ),
+        ),
         taskCatalogControllerProvider.overrideWith(
           () => _Catalog(() => next()),
         ),

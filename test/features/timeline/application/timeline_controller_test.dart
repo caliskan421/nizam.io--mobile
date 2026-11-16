@@ -54,10 +54,13 @@ void main() {
         r.method == 'POST' && r.path == '/v1/date-change-requests'
         ? envelope(409, 'work.edit_conflict')
         : backend.handle(r);
-    await expectLater(ctrl.requestDates(), throwsA(anything));
+    await expectLater(ctrl.requestDates(reason: 'Gerekçe'), throwsA(anything));
     expect(h.backend.count('POST', '/v1/date-change-requests'), 1);
     expect(h.backend.count('GET', '/v1/program/work-items'), 1);
-    expect(await ctrl.requestDates(), isA<TimelineRequestNoChange>());
+    expect(
+      await ctrl.requestDates(reason: 'Gerekçe'),
+      isA<TimelineRequestNoChange>(),
+    );
   });
   test(
     'tarih talebi kaydedildikten sonra katalog hatası başarıyı gizlemez',
@@ -85,7 +88,10 @@ void main() {
         }
         return backend.handle(r);
       };
-      expect(await ctrl.requestDates(), isA<TimelineRequestSent>());
+      expect(
+        await ctrl.requestDates(reason: 'Gerekçe'),
+        isA<TimelineRequestSent>(),
+      );
       expect(h.backend.count('POST', '/v1/date-change-requests'), 1);
       expect(h.backend.count('GET', '/v1/program/work-items'), greaterThan(1));
     },
@@ -112,8 +118,14 @@ void main() {
         }
         return backend.handle(r);
       };
-      await expectLater(ctrl.requestDates(), throwsA(anything));
-      expect(await ctrl.requestDates(), isA<TimelineRequestSent>());
+      await expectLater(
+        ctrl.requestDates(reason: 'Gerekçe'),
+        throwsA(anything),
+      );
+      expect(
+        await ctrl.requestDates(reason: 'Gerekçe'),
+        isA<TimelineRequestSent>(),
+      );
       final seen = h.backend.requests
           .where(
             (r) => r.method == 'POST' && r.path == '/v1/date-change-requests',
@@ -365,15 +377,18 @@ void main() {
   test('tarih talebi: değişiklik yok / gönderildi / bekleyen var', () async {
     final (_, ctrl, view) = await _open(dAlt, false);
     expect(
-      await ctrl.requestDates(),
+      await ctrl.requestDates(reason: 'Gerekçe'),
       isA<TimelineRequestNoChange>(),
       reason: 'seçim yok',
     );
     ctrl.select('wi-alt-1');
-    expect(await ctrl.requestDates(), isA<TimelineRequestNoChange>());
+    expect(
+      await ctrl.requestDates(reason: 'Gerekçe'),
+      isA<TimelineRequestNoChange>(),
+    );
     final cur = view().selection!.current;
     ctrl.nudgeEnd(5);
-    final r = await ctrl.requestDates();
+    final r = await ctrl.requestDates(reason: 'Gerekçe');
     expect(r, isA<TimelineRequestSent>());
     expect(
       (r as TimelineRequestSent).end,
@@ -385,6 +400,9 @@ void main() {
       cur.end + 5,
     );
     ctrl.nudgeEnd(1);
-    expect(await ctrl.requestDates(), isA<TimelineRequestPending>());
+    expect(
+      await ctrl.requestDates(reason: 'Gerekçe'),
+      isA<TimelineRequestPending>(),
+    );
   });
 }

@@ -16,29 +16,38 @@ import 'coordinatorships_providers.dart';
 
 part 'coordinatorship_form_controller.g.dart';
 
-/// Koordinatörlük formunun girdisi: ad (programda görünen ad), tür, açıklama (boş → yok).
-/// [kind] `null` → seçilmedi (düzenlemede departman kaydı okunamadıysa).
+/// Koordinatörlük formunun girdisi (`CreateDepartmentRequest` + `LinkDepartmentRequest`): ad
+/// (programda görünen ad; yeni departmanda katalog adı da budur), tür, kısa kod (boş → yok;
+/// [DepartmentCode]), açıklama (boş → yok). [kind] `null` → seçilmedi (düzenlemede departman
+/// kaydı okunamadıysa).
 @immutable
 final class CoordinatorshipDraft {
   const CoordinatorshipDraft({
     required this.name,
     required this.kind,
+    this.code = '',
     this.description = '',
   });
 
   final String name;
   final DepartmentKind? kind;
+  final String code;
   final String description;
+
+  /// Sunucuya giden kod: boşsa `null`, değilse kırpılmış büyük harf.
+  String? get wireCode =>
+      code.trim().isEmpty ? null : DepartmentCode.normalize(code);
 
   @override
   bool operator ==(Object other) =>
       other is CoordinatorshipDraft &&
       other.name == name &&
       other.kind == kind &&
+      other.code == code &&
       other.description == description;
 
   @override
-  int get hashCode => Object.hash(name, kind, description);
+  int get hashCode => Object.hash(name, kind, code, description);
 }
 
 /// Formun gönderim durumu. [pending]: sunucuda oluşturulmuş ama seçili programa
@@ -62,13 +71,12 @@ final class CoordinatorshipFormState {
   final bool frozen;
 }
 
-/// Şirket yöneticisi mi: koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
+/// Yönetici görünümü mü ([EffectiveAccess.canAdminister]): koordinatörlük ekleme ve bilgi düzenleme düğmeleri yalnız ona görünür
 /// (`createDepartment`, `updateDepartment`, `linkDepartment`, `renameDepartmentLink` yalnız
 /// şirket yöneticisine açık). Gizleme güvenlik değildir; sunucu her istekte denetler.
 @riverpod
 bool canManageCoordinatorships(Ref ref) =>
-    ref.watch(taskCatalogControllerProvider).value?.access?.companyAdmin ??
-    false;
+    ref.watch(effectiveAccessProvider).canAdminister;
 
 /// Uçuştaki işlemin sahibi (yerel nesil, oturum nesli, program).
 typedef _Owner = ({int epoch, int session, String program, String? department});
@@ -108,7 +116,12 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
   String? _existingId;
   bool _needsRestore = false;
   bool _confirmed = false;
+  String? _copyFrom;
+  String? _created;
   CoordinatorshipDraft? get pendingDraft => _draft;
+
+  /// Son başarılı [create]'in programa bağladığı departman (ayrıntıyı açmak için).
+  String? get createdId => _created;
 
   void _reset() {
     _session = ref.read(sessionControllerProvider).generation;
@@ -118,6 +131,8 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
     _existingId = null;
     _needsRestore = false;
     _confirmed = false;
+    _copyFrom = null;
+    _created = null;
     state = const CoordinatorshipFormState();
   }
 
@@ -150,9 +165,13 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
     );
   }
 
-  Future<bool> confirmExisting() async {
+  /// Ad çakışmasında var olan departmanı (silinmişse geri yükleyerek) bu programa bağlar.
+  /// [copyMembersFrom] verilirse o programdaki ekibi rolleriyle kopyalanır (`linkDepartment`
+  /// `copy_members_from_program_id`).
+  Future<bool> confirmExisting({String? copyMembersFrom}) async {
     if (_existingId == null || _draft == null) return false;
     _confirmed = true;
+    _copyFrom = copyMembersFrom;
     return create(_draft!);
   }
 
@@ -173,6 +192,7 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
     }
     final owner = _own(program);
     final repo = ref.read(departmentRepositoryProvider);
+    _created = null;
     _draft ??= draft;
     final frozen = _draft!;
     var pending = state.pending;
@@ -201,13 +221,15 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
         }
         final (keys, key) = _keys.keyFor(
           'create',
-          '${frozen.name}\u0000${frozen.kind}\u0000${frozen.description}',
+          '${frozen.name}\u0000${frozen.kind}\u0000${frozen.wireCode}'
+              '\u0000${frozen.description}',
         );
         _keys = keys;
         if (!_live(owner)) return false;
         pending = await repo.createDepartment(
           name: frozen.name,
           kind: frozen.kind!,
+          code: frozen.wireCode,
           description: frozen.description.isEmpty ? null : frozen.description,
           requestKey: key,
         );
@@ -215,9 +237,10 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
         state = CoordinatorshipFormState(saving: true, pending: pending);
       }
       final id = pending?.id ?? _existingId!;
+      final copyFrom = _existingId != null ? _copyFrom : null;
       final (keys, key) = _keys.keyFor(
         'link',
-        '$program\u0000$id\u0000${frozen.name}',
+        '$program\u0000$id\u0000${frozen.name}\u0000$copyFrom',
       );
       _keys = keys;
       if (!_live(owner)) return false;
@@ -225,9 +248,11 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
         program,
         id,
         displayName: frozen.name,
+        copyMembersFromProgramId: copyFrom,
         requestKey: key,
       );
       if (!_live(owner)) return false;
+      _created = id;
     } on Object catch (e, st) {
       // Rapor/çeviri sahiplik korumasından ÖNCE; yalnız durum yazımı koruma altında.
       final error = toReportedApiError(
@@ -270,6 +295,7 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
     _draft = null;
     _existingId = null;
     _confirmed = false;
+    _copyFrom = null;
     _keys = const RequestKeys();
     try {
       await _reload();
@@ -280,7 +306,7 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
     return _live(owner);
   }
 
-  /// Bilgileri düzenler: tür ve açıklama departman kaydındadır (`updateDepartment`, yalnız
+  /// Bilgileri düzenler: tür, kod ve açıklama departman kaydındadır (`updateDepartment`, yalnız
   /// değişen alanlar); ad bu programdaki addır (`renameDepartmentLink`; katalog adı ve başka
   /// programlardaki adlar değişmez). Değişiklik yoksa istek atılmaz. İki istek de aynı değerle
   /// tekrarlanabilir: biri düşüp yeniden denenirse ötekinin tekrarı zararsızdır.
@@ -300,15 +326,21 @@ class CoordinatorshipFormController extends _$CoordinatorshipFormController {
         kind != null && kind != DepartmentKind.unknown && kind != initial.kind;
     final descriptionChanged = draft.description != initial.description;
     final nameChanged = draft.name != initial.name;
-    if (!kindChanged && !descriptionChanged && !nameChanged) return true;
+    // Kod boşaltılamaz (sunucu boş kodu "değişmez" sayar); yalnız dolu ve farklı kod yazılır.
+    final code = draft.wireCode;
+    final codeChanged = code != null && code != initial.wireCode;
+    if (!kindChanged && !descriptionChanged && !nameChanged && !codeChanged) {
+      return true;
+    }
     final owner = _own(program);
     final repo = ref.read(departmentRepositoryProvider);
     state = CoordinatorshipFormState(saving: true, pending: state.pending);
     try {
-      if (kindChanged || descriptionChanged) {
+      if (kindChanged || descriptionChanged || codeChanged) {
         await repo.updateDepartment(
           departmentId,
           kind: kindChanged ? kind : null,
+          code: codeChanged ? code : null,
           description: descriptionChanged ? draft.description : null,
         );
         if (!_live(owner)) return false;

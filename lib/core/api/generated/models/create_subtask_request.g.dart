@@ -19,6 +19,7 @@ _CreateSubtaskRequest _$CreateSubtaskRequestFromJson(
     json['end_on'],
     const DateOnlyConverter().fromJson,
   ),
+  evidenceRequired: json['evidence_required'] as bool?,
 );
 
 Map<String, dynamic> _$CreateSubtaskRequestToJson(
@@ -34,6 +35,7 @@ Map<String, dynamic> _$CreateSubtaskRequestToJson(
     instance.endOn,
     const DateOnlyConverter().toJson,
   ),
+  'evidence_required': ?instance.evidenceRequired,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

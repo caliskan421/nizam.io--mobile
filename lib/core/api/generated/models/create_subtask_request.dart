@@ -21,6 +21,9 @@ abstract class CreateSubtaskRequest with _$CreateSubtaskRequest {
     /// Opsiyonel; `end_on` ile birlikte verilir. Yalnız bilgidir (Gantt, bağımlılık ve gecikmeye girmez).
     @DateOnlyConverter() @JsonKey(name: 'start_on') DateTime? startOn,
     @DateOnlyConverter() @JsonKey(name: 'end_on') DateTime? endOn,
+
+    /// Opsiyonel (varsayılan false). Açıksa alt görev, kendisine bağlı en az bir dosya olmadan kapatılamaz (422 `work.subtask_attachment_required`; WORK-K70).
+    @JsonKey(name: 'evidence_required') bool? evidenceRequired,
   }) = _CreateSubtaskRequest;
 
   factory CreateSubtaskRequest.fromJson(Map<String, Object?> json) =>

@@ -65,42 +65,56 @@ void main() {
     expect(nav.calls, ['coord:$dAlt']);
   });
 
-  testWidgets('kısayol: koordinatörlük ekle yalnız şirket yöneticisinde', (
-    tester,
-  ) async {
-    final (h, _) = await _open(tester, backend: CoordBackend()..admin = false);
-    h
-        .read(shellReselectEventsProvider.notifier)
-        .fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    expect(find.text(_l.uiCoordFlyTimelineAll), findsOneWidget);
-    expect(find.text(_l.uiCoordFlyAdd), findsNothing);
-  });
+  testWidgets(
+    'koordinatörlük ekle (başlık + ve kısayol) yalnız şirket yöneticisinde',
+    (tester) async {
+      final (h, _) = await _open(
+        tester,
+        backend: CoordBackend()..admin = false,
+      );
+      expect(find.bySemanticsLabel(_l.uiCoordFlyAdd), findsNothing);
+      h
+          .read(shellReselectEventsProvider.notifier)
+          .fire(CoordinatorshipsPage.shellTab);
+      await settle(tester);
+      expect(find.text(_l.uiCoordFlyTimelineAll), findsOneWidget);
+      expect(find.text(_l.uiCoordFlyAdd), findsNothing);
+    },
+  );
 
-  testWidgets('yönetici: ekle formu → oluşturulur, bağlanır, listede görünür', (
-    tester,
-  ) async {
-    final backend = CoordBackend();
-    final (h, _) = await _open(tester, backend: backend);
-    h
-        .read(shellReselectEventsProvider.notifier)
-        .fire(CoordinatorshipsPage.shellTab);
-    await settle(tester);
-    await tester.tap(find.text(_l.uiCoordFlyAdd));
-    await settle(tester);
-    await tester.enterText(
-      find.widgetWithText(NzTextField, _l.uiCoordFormName),
-      'Saha',
-    );
-    await tester.tap(find.text(_l.uiCoordFormCreate));
-    await settle(tester);
-    expect(
-      [for (final (k, _) in backend.writes) k],
-      ['POST /v1/departments', 'POST /v1/program/departments'],
-    );
-    expect(find.text(_l.uiCoordFormCreate), findsNothing, reason: 'kapandı');
-    expect(find.text('Saha'), findsOneWidget);
-  });
+  testWidgets(
+    'yönetici: + → form; geçersiz kod gitmez; oluşturulur, bağlanır, ayrıntı açılır',
+    (tester) async {
+      final backend = CoordBackend();
+      final (_, nav) = await _open(tester, backend: backend);
+      await tester.tap(find.bySemanticsLabel(_l.uiCoordFlyAdd));
+      await settle(tester);
+      await tester.enterText(
+        find.widgetWithText(NzTextField, _l.uiCoordFormName),
+        'Saha',
+      );
+      final code = find.widgetWithText(NzTextField, _l.uiCoordFormCode);
+      await tester.enterText(code, 'şh');
+      await tester.tap(find.text(_l.uiCoordFormCreate));
+      await settle(tester);
+      expect(backend.writes, isEmpty, reason: 'istemci kod doğrulaması');
+      await tester.enterText(code, ' sh1 ');
+      await tester.tap(find.text(_l.uiCoordFormCreate));
+      await settle(tester);
+      expect(
+        [for (final (k, _) in backend.writes) k],
+        ['POST /v1/departments', 'POST /v1/program/departments'],
+      );
+      expect(
+        (backend.writes.first.$2! as Map)['code'],
+        'SH1',
+        reason: 'kırpılmış büyük harf',
+      );
+      expect(find.text(_l.uiCoordFormCreate), findsNothing, reason: 'kapandı');
+      expect(find.text('Saha'), findsOneWidget);
+      expect(nav.calls, ['coord:dep-new-3']);
+    },
+  );
 
   for (final width in [360.0, 390.0]) {
     for (final scale in [1.0, 2.0]) {

@@ -111,24 +111,101 @@ void main() {
       expect(m.state.value, ConnectivityState.online);
     });
 
-    test('istek sonucu: başarı → çevrimiçi; ağ hatası → çevrimdışı', () async {
-      final m = await started(FakeLink());
-      m.reportError(ApiError(ClientErrorCode.networkError));
-      expect(m.state.value, ConnectivityState.offline);
-      m.reportSuccess();
-      expect(m.state.value, ConnectivityState.online);
+    test(
+      'ayrım kararı: arayüz yok → internet yok; var/bilinmiyor → sunucu yok',
+      () {
+        expect(
+          stateAfterNetworkError(hasInterface: false),
+          ConnectivityState.offline,
+        );
+        expect(
+          stateAfterNetworkError(hasInterface: true),
+          ConnectivityState.unreachable,
+        );
+        expect(
+          stateAfterNetworkError(hasInterface: null),
+          ConnectivityState.unreachable,
+        );
+      },
+    );
+
+    test(
+      'arayüz yokken ağ hatası çevrimdışı kalır; arayüz gelince bilinmiyor',
+      () async {
+        final link = FakeLink(initial: false);
+        final m = await started(link);
+        m.reportError(ApiError(ClientErrorCode.networkError));
+        expect(m.state.value, ConnectivityState.offline);
+        await link.emit(true);
+        expect(m.state.value, ConnectivityState.unknown);
+        m.reportError(ApiError(ClientErrorCode.networkError));
+        expect(m.state.value, ConnectivityState.unreachable);
+        await link.emit(true);
+        expect(m.state.value, ConnectivityState.unknown);
+      },
+    );
+
+    test('bağlantı geri geldi yalnız sorunlu → sorunsuz geçişte', () {
+      expect(connectionRestored(null, ConnectivityState.online), isFalse);
+      expect(
+        connectionRestored(ConnectivityState.unknown, ConnectivityState.online),
+        isFalse,
+      );
+      expect(
+        connectionRestored(
+          ConnectivityState.unreachable,
+          ConnectivityState.online,
+        ),
+        isTrue,
+      );
+      expect(
+        connectionRestored(
+          ConnectivityState.offline,
+          ConnectivityState.unknown,
+        ),
+        isTrue,
+      );
+      expect(
+        connectionRestored(
+          ConnectivityState.offline,
+          ConnectivityState.unreachable,
+        ),
+        isFalse,
+      );
     });
+
+    test('bağlantı kaynaklı hata: ağ, zaman aşımı, 502–504', () {
+      expect(isConnectionError(ApiError(ClientErrorCode.networkError)), isTrue);
+      expect(isConnectionError(ApiError(ClientErrorCode.timeout)), isTrue);
+      expect(isConnectionError(ApiError('x.y', status: 503)), isTrue);
+      expect(
+        isConnectionError(ApiError('platform.internal', status: 500)),
+        isFalse,
+      );
+      expect(isConnectionError(ApiError(ClientErrorCode.tlsError)), isFalse);
+    });
+
+    test(
+      'istek sonucu: başarı → çevrimiçi; ağ hatası → sunucuya ulaşılamıyor',
+      () async {
+        final m = await started(FakeLink());
+        m.reportError(ApiError(ClientErrorCode.networkError));
+        expect(m.state.value, ConnectivityState.unreachable);
+        m.reportSuccess();
+        expect(m.state.value, ConnectivityState.online);
+      },
+    );
 
     test('durumlu hata (sunucu zarfı) sunucuya ulaşıldı demektir; diğer client hataları nötr', () async {
       final m = await started(FakeLink());
       m.reportError(ApiError('identity.credentials_invalid', status: 401));
       expect(m.state.value, ConnectivityState.online);
       m.reportError(ApiError(ClientErrorCode.networkError));
-      expect(m.state.value, ConnectivityState.offline);
+      expect(m.state.value, ConnectivityState.unreachable);
       m.reportError(ApiError(ClientErrorCode.tlsError));
       m.reportError(ApiError(ClientErrorCode.timeout));
       m.reportError(ApiError(ClientErrorCode.sessionEnded));
-      expect(m.state.value, ConnectivityState.offline);
+      expect(m.state.value, ConnectivityState.unreachable);
     });
 
     test('platform kanalı YOK (MissingPluginException): rapor 0; istek girdisi çalışır', () async {
@@ -245,7 +322,7 @@ void main() {
       c
           .read(connectivityMonitorProvider)
           .reportError(ApiError(ClientErrorCode.networkError));
-      expect(c.read(connectivityStateProvider), ConnectivityState.offline);
+      expect(c.read(connectivityStateProvider), ConnectivityState.unreachable);
     });
 
     test('gerçek istek zinciri: ağ hatası çevrimdışı, sonraki zarf yanıtı çevrimiçi', () async {
@@ -277,12 +354,12 @@ void main() {
       }
 
       await profile();
-      expect(mon.state.value, ConnectivityState.offline);
+      expect(mon.state.value, ConnectivityState.unreachable);
       mode = 'gw';
       await profile();
       expect(
         mon.state.value,
-        ConnectivityState.offline,
+        ConnectivityState.unreachable,
         reason: '503 sinyal değil',
       );
       mode = 'env';

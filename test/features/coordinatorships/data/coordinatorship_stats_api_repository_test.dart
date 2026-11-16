@@ -85,6 +85,7 @@ void main() {
     expect(s.done, 4);
     expect(s.total, 10);
     expect(s.late, 2);
+    expect((s.inProgress, s.todo, s.inReview), (3, 1, 2));
     expect(s.leads.single.id, 'a1');
     expect(s.leads.single.name, 'Ayşe Kaya');
     expect(s.leads.single.role, PersonRole.coordinator);

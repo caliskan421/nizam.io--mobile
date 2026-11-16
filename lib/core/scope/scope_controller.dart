@@ -1,17 +1,30 @@
 import 'package:flutter/foundation.dart';
 
+import '../domain/effective_role.dart';
 import '../logging/log.dart';
 import '../telemetry/report_source.dart';
 import '../telemetry/unexpected_error.dart';
 import 'scope_store.dart';
 
-/// Seçili kapsam. Örtük varsayılan kapsam yoktur (C-04): S2 uçlar program, S3 uçlar ek olarak
-/// departman seçimi ister; seçim yoksa istek GÖNDERİLMEZ (`client.scope_missing`).
+/// Seçili kapsam: etkin görünüm üçlüsü program × rol × koordinatörlük. Örtük varsayılan
+/// program yoktur (C-04): S2 uçlar program, S3 uçlar ek olarak departman seçimi ister; seçim
+/// yoksa istek GÖNDERİLMEZ (`client.scope_missing`).
+///
+/// [role] ve [departmentId] kullanıcının seçimidir; `null` → varsayılan erişim kaynağında
+/// türetilir ([ScopeGrants.resolve]). Etkin değerin tek okunduğu yer tasks açık yüzündeki
+/// `effectiveAccessProvider`'dır; ham alanlar yalnız önbellek sahibi ve kayıt içindir.
 @immutable
 final class ScopeSelection {
-  const ScopeSelection({this.programId, this.departmentId});
+  const ScopeSelection({this.programId, this.departmentId, this.role});
   final String? programId;
   final String? departmentId;
+  final EffectiveRole? role;
+
+  /// Aynı görünüm mü (program, rol, koordinatörlük); uçuştaki okumanın bayatlık denetimi.
+  bool sameView(ScopeSelection other) =>
+      other.programId == programId &&
+      other.departmentId == departmentId &&
+      other.role == role;
 
   /// Program seçili mi (kabuk açık, `scoped` fazı; S2 istekleri program kimliğini taşır).
   bool get hasProgram => programId != null && programId!.isNotEmpty;
@@ -59,15 +72,57 @@ class ScopeController {
     _persistSelection();
   }
 
-  void selectDepartment(String departmentId) {
+  /// Etkin rolü seçer. Yalnız [grants]'ın verdiği rol seçilebilir; değilse seçim değişmez ve
+  /// `false` döner. Koordinatörlük yeni rolde geçerliyse korunur, değilse rolün ilk satırı
+  /// (yöneticide `null`). Program yoksa `false`.
+  bool selectRole(EffectiveRole role, ScopeGrants grants) {
+    final cur = _state.value;
+    if (!cur.hasProgram || !grants.roles.contains(role)) return false;
+    final view = grants.resolve(role, cur.departmentId);
     _state.value = ScopeSelection(
-      programId: _state.value.programId,
+      programId: cur.programId,
+      role: view.role,
+      departmentId: view.departmentId,
+    );
+    _persistSelection();
+    return true;
+  }
+
+  /// Koordinatörlüğü seçer. [grants] verildiğinde yalnız etkin rolün (seçili ya da türetilen)
+  /// satırlarından biri seçilebilir; yönetici rolünde koordinatörlük seçilmez; geçersizse seçim
+  /// değişmez ve `false` döner. Etkin rol kayda yazılır (türetilmişse sabitlenir).
+  ///
+  /// [grants]'sız çağrı yalnız S3 başlığı için düşük düzey yoldur (rol dokunulmaz, denetim yok);
+  /// arayüz her zaman [grants] verir.
+  bool selectDepartment(String departmentId, {ScopeGrants? grants}) {
+    final cur = _state.value;
+    var role = cur.role;
+    if (grants != null) {
+      final view = grants.resolve(cur.role, cur.departmentId);
+      if (!cur.hasProgram ||
+          !grants.departmentsFor(view.role).contains(departmentId)) {
+        return false;
+      }
+      role = view.role;
+    }
+    _state.value = ScopeSelection(
+      programId: cur.programId,
+      role: role,
       departmentId: departmentId,
     );
     _persistSelection();
+    return true;
   }
 
-  /// Seçimi bellekten siler ve kayıtlı seçimi siler (sıralı kuyruk, nesil artar).
+  /// Seçimi YALNIZ bellekten bırakır; kayıtlı seçim kalır (oturum bitti ya da uygulama açıldı:
+  /// aynı hesap + kurulumla tekrar girişte [restore] son görünümü geri getirir). Kuyruktaki
+  /// yazımlar kendi anlık görüntüsüyle (sahip + seçim) biter, bu yüzden son seçim kaybolmaz.
+  void suspend() {
+    _state.value = const ScopeSelection();
+  }
+
+  /// Seçimi bellekten siler ve kayıtlı seçimi siler (sıralı kuyruk, nesil artar). Açık eylem
+  /// ("kapsamı değiştir"), sunucu değişimi ve program silinmesi için; çıkış/açılış [suspend].
   void clear() {
     _generation++;
     _state.value = const ScopeSelection();
@@ -108,10 +163,11 @@ class ScopeController {
     final owner = _owner?.call();
     if (store == null || owner == null) return;
     final gen = _generation;
+    final sel = _state
+        .value; // anlık görüntü: çıkış sonrası boşalan bellek yazımı bozmaz
     _enqueue(() async {
-      // Kuyrukta beklerken çıkış/yeniden bağlanma olduysa yazılmaz.
+      // Kuyrukta beklerken kapsamı değiştir/yeniden bağlanma ([clear]) olduysa yazılmaz.
       if (gen != _generation) return;
-      final sel = _state.value;
       if (!sel.hasProgram) return;
       if (!await _attempt(() => store.save(owner, sel))) {
         Log.warn('kapsam: seçim kalıcılaştırılamadı; yalnız bellekte');

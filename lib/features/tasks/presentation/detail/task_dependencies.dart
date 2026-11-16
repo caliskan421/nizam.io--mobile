@@ -10,11 +10,14 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/page/nz_app_nav.dart';
 import '../../../../core/ui/state/nz_async_view.dart';
 import '../../../../core/ui/widgets/feedback/nz_toast.dart';
+import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../application/effective_access.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_lifecycle_controller.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_permissions.dart';
+import '../task_picker_sheet.dart';
 import '../task_texts.dart';
 
 /// Görevin beklediği ve bu görevi bekleyen görevler.
@@ -27,7 +30,11 @@ class TaskDependencies extends ConsumerWidget {
     final catalog = ref.watch(taskCatalogControllerProvider).value;
     final task = catalog?.task(code);
     if (task == null || catalog == null) return const SizedBox.shrink();
-    final canEdit = TaskPermissions.of(catalog.access, task).coordinator;
+    // Etkin görünümle (Üye görünümündeki koordinatör bağımlılık düzenlemez).
+    final canEdit = TaskPermissions.of(
+      ref.watch(effectiveAccessProvider).viewAccess,
+      task,
+    ).coordinator;
     TaskItem? byId(String id) =>
         catalog.tasks.where((t) => t.id == id).firstOrNull;
     String? coordName(TaskItem? t) =>
@@ -41,7 +48,13 @@ class TaskDependencies extends ConsumerWidget {
       } on Object catch (e, st) {
         // Rapor, bağlam korumasından ÖNCE.
         final api = toReportedApiError(e, st, source: ReportSource.tasks);
-        if (context.mounted) NzToast.error(context, api);
+        if (!context.mounted) return;
+        final hint = dependencyErrorHint(api.code);
+        if (hint == null) {
+          NzToast.error(context, api);
+        } else {
+          NzToast.show(context, hint, tone: NzToastTone.danger);
+        }
       }
     }
 
@@ -131,36 +144,31 @@ class TaskDependencies extends ConsumerWidget {
                       onPressed: busy
                           ? null
                           : () async {
-                              final candidates = catalog.tasks.where(
-                                (t) =>
-                                    t.id != task.id &&
-                                    !links.dependencies.any(
-                                      (d) => d.dependsOnId == t.id,
-                                    ),
+                              final candidates = [
+                                for (final t in catalog.tasks)
+                                  if (t.id != task.id &&
+                                      t.programId == task.programId &&
+                                      !links.dependencies.any(
+                                        (d) => d.dependsOnId == t.id,
+                                      ))
+                                    t,
+                              ];
+                              final picked = await showTaskPickerSheet(
+                                context,
+                                title: 'Ön görev seç',
+                                description:
+                                    'Bu görev, seçilen görev bitmeden '
+                                    'başlayamaz.',
+                                tasks: candidates,
+                                subtitle: (t) => [
+                                  ?coordName(t),
+                                  context.l10n.statusLabel(t.status),
+                                ].join(' · '),
                               );
-                              final id = await showDialog<String>(
-                                context: context,
-                                builder: (context) => SimpleDialog(
-                                  title: const Text('Ön görev seç'),
-                                  children: [
-                                    for (final candidate in candidates)
-                                      SimpleDialogOption(
-                                        onPressed: () => Navigator.pop(
-                                          context,
-                                          candidate.id,
-                                        ),
-                                        child: Text(candidate.title),
-                                      ),
-                                    SimpleDialogOption(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('Vazgeç'),
-                                    ),
-                                  ],
-                                ),
-                              );
+                              final id = picked?.id;
                               if (id != null) await change(add: id);
                             },
-                      icon: const Icon(Icons.add),
+                      icon: const NzIcon(Icons.add),
                       label: const Text('Ön görev ekle'),
                     ),
                   ),
@@ -311,7 +319,7 @@ class _DependencyRow extends StatelessWidget {
                     IconButton(
                       tooltip: 'Bağımlılığı kaldır',
                       onPressed: onRemove,
-                      icon: const Icon(Icons.close),
+                      icon: const NzIcon(Icons.close),
                     ),
                 ],
               ),
@@ -322,3 +330,16 @@ class _DependencyRow extends StatelessWidget {
     );
   }
 }
+
+/// Bağımlılık yazımında sunucu reddinin kullanıcı metni (WORK-K34): kendine bağ 422
+/// `work.input_invalid`, döngü 409 `work.dependency_cycle`, tekrar 409
+/// `work.dependency_duplicate`. Diğer kodlarda null (ortak hata metni gösterilir).
+String? dependencyErrorHint(String code) => switch (code) {
+  'work.input_invalid' =>
+    'Görev kendisine bağlanamaz; başka bir ön görev seçin.',
+  'work.dependency_cycle' =>
+    'Bu bağ döngü oluşturur: seçilen görev zaten (dolaylı olarak) bu göreve '
+        'bağlı. Önce o bağı kaldırın.',
+  'work.dependency_duplicate' => 'Bu ön görev zaten ekli.',
+  _ => null,
+};

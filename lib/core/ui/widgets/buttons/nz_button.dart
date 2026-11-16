@@ -81,7 +81,6 @@ class NzButton extends StatelessWidget {
   static const _focusWidth = NizamioSize.focusRingWidth;
   static const _disabledContentAlpha = 0.38;
   static const _disabledFillAlpha = 0.12;
-  static const _overlayAlpha = 0.12;
 
   bool get _active => onPressed != null && !loading;
 
@@ -112,8 +111,6 @@ class NzButton extends StatelessWidget {
     // Yüklenirken dokunma kapalıdır ama görünüm sönmez.
     bool disabled(Set<WidgetState> s) =>
         s.contains(WidgetState.disabled) && !loading;
-    bool hot(Set<WidgetState> s) =>
-        s.contains(WidgetState.hovered) || s.contains(WidgetState.pressed);
 
     final Color foreground = switch (v) {
       _ButtonVariant.primary => c.onPrimary,
@@ -187,13 +184,9 @@ class NzButton extends StatelessWidget {
             ? c.text.withValues(alpha: _disabledContentAlpha)
             : foreground,
       ),
-      overlayColor: WidgetStateProperty.resolveWith(
-        (s) => hot(s) || s.contains(WidgetState.focused)
-            ? (v == _ButtonVariant.primary || v == _ButtonVariant.danger
-                      ? foreground
-                      : accent)
-                  .withValues(alpha: _overlayAlpha)
-            : null,
+      splashFactory: NoSplash.splashFactory,
+      overlayColor: WidgetStatePropertyAll(
+        context.colors.text.withValues(alpha: 0),
       ),
       side: WidgetStateProperty.resolveWith((s) {
         if (disabled(s)) {

@@ -134,6 +134,13 @@ class FakeArchiveRepository implements ArchiveRepository {
       _do('delete', department, null, fileId);
 
   @override
+  Future<void> retagFile(
+    String fileId,
+    RecordTag tag, {
+    required String department,
+  }) => _do('retag', department, null, (fileId, tag));
+
+  @override
   Future<Stream<List<int>>> downloadFile(
     String fileId, {
     required String department,

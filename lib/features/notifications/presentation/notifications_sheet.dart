@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/errors/api_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
@@ -14,8 +15,10 @@ import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/nz_size.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../tasks/tasks.dart';
 import '../application/notifications_controller.dart';
 import '../domain/app_notification.dart';
+import '../domain/notification_groups.dart';
 import 'notifications_texts.dart';
 
 /// Zilin okuyucu etiketi ve okunmamış noktası (`countUnreadNotifications`); kök üst çubuk ve
@@ -59,8 +62,9 @@ Future<void> showNotifications(BuildContext context) async {
   }
 }
 
-/// Bildirim satırları: ilk yükleme, hata ve boş durumu ortak bileşenlerden ([NzAsyncView]);
-/// sonraki sayfa dokunuşla ("Daha fazla göster"), hatası satır içi.
+/// Bildirim satırları: başlıklara gruplanır (Görevler, Tarih talepleri, Toplantılar, Ekip),
+/// art arda aynı olay tek satırda "×N" ([groupNotifications]). İlk yükleme, hata ve boş durumu
+/// ortak bileşenlerden ([NzAsyncView]); sonraki sayfa dokunuşla, hatası satır içi.
 class NotificationsList extends ConsumerWidget {
   const NotificationsList({super.key});
 
@@ -81,7 +85,16 @@ class NotificationsList extends ConsumerWidget {
       data: (v) => Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final n in v.items) _Row(n, key: ValueKey(n.id)),
+          for (final s in groupNotifications(v.items)) ...[
+            Padding(
+              padding: const EdgeInsets.only(
+                top: NizamioSpacing.space3,
+                bottom: NizamioSpacing.space1,
+              ),
+              child: NzKicker(l.notificationGroupLabel(s.group)),
+            ),
+            for (final b in s.bundles) _Row(b, key: ValueKey(b.latest.id)),
+          ],
           if (v.moreError case final error?)
             NzErrorState.inline(
               error: error,
@@ -105,9 +118,12 @@ class NotificationsList extends ConsumerWidget {
 }
 
 class _Row extends ConsumerWidget {
-  const _Row(this.n, {super.key});
+  const _Row(this.b, {super.key});
 
-  final AppNotification n;
+  /// Art arda aynı olaylar; satır en yenisini gösterir.
+  final NotificationBundle b;
+
+  AppNotification get n => b.latest;
 
   IconData get _icon => switch (n.subject.link) {
     NotificationLink.task => NzIcons.tasks,
@@ -115,13 +131,18 @@ class _Row extends ConsumerWidget {
     NotificationLink.none => NzIcons.bell,
   };
 
-  /// Okunmamışsa okundu yapılır; hedefi varsa sayfa hedefle kapanır (okundu hatası gezinmeyi
-  /// engellemez, bildirilir). Rotası olmayan bildirim yalnız okundu olur.
+  /// Birleşen okunmamışların hepsi okundu yapılır; hedefi varsa sayfa hedefle kapanır (okundu
+  /// hatası gezinmeyi engellemez, ilki bildirilir). Rotası olmayan bildirim yalnız okundu olur.
   Future<void> _open(BuildContext context, WidgetRef ref) async {
     final routable = n.subject.link != NotificationLink.none;
-    final error = await ref
-        .read(notificationsControllerProvider.notifier)
-        .markRead(n.id);
+    final ctl = ref.read(notificationsControllerProvider.notifier);
+    ApiError? error;
+    for (final id in b.unreadIds) {
+      final e = await ctl.markRead(
+        id,
+      ); // her biri gönderilir; yalnız ilk hata saklanır
+      error ??= e;
+    }
     if (!context.mounted) return;
     if (error != null) NzToast.error(context, error);
     if (routable) Navigator.of(context).pop(n.subject);
@@ -132,7 +153,7 @@ class _Row extends ConsumerWidget {
     final l = context.l10n;
     final c = context.colors;
     void open() => unawaited(_open(context, ref));
-    final dot = n.isRead
+    final dot = !b.hasUnread
         ? null
         : Semantics(
             label: l.uiNotificationsUnreadBadge,
@@ -145,9 +166,26 @@ class _Row extends ConsumerWidget {
               ),
             ),
           );
-    final leading = NzIconTile(icon: _icon, color: n.isRead ? null : c.primary);
-    final title = l.notificationTitle(n.type);
-    final subtitle = l.notificationWhen(n.createdAt);
+    final leading = NzIconTile(
+      icon: _icon,
+      color: b.hasUnread ? c.primary : null,
+    );
+    final title = b.count > 1
+        ? '${l.notificationTitle(n.type)} ×${b.count}'
+        : l.notificationTitle(n.type);
+    // Konu başlığı: görev bildiriminde katalogdaki "KOD · başlık" (yoksa yalnız zaman).
+    final task = n.subject.link == NotificationLink.task
+        ? ref
+              .watch(taskCatalogControllerProvider)
+              .value
+              ?.tasks
+              .where((t) => t.id == n.subject.id)
+              .firstOrNull
+        : null;
+    final when = l.notificationWhen(n.createdAt);
+    final subtitle = task == null
+        ? when
+        : '${task.code} · ${task.title} · $when';
     return n.subject.link != NotificationLink.none
         ? NzListTile.navigation(
             leading: leading,
@@ -161,7 +199,7 @@ class _Row extends ConsumerWidget {
             title: title,
             subtitle: subtitle,
             trailing: dot,
-            onTap: n.isRead ? null : open,
+            onTap: b.hasUnread ? open : null,
           );
   }
 }

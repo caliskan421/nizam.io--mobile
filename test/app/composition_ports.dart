@@ -5,11 +5,12 @@ import 'package:nizamio/features/activity/activity.dart';
 import 'package:nizamio/features/archive/application/archive_providers.dart';
 import 'package:nizamio/features/coordinatorships/coordinatorships.dart';
 import 'package:nizamio/features/identity/identity.dart';
+import 'package:nizamio/features/meetings/application/meetings_providers.dart'
+    show conferenceLinkFactoryProvider;
 import 'package:nizamio/features/meetings/meetings.dart';
 import 'package:nizamio/features/messages/application/messages_providers.dart';
 import 'package:nizamio/features/notifications/application/notifications_providers.dart';
 import 'package:nizamio/features/scope/scope.dart';
-import 'package:nizamio/features/tables/application/tables_providers.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 /// Q3 — kayıt denetimi (ADR-0003 karar 13). Port listesi KODDAN toplanır: `_unbound('<ad>')`
@@ -47,6 +48,5 @@ final portProviders = <String, ProviderBase<Object?>>{
   'archiveRepositoryProvider': archiveRepositoryProvider,
   'chatRepositoryProvider': chatRepositoryProvider,
   'notificationRepositoryProvider': notificationRepositoryProvider,
-  'tablesRepositoryProvider': tablesRepositoryProvider,
-  'tableReferenceSourcesProvider': tableReferenceSourcesProvider,
+  'conferenceLinkFactoryProvider': conferenceLinkFactoryProvider,
 };

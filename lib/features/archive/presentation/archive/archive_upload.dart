@@ -11,6 +11,7 @@ import '../../../tasks/tasks.dart';
 import '../../application/archive_actions_controller.dart';
 import '../../application/archive_folder_controller.dart';
 import '../../application/archive_folder_sources.dart';
+import '../../application/archive_folders_controller.dart';
 import 'archive_outcome.dart';
 import 'archive_texts.dart';
 
@@ -48,6 +49,46 @@ void startArchiveUpload(BuildContext context, WidgetRef ref, String code) {
         ),
     ],
   );
+}
+
+/// Arşiv kökünden yükleme: önce görev seçilir (klasörü arşivde olan görevler; aranabilir
+/// liste), sonra etiket ve kaynak; dosya `/v1/work-items/{id}/files` ile görevin klasörüne
+/// yüklenir. Görevin klasörü koordinatörlüğüdür; üyede tek sanal klasördür ("Görevlerim").
+Future<void> startArchiveRootUpload(BuildContext context, WidgetRef ref) async {
+  final l = context.l10n;
+  final folders = ref.read(archiveFoldersControllerProvider).value ?? const [];
+  final catalog = ref.read(taskCatalogControllerProvider).value;
+  final virtual = folders.where((f) => f.isVirtual).firstOrNull?.code;
+  String? folderOf(TaskItem t) =>
+      folders.any((f) => !f.isVirtual && f.code == t.departmentId)
+      ? t.departmentId
+      : virtual;
+  final tasks = [
+    for (final t in catalog?.tasks ?? const <TaskItem>[])
+      if (folderOf(t) != null) t,
+  ];
+  if (tasks.isEmpty) {
+    NzToast.show(context, l.uiArchiveUploadNoTask);
+    return;
+  }
+  final task = await showTaskPickerSheet(
+    context,
+    title: l.uiArchivePickTask,
+    description: l.uiArchiveUploadTaskDesc,
+    tasks: tasks,
+    subtitle: (t) => catalog?.coordinatorship(t.coordinatorship)?.name,
+  );
+  final code = task == null ? null : folderOf(task);
+  if (task == null || code == null || !context.mounted) return;
+  // Klasör eylem denetleyicisi (autoDispose) yükleme boyunca canlı kalsın; abonelik
+  // sayfa kapanınca düşer.
+  ref.listenManual(archiveActionsControllerProvider(code), (_, _) {});
+  final ctrl = ref.read(archiveActionsControllerProvider(code).notifier);
+  if (ctrl.uploadStart == ArchiveUploadStart.noPicker) {
+    NzToast.show(context, l.uiArchivePickerMissing);
+    return;
+  }
+  _pickTag(context, ctrl, task.id);
 }
 
 void _pickTag(

@@ -190,6 +190,15 @@ final class Meeting {
 
   bool get byPerson => inviteMode == MeetingInviteMode.person;
 
+  /// Yer metnindeki ilk http(s) bağlantısı (ör. çevrim içi toplantı); yoksa null.
+  Uri? get placeLink {
+    final match = _link.firstMatch(place ?? '');
+    final uri = match == null ? null : Uri.tryParse(match.group(0)!);
+    return uri != null && uri.host.isNotEmpty ? uri : null;
+  }
+
+  static final _link = RegExp(r'https?://\S+', caseSensitive: false);
+
   Meeting withSummary(MeetingSummary s) => Meeting(
     id: id,
     programId: programId,

@@ -287,7 +287,9 @@ void main() {
 
   group('deleteDepartment', () {
     test('DELETE /v1/departments/{id} → deleted', () async {
-      final (repo, a) = _repo('{"department_id":"d1","deleted":true}');
+      final (repo, a) = _repo(
+        '{"department_id":"d1","deleted":true,"work_items_deleted":0}',
+      );
       expect(await repo.deleteDepartment('d1'), isTrue);
       expect(a.seen!.method, 'DELETE');
       expect(a.seen!.uri.path, '/v1/departments/d1');

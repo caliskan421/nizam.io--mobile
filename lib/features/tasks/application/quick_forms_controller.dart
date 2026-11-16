@@ -13,6 +13,7 @@ import '../domain/chat_task_planner.dart';
 import '../domain/meeting_planner.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_writes.dart';
+import 'effective_access.dart';
 import 'task_catalog_controller.dart';
 import 'tasks_providers.dart';
 
@@ -144,8 +145,9 @@ final class NewTaskForm {
 List<CoordinatorshipRef> newTaskCoordinatorships(Ref ref) {
   final catalog = ref.watch(taskCatalogControllerProvider).value;
   if (catalog == null) return const [];
-  final access = catalog.access;
-  final program = ref.watch(scopeStateProvider).programId;
+  final scope = ref.watch(scopeStateProvider);
+  final access = EffectiveAccess.of(catalog.access, scope).viewAccess;
+  final program = scope.programId;
   if (access == null || program == null) return const [];
   return [
     for (final c in catalog.coordinatorships)

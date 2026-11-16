@@ -11,7 +11,9 @@ import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../../tasks/tasks.dart';
 import '../../domain/timeline.dart';
 import '../timeline_texts.dart';
+import 'timeline_rule_panel.dart';
 import 'timeline_selection_dates.dart';
+import 'timeline_selection_subtasks.dart';
 
 /// Çizelgeyi görünür bırakan seçili görev: kimlik, tarihler ve gerçek tarih komutları.
 /// Telefon ve tablet aynı içerik/izin yüzünü kullanır; konumu çağıran belirler.
@@ -33,6 +35,9 @@ class TimelineSelectionCard extends StatelessWidget {
     required this.onRequest,
     required this.onRemind,
     required this.onReset,
+    required this.onExtendDraft,
+    this.onPull,
+    this.directRule = false,
     this.canEditDates = false,
     this.canSave = false,
     this.canRequest = false,
@@ -51,22 +56,24 @@ class TimelineSelectionCard extends StatelessWidget {
   final VoidCallback onPickEnd;
   final ValueChanged<int> onShift;
   final VoidCallback onSave;
-  final VoidCallback onRequest;
+
+  /// Tarih talebi; argüman gerekçe (koordinatör formunda zorunlu).
+  final ValueChanged<String> onRequest;
+
+  /// Ortak süre uzatma penceresini açar.
+  final VoidCallback onExtendDraft;
+
+  /// "Bitişi bugüne çek"; koşul yoksa null.
+  final VoidCallback? onPull;
+
+  /// 7 gün kuralı (Koordinatör görünümü; [TimelineRulePanel]).
+  final bool directRule;
   final VoidCallback? onRemind;
   final VoidCallback onReset;
   final bool canEditDates;
   final bool canSave;
   final bool canRequest;
   final bool busy;
-
-  static NzTone tone(TaskStatus s) => switch (s) {
-    TaskStatus.todo => NzTone.neutral,
-    TaskStatus.inProgress => NzTone.progress,
-    TaskStatus.review => NzTone.waiting,
-    TaskStatus.returned => NzTone.danger,
-    TaskStatus.done => NzTone.done,
-    TaskStatus.unknown => NzTone.neutral,
-  };
 
   @override
   Widget build(BuildContext context) {
@@ -132,7 +139,7 @@ class TimelineSelectionCard extends StatelessWidget {
                             children: [
                               NzStatusLabel(
                                 label: l.statusLabel(task.status),
-                                tone: tone(task.status),
+                                tone: statusTone(task.status),
                               ),
                               if (late.isNotEmpty)
                                 Text(
@@ -193,28 +200,18 @@ class TimelineSelectionCard extends StatelessWidget {
                   onPickStart: onPickStart,
                   onPickEnd: onPickEnd,
                 ),
-                const Gap(14),
-                Row(
-                  spacing: NizamioSpacing.space2,
-                  children: [
-                    Expanded(
-                      child: NzButton.secondary(
-                        label: l.uiTimelineSendRequest,
-                        expand: true,
-                        onPressed: canRequest && !busy ? onRequest : null,
-                      ),
-                    ),
-                    Expanded(
-                      child: NzButton.primary(
-                        label: l.uiTimelineSave,
-                        expand: true,
-                        loading: busy,
-                        onPressed: canSave && s.changed && !busy
-                            ? onSave
-                            : null,
-                      ),
-                    ),
-                  ],
+                TimelineSelectionSubtasks(task: task.item),
+                TimelineRulePanel(
+                  selection: s,
+                  year: year,
+                  directRule: directRule,
+                  canSave: canSave,
+                  canRequest: canRequest,
+                  busy: busy,
+                  onSave: onSave,
+                  onRequest: onRequest,
+                  onExtendDraft: onExtendDraft,
+                  onPull: onPull,
                 ),
               ],
             ),

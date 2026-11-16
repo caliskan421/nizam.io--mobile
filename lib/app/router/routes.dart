@@ -25,12 +25,13 @@ import 'transitions.dart';
 
 part 'routes.g.dart';
 
+/// Silinenler (görev, toplantı, koordinatörlük, kullanıcı sekmeleri; yalnız yönetici).
 @TypedGoRoute<DeletedTasksRoute>(path: '/deleted-tasks')
 class DeletedTasksRoute extends NzRouteData with $DeletedTasksRoute {
   const DeletedTasksRoute();
   @override
   Widget build(BuildContext context, GoRouterState state) =>
-      const DeletedTasksPage();
+      const DeletedRecordsPage();
 }
 
 /// Eski yönetim bağlantıları kullanıcı modülüne açılır.
@@ -505,6 +506,19 @@ class ChatRoute extends NzRouteData with $ChatRoute {
   Widget build(BuildContext context, GoRouterState state) => ChatPage(id: id);
 }
 
+/// Görüntülü görüşme (kabuk dışı tam ekran; alt menü yok). Kimlik `meeting_id`; oda bağı
+/// ConferenceController'dadır, ekran kapanınca görüşme mini pencerede sürer.
+@TypedGoRoute<ConferenceRoute>(path: '/conference/:id')
+class ConferenceRoute extends NzRouteData with $ConferenceRoute {
+  const ConferenceRoute({required this.id});
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      ConferencePage(key: ValueKey(id), id: id);
+}
+
 @TypedGoRoute<ProfileRoute>(path: '/profile')
 class ProfileRoute extends NzRouteData with $ProfileRoute {
   const ProfileRoute();
@@ -557,6 +571,6 @@ Widget _keyedTablePage(String id) => Builder(
   builder: (context) => TablePage(
     key: ValueKey(id),
     id: id,
-    onOpenTable: context.appNav.openTable,
+    onOpenTable: context.appNav.openLinkedTable,
   ),
 );

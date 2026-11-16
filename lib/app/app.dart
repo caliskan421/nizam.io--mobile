@@ -10,6 +10,7 @@ import '../core/security/privacy_mask.dart';
 import '../core/ui/layout/nz_tablet_scale.dart';
 import '../core/ui/page/nz_app_nav.dart';
 import '../core/ui/theme/app_theme.dart';
+import '../features/meetings/meetings.dart';
 import 'config/release_policy_host.dart';
 import 'foreground_refresh.dart';
 import 'orientation_policy.dart';
@@ -69,11 +70,20 @@ class _NizamioAppState extends ConsumerState<NizamioApp> {
         child: NzAppNavScope(
           nav: _nav,
           child: ForegroundRefresh(
+            // Maske etkin temanın zemin renginde: Kontrol/Bildirim Merkezi açıkken (inactive)
+            // tema değişirse arkadaki ekran da anında açık/koyu olur; içerik yine gizli.
             child: PrivacyMask(
               controller: _mask,
+              color: Theme.of(context).scaffoldBackgroundColor,
               child: NzTabletScale(
                 child: ReleasePolicyHost(
-                  child: child ?? const SizedBox.shrink(),
+                  // Süren görüşmenin mini penceresi bütün ekranların üstünde.
+                  child: Stack(
+                    children: [
+                      Positioned.fill(child: child ?? const SizedBox.shrink()),
+                      const ConferenceDock(),
+                    ],
+                  ),
                 ),
               ),
             ),

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/theme/generated/tokens.gen.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_form.dart';
+import 'package:nizamio/core/ui/widgets/inputs/nz_form_rows.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_select.dart';
 import 'package:nizamio/core/ui/widgets/inputs/nz_validators.dart';
 import 'package:nizamio/core/ui/widgets/nz_size.dart';
@@ -100,7 +102,7 @@ void main() {
     await tester.pumpWidget(testApp(_stateful(onChanged: changes.add)));
     expect(find.text('Rol'), findsOneWidget);
     expect(find.text('Seçin'), findsOneWidget);
-    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.tap(find.byType(NzSelect<String>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Seçenek B').last);
     await tester.pumpAndSettle();
@@ -112,9 +114,9 @@ void main() {
   testWidgets('devre dışı seçenek seçilemez', (tester) async {
     final changes = <String?>[];
     await tester.pumpWidget(testApp(_stateful(onChanged: changes.add)));
-    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.tap(find.byType(NzSelect<String>));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Seçenek C').last, warnIfMissed: false);
+    expect(find.text('Seçenek C'), findsNothing);
     await tester.pumpAndSettle();
     expect(changes, isEmpty);
   });
@@ -130,7 +132,7 @@ void main() {
         ),
       ),
     );
-    await tester.tap(find.byType(DropdownButton<String>), warnIfMissed: false);
+    await tester.tap(find.byType(NzSelect<String>), warnIfMissed: false);
     await tester.pumpAndSettle();
     expect(find.text('Seçenek B'), findsNothing);
   });
@@ -149,7 +151,7 @@ void main() {
         ),
       );
       expect(
-        tester.getSize(find.byType(InputDecorator)).height,
+        tester.getSize(find.byType(NzFormRows)).height,
         greaterThanOrEqualTo(NizamioSpacing.space12),
         reason: size.name,
       );
@@ -172,7 +174,7 @@ void main() {
       expect(form.submit(), isFalse);
       await tester.pump();
       expect(find.text('Bir seçim yapın.'), findsOneWidget);
-      await tester.tap(find.byType(DropdownButton<String>));
+      await tester.tap(find.byType(NzSelect<String>));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Seçenek A').last);
       await tester.pumpAndSettle();
@@ -205,7 +207,7 @@ void main() {
     await tester.pump();
     expect(find.text('Ad soyad geçersiz.'), findsOneWidget);
     expect(find.textContaining('SUNUCU'), findsNothing);
-    await tester.tap(find.byType(DropdownButton<String>));
+    await tester.tap(find.byType(NzSelect<String>));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Seçenek A').last);
     await tester.pumpAndSettle();
@@ -224,29 +226,22 @@ void main() {
         ),
       ),
     );
-    final node = tester.getSemantics(find.byType(InputDecorator));
+    final node = tester.getSemantics(find.bySemanticsLabel('Rol, Seçenek A'));
     expect(node.label, contains('Rol'));
     expect(node.label, contains('Seçenek A'));
     handle.dispose();
   });
 
-  testWidgets('odak düğmeye gelince çerçeve odak durumuna geçer', (
-    tester,
-  ) async {
+  testWidgets('klavyeyle açılıp seçim yapılır', (tester) async {
     await tester.pumpWidget(testApp(_stateful()));
-    final decorator = find.byType(InputDecorator);
-    expect(tester.widget<InputDecorator>(decorator).isFocused, isFalse);
-    FocusScope.of(tester.element(decorator)).nextFocus();
+    FocusScope.of(tester.element(find.byType(NzSelect<String>))).nextFocus();
     await tester.pump();
-    expect(tester.widget<InputDecorator>(decorator).isFocused, isTrue);
-  });
-
-  testWidgets('piksel: tabaka 1024 geniş, dolgu renkleri', (tester) async {
-    await pumpSheet(tester, _variants);
-    await expectSheetPixels(tester, [
-      NizamioColors.light.surface,
-      NizamioColors.dark.surface,
-    ]);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    expect(find.text('Seçenek B'), findsOneWidget);
+    await tester.tap(find.text('Seçenek B'));
+    await tester.pumpAndSettle();
+    expect(find.text('Seçenek B'), findsOneWidget);
   });
 
   goldenTestWidgets(

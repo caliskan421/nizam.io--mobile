@@ -7,6 +7,7 @@ import '../../../core/providers.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/task_writes.dart';
+import 'effective_access.dart';
 import 'quick_forms_controller.dart' show newTaskCoordinatorshipsProvider;
 import 'task_catalog_controller.dart';
 import 'tasks_providers.dart';
@@ -178,7 +179,10 @@ class InviteFormController extends _$InviteFormController {
       state = f.copyWith(error: () => err, failure: () => null);
       return null;
     }
-    final admin = access.companyAdmin;
+    final admin = EffectiveAccess.of(
+      access,
+      ref.read(scopeStateProvider),
+    ).isAdminView;
     final email = f.email.trim();
     final enrollment = MemberEnrollment(
       programId: program,

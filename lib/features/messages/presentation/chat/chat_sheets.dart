@@ -8,6 +8,7 @@ import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/chat.dart';
+import '../../domain/chat_send_failure.dart';
 import 'messages_texts.dart';
 
 /// Mesaj işlemleri sayfasının sonucu (sayfa kapandıktan sonra ekran uygular).
@@ -42,19 +43,19 @@ final class ChatActSimple extends ChatAction {
 /// tepki çubuğu, hızlı ızgara (Yanıtla, Kopyala, [canPin] ise Sabitle, [canEdit] ise Düzenle),
 /// liste (anket sonuçları ve [canClosePoll] ise anketi bitir; [canToTask] ise göreve dönüştür;
 /// [canDelete] ise Sil — `danger`). Gönderilemeyen kendi mesajımda yalnız Tekrar gönder
-/// ([canRetry]), Kopyala ve Mesajı at. Seçim sonuç olarak döner.
+/// (neden tekrarı anlamlıysa; `chatSendRetryable`), Kopyala ve Mesajı at. Seçim sonuç olarak döner.
 Future<ChatAction?> showMessageActions(
   BuildContext context, {
   required ChatMessage message,
   required bool canEdit,
   required bool canDelete,
-  bool canRetry = true,
   bool canPin = false,
   bool canToTask = false,
   bool canClosePoll = false,
 }) {
   final l = context.l10n;
   final failed = message.state == ChatSendState.failed;
+  final canRetry = chatSendRetryable(message.failure);
   final myReaction = message.reactions.where((r) => r.mine).firstOrNull?.kind;
   return NzBottomSheet.show<ChatAction>(
     context,

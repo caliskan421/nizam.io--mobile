@@ -9,6 +9,7 @@ import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/client_error_codes.gen.dart';
 import 'package:nizamio/features/notifications/data/notification_api_repository.dart';
 import 'package:nizamio/features/notifications/domain/app_notification.dart';
+import 'package:nizamio/features/notifications/domain/notification_preferences.dart';
 
 /// Tek yanıtlı sahte bağdaştırıcı; isteği kaydeder.
 class _Adapter implements HttpClientAdapter {
@@ -261,5 +262,38 @@ void main() {
     expect(k.enabled, isFalse);
     expect(k.publicKey, '');
     expect(adapter.seen.single.uri.path, '/v1/notifications/vapid-public-key');
+  });
+
+  group('tercihler', () {
+    const body =
+        '{"preferences":[{"group":"gorev","push_muted":true},'
+        '{"group":"mesaj","push_muted":false},{"group":"yeni","push_muted":true}]}';
+
+    test(
+      'GET: dört grup; dönmeyen grup açık, tanınmayan yok sayılır',
+      () async {
+        final (repo, adapter) = _repo(body);
+        final p = await repo.preferences();
+        expect(adapter.seen.single.uri.path, '/v1/notifications/preferences');
+        expect(p, {
+          NotificationPrefGroup.gorev: true,
+          NotificationPrefGroup.mesaj: false,
+          NotificationPrefGroup.toplanti: false,
+          NotificationPrefGroup.sistem: false,
+        });
+      },
+    );
+
+    test('PUT: yalnız değişen grup gövdede', () async {
+      final (repo, adapter) = _repo(body);
+      await repo.updatePreferences({NotificationPrefGroup.toplanti: true});
+      final o = adapter.seen.single;
+      expect(o.method, 'PUT');
+      expect(jsonDecode(jsonEncode(o.data)), {
+        'preferences': [
+          {'group': 'toplanti', 'push_muted': true},
+        ],
+      });
+    });
   });
 }

@@ -4,9 +4,9 @@ import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/providers.dart';
 import '../domain/task_catalog.dart';
-import '../domain/task_permissions.dart';
 import '../domain/work_item.dart';
 import '../domain/work_item_repository.dart';
+import 'effective_access.dart';
 import 'task_catalog_controller.dart';
 import 'task_details_controller.dart';
 
@@ -39,7 +39,7 @@ class DeletedTasksController extends AsyncNotifier<PageSlice<DeletedTask>> {
     ref.watch(sessionGenerationProvider);
     ref.watch(scopeStateProvider);
     final catalog = await ref.watch(taskCatalogControllerProvider.future);
-    if (catalog.access?.companyAdmin != true) {
+    if (!catalog.viewIn(ref.read(scopeStateProvider)).canAdminister) {
       throw ApiError('work.not_authorized');
     }
     return ref.watch(deletedTasksRepositoryProvider).list();
@@ -89,6 +89,38 @@ class DeletedTasksController extends AsyncNotifier<PageSlice<DeletedTask>> {
       _busy = false;
     }
   }
+
+  /// Silinmiş görevi kalıcı siler (`permanentDeleteWorkItem`); satır listeden düşer. Silinen
+  /// dosya sayısı döner. Sürmekte olan işlem varken null (istek gönderilmez).
+  Future<int?> purge(DeletedTask task) async {
+    if (_busy) return null;
+    _busy = true;
+    final session = ref.read(sessionGenerationProvider);
+    final scope = ref.read(scopeStateProvider);
+    try {
+      final files = await ref
+          .read(deletedTasksRepositoryProvider)
+          .purge(task.id);
+      final old = state.value;
+      if (ref.mounted &&
+          old != null &&
+          session == ref.read(sessionGenerationProvider) &&
+          scope == ref.read(scopeStateProvider)) {
+        state = AsyncData(
+          PageSlice(
+            items: [
+              for (final t in old.items)
+                if (t.id != task.id) t,
+            ],
+            nextCursor: old.nextCursor,
+          ),
+        );
+      }
+      return files;
+    } finally {
+      _busy = false;
+    }
+  }
 }
 
 final taskDependencyCommandProvider =
@@ -112,9 +144,11 @@ class TaskDependencyCommandController extends Notifier<bool> {
     if (state) return;
     final catalog = ref.read(taskCatalogControllerProvider).value;
     final task = catalog?.task(code);
-    // WORK-K34: şirket yöneticisi tek başına bağımlılık değiştiremez.
+    // WORK-K34: şirket yöneticisi tek başına bağımlılık değiştiremez (etkin görünümle).
     if (task == null ||
-        !TaskPermissions.of(catalog?.access, task).coordinator) {
+        !catalog
+            .permissionsIn(ref.read(scopeStateProvider), task)
+            .coordinator) {
       throw ApiError('work.not_authorized');
     }
     state = true;

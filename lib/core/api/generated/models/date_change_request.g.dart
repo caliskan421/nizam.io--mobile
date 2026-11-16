@@ -21,6 +21,7 @@ _DateChangeRequest _$DateChangeRequestFromJson(
   oldEndOn: const DateOnlyConverter().fromJson(json['old_end_on'] as String),
   newEndOn: const DateOnlyConverter().fromJson(json['new_end_on'] as String),
   reason: json['reason'] as String?,
+  reviewReason: json['review_reason'] as String?,
 );
 
 Map<String, dynamic> _$DateChangeRequestToJson(_DateChangeRequest instance) =>
@@ -33,6 +34,7 @@ Map<String, dynamic> _$DateChangeRequestToJson(_DateChangeRequest instance) =>
       'old_end_on': const DateOnlyConverter().toJson(instance.oldEndOn),
       'new_end_on': const DateOnlyConverter().toJson(instance.newEndOn),
       'reason': ?instance.reason,
+      'review_reason': ?instance.reviewReason,
     };
 
 const _$DateChangeRequestStatusEnumMap = {

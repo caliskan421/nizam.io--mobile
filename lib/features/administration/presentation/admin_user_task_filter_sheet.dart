@@ -73,7 +73,7 @@ class _Filters extends ConsumerWidget {
     final catalog = ref.watch(taskCatalogControllerProvider);
     if (catalog.isReloading ||
         catalog.hasError ||
-        catalog.value?.access?.companyAdmin != true) {
+        !ref.watch(effectiveAccessProvider).canAdminister) {
       return const SizedBox.shrink();
     }
     final tasks = catalog.requireValue.tasks

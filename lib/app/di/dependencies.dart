@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
@@ -25,6 +27,7 @@ import '../../core/storage/secure_store.dart';
 import '../../core/storage/shared_preference_store.dart';
 import '../../core/telemetry/error_reporting.dart';
 import '../../core/telemetry/error_reporting_controller.dart';
+import '../../features/scope/scope.dart' show ScopeService;
 
 /// Altyapı nesne grafiği (ADR-0001, D-0182): bütün altyapı tekilleri ve aralarındaki
 /// KABLOLAMA yalnız burada kaydedilir; ömür (tembel tekil, `dispose`) get_it'tedir.
@@ -34,8 +37,9 @@ import '../../core/telemetry/error_reporting_controller.dart';
 ///   (CX-r1-Ö-01).
 /// - Farklı sunucu/kuruluma yeniden bağlanma oturumu ve kapsamı temizler (bağ denetleyicisi
 ///   oturumu bilmez; yön tek: oturum → bağ).
-/// - Oturum etkin değilse (çıkış, yeniden giriş gerekli) kapsam temizlenir; kayıtlı son seçim
-///   (güvenli depo) de aynı iki yerde (bu ve yeniden bağlanma) silinir.
+/// - Oturum etkin değilse (çıkış, yeniden giriş gerekli) seçim bellekten bırakılır, kayıtlı son
+///   seçim (güvenli depo) KALIR ve aynı hesap + kurulumla tekrar girişte geri yüklenir; kayıt
+///   yalnız yeniden bağlanmada, "kapsamı değiştir"de ve program silinince silinir.
 ///
 /// [secureStore] / [httpAdapter] / [preferenceStore] yalnız testler ve cihazsız
 /// entegrasyon içindir; verilmezse flutter_secure_storage, dio'nun varsayılan bağdaştırıcısı (platform
@@ -152,8 +156,14 @@ void configureDependencies(
           await controller.clear();
         }),
       );
+      // Çıkış/oturum bitişinde seçim bellekten bırakılır, kayıt KALIR; aynı hesap + kurulumla
+      // tekrar girişte son görünüm (program, rol, koordinatörlük) geri yüklenir (karar 20).
       void onSession() {
-        if (controller.state.value is! SessionActive) scope.clear();
+        if (controller.state.value is! SessionActive) {
+          scope.suspend();
+        } else if (locator.isRegistered<ScopeService>()) {
+          unawaited(locator<ScopeService>().restoreLast());
+        }
       }
 
       controller.state.addListener(onSession);

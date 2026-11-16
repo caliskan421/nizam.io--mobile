@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
+import '../../../core/ui/widgets/feedback/nz_toast.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
@@ -51,7 +53,6 @@ class MeetingInfo extends ConsumerWidget {
       ),
       (l.uiMeetingsInfoCreator, '$creator · ${l.meetingRole(m.createdByRole)}'),
       (l.uiMeetingsInfoInvite, l.meetingInviteKind(m)),
-      if (m.place case final place?) (l.uiMeetingsInfoPlace, place),
       (l.uiMeetingsInfoCreated, l.meetingDayMonth(m.createdAt)),
       (
         l.uiMeetingsInfoVisibility,
@@ -75,6 +76,25 @@ class MeetingInfo extends ConsumerWidget {
           rows: [
             for (final (label, value) in rows)
               MeetingInfoRow(label: label, value: value),
+            if (m.place case final place?)
+              MeetingInfoRow(
+                label: l.uiMeetingsInfoPlace,
+                value: place,
+                tapHint: m.placeLink == null ? null : l.uiMeetingsCopyLink,
+                // Bağlantı dış uygulamada açılmaz (url_launcher yalnız mağaza hedefi,
+                // ADR-0002); kopyalanır.
+                onTap: switch (m.placeLink) {
+                  null => null,
+                  final link => () async {
+                    await Clipboard.setData(
+                      ClipboardData(text: link.toString()),
+                    );
+                    if (context.mounted) {
+                      NzToast.show(context, l.uiMeetingsLinkCopied);
+                    }
+                  },
+                },
+              ),
           ],
         ),
         NzKicker(l.uiMeetingsCoordsKicker),

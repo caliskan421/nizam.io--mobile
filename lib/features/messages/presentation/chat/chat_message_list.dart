@@ -15,6 +15,7 @@ import '../../domain/chat.dart';
 import '../../domain/chat_logic.dart';
 import '../../domain/chat_room.dart';
 import 'chat_parts.dart';
+import 'chat_swipe_reply.dart';
 import 'messages_texts.dart';
 
 /// Mesaj akışı: yukarıdan aşağı (kısa sohbet üstte, uzun sohbet en altta açılır) tembel liste.
@@ -33,10 +34,12 @@ class ChatMessageList extends ConsumerStatefulWidget {
     required this.composerH,
     required this.onJump,
     required this.onActions,
+    required this.onReply,
     required this.onReact,
     required this.onVote,
     required this.onAttachment,
     required this.onSharedFile,
+    required this.onRetry,
   });
 
   final String chatId;
@@ -49,11 +52,17 @@ class ChatMessageList extends ConsumerStatefulWidget {
   final ValueChanged<String> onJump;
   final void Function(ChatRoom room, ChatMessage m) onActions;
 
+  /// Kaydırarak yanıtlama (sunucudaki mesajda).
+  final ValueChanged<ChatMessage> onReply;
+
   /// Tepki çipine dokunuş (aynı tür kaldırır).
   final void Function(ChatMessage m, ChatReaction kind) onReact;
   final void Function(ChatMessage m, int option) onVote;
   final ValueChanged<ChatAttachment> onAttachment;
   final void Function(String refId, String name) onSharedFile;
+
+  /// Gönderilemeyen mesajın balon içi "Tekrar dene"si.
+  final ValueChanged<ChatMessage> onRetry;
 
   @override
   ConsumerState<ChatMessageList> createState() => _ChatMessageListState();
@@ -256,83 +265,92 @@ class _ChatMessageListState extends ConsumerState<ChatMessageList> {
         final quoteMine = quote?.senderId == me;
         final quoteName = quote?.senderName ?? '';
         final tick = tickOf(m, me: me, room: room);
-        return Padding(
-          padding: EdgeInsets.only(top: first ? 8 : 2),
-          child: _Flash(
-            id: m.id,
-            flash: widget.flash,
-            builder: (flash) => NzChatBubble(
-              mine: mine,
-              last: last,
-              semanticLabel: [
-                if (mine) l.uiMessagesYou else name,
-                l.summaryOf(m),
-                l.time(m.at),
-                if (tick == ChatTick.failed) l.uiMessagesSendFailed,
-              ].where((s) => s.isNotEmpty).join(', '),
-              senderName: chat.group && !mine && first ? name : null,
-              senderColor: personColor(context, name),
-              quote: quote == null
-                  ? null
-                  : NzChatQuote(
-                      who: quoteMine ? l.uiMessagesYou : quoteName,
-                      text: quote.deleted
-                          ? l.uiMessagesDeletedMessage
-                          : quote.text ??
-                                room.message(quote.messageId)?.text ??
-                                '',
-                      color: quoteMine
-                          ? c.accentText
-                          : personColor(context, quoteName),
-                      semanticLabel: l.uiMessagesQuoteJump,
-                      onTap: () => widget.onJump(quote.messageId),
-                    ),
-              body: ChatMessageBody(
-                message: m,
-                onAttachment: m.onServer ? widget.onAttachment : (_) {},
-                onSharedFile: widget.onSharedFile,
+        return ChatSwipeReply(
+          onReply: m.onServer ? () => widget.onReply(m) : null,
+          child: Padding(
+            padding: EdgeInsets.only(top: first ? 8 : 2),
+            child: _Flash(
+              id: m.id,
+              flash: widget.flash,
+              builder: (flash) => NzChatBubble(
+                mine: mine,
+                last: last,
+                semanticLabel: [
+                  if (mine) l.uiMessagesYou else name,
+                  l.summaryOf(m),
+                  l.time(m.at),
+                  if (tick == ChatTick.failed)
+                    '${l.uiMessagesSendFailed}: ${l.sendFailure(m.failure)}',
+                ].where((s) => s.isNotEmpty).join(', '),
+                senderName: chat.group && !mine && first ? name : null,
+                senderColor: personColor(context, name),
+                quote: quote == null
+                    ? null
+                    : NzChatQuote(
+                        who: quoteMine ? l.uiMessagesYou : quoteName,
+                        text: quote.deleted
+                            ? l.uiMessagesDeletedMessage
+                            : quote.text ??
+                                  room.message(quote.messageId)?.text ??
+                                  '',
+                        color: quoteMine
+                            ? c.accentText
+                            : personColor(context, quoteName),
+                        semanticLabel: l.uiMessagesQuoteJump,
+                        onTap: () => widget.onJump(quote.messageId),
+                      ),
+                body: ChatMessageBody(
+                  message: m,
+                  onAttachment: m.onServer ? widget.onAttachment : null,
+                  onSharedFile: widget.onSharedFile,
+                ),
+                extra: tick == ChatTick.failed
+                    ? ChatSendFailureRow(
+                        failure: m.failure,
+                        onRetry: () => widget.onRetry(m),
+                      )
+                    : m.poll == null
+                    ? null
+                    : ChatPollView(
+                        question: m.text,
+                        poll: m.poll!,
+                        me: me,
+                        onVote: (i) => widget.onVote(m, i),
+                      ),
+                editedLabel: tick == ChatTick.failed
+                    ? l.uiMessagesSendFailed
+                    : m.edited
+                    ? l.uiMessagesEdited
+                    : null,
+                pinned: m.pinned,
+                time: l.time(m.at),
+                tick: switch (tick) {
+                  ChatTick.none || ChatTick.failed => NzChatTick.none,
+                  ChatTick.sending => NzChatTick.sent,
+                  ChatTick.sent => NzChatTick.delivered,
+                  ChatTick.read => NzChatTick.read,
+                },
+                flash: flash,
+                reactions: [
+                  for (final r in m.reactions)
+                    if (r.count > 0)
+                      NzChatReactionChip(
+                        kind: nzReaction(r.kind),
+                        count: r.count,
+                        mine: r.mine,
+                        semanticLabel: l.reaction(r.kind),
+                        onTap: () => widget.onReact(m, r.kind),
+                      ),
+                ],
+                showAvatarSlot: chat.group && !mine,
+                avatar: NzChatAvatar(
+                  initials: chatInitials(name),
+                  tone: personTone(name),
+                  extent: 30,
+                ),
+                longPressLabel: l.uiMessagesMessageActions,
+                onLongPress: () => widget.onActions(room, m),
               ),
-              extra: m.poll == null
-                  ? null
-                  : ChatPollView(
-                      question: m.text,
-                      poll: m.poll!,
-                      me: me,
-                      onVote: (i) => widget.onVote(m, i),
-                    ),
-              editedLabel: tick == ChatTick.failed
-                  ? l.uiMessagesSendFailed
-                  : m.edited
-                  ? l.uiMessagesEdited
-                  : null,
-              pinned: m.pinned,
-              time: l.time(m.at),
-              tick: switch (tick) {
-                ChatTick.none || ChatTick.failed => NzChatTick.none,
-                ChatTick.sending => NzChatTick.sent,
-                ChatTick.sent => NzChatTick.delivered,
-                ChatTick.read => NzChatTick.read,
-              },
-              flash: flash,
-              reactions: [
-                for (final r in m.reactions)
-                  if (r.count > 0)
-                    NzChatReactionChip(
-                      kind: nzReaction(r.kind),
-                      count: r.count,
-                      mine: r.mine,
-                      semanticLabel: l.reaction(r.kind),
-                      onTap: () => widget.onReact(m, r.kind),
-                    ),
-              ],
-              showAvatarSlot: chat.group && !mine,
-              avatar: NzChatAvatar(
-                initials: chatInitials(name),
-                tone: personTone(name),
-                extent: 30,
-              ),
-              longPressLabel: l.uiMessagesMessageActions,
-              onLongPress: () => widget.onActions(room, m),
             ),
           ),
         );

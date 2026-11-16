@@ -353,7 +353,7 @@ void k5b() {
 
   test(
     'ek: gönderiliyor balonu; tekrar aynı kimlik; reddedilen ya da okunamayan '
-    'dosya kalkar',
+    'dosya nedeniyle gönderilemedi kalır',
     () async {
       final (c, repo) = await _open();
       const file = ChatUpload(
@@ -374,10 +374,10 @@ void k5b() {
         ClientErrorCode.fileUnreadable,
       ]) {
         repo.writeError = ApiError(code);
-        await expectLater(
-          _ctrl(c).sendAttachment(file),
-          throwsA(isA<ApiError>()),
-        );
+        expect(await _ctrl(c).sendAttachment(file), ChatSendOutcome.failed);
+        final failed = _room(c).messages.last;
+        expect((failed.state, failed.failure), (ChatSendState.failed, code));
+        _ctrl(c).discard(failed.clientId);
         expect(_room(c).messages.where((m) => !m.onServer), isEmpty);
       }
     },

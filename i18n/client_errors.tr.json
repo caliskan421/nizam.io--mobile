@@ -25,6 +25,9 @@
     "client.file_unreadable": "Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.",
     "client.camera_permission_denied": "Kamera izni verilmedi. Fotoğraf çekmek için cihaz ayarlarından NIZAM.IO'ya kamera izni verin.",
     "client.camera_unavailable": "Bu cihazda kullanılabilir bir kamera bulunamadı. Fotoğrafı galeriden ya da dosyalardan seçin.",
-    "client.task_lookup_limit": "Görev aranan departman sınırına ulaşıldı. Görev listesinden departman seçerek açın."
+    "client.task_lookup_limit": "Görev aranan departman sınırına ulaşıldı. Görev listesinden departman seçerek açın.",
+    "client.conference_insecure_url": "Görüşme sunucusunun adresi güvenli değil; bağlantı kurulmadı.",
+    "client.conference_connect_failed": "Görüşmeye bağlanılamadı. Bağlantınızı kontrol edip yeniden katılın.",
+    "client.conference_token_expired": "Görüşme anahtarının süresi doldu. Yeniden katılın."
   }
 }

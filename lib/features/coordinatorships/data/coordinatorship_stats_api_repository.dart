@@ -29,7 +29,8 @@ class ApiCoordinatorshipStatsRepository
   }
 
   /// Örtüşme: `code` ← `department_id` (kısa kod backend'de yok), `name`, `done` ←
-  /// `completed_tasks`, `total` ← `total_tasks`, `late` ← `overdue_tasks`, `leads` ←
+  /// `completed_tasks`, `total` ← `total_tasks`, `inProgress` ← `in_progress_tasks`, `todo` ←
+  /// `not_started_tasks`, `late` ← `overdue_tasks`, `leads` ←
   /// `coordinators` (rol [PersonRole.coordinator]). `members` boş: sunucu yalnız
   /// `member_count` verir.
   static CoordinatorshipStats _stats(CoordinatorshipStat s) =>
@@ -38,6 +39,8 @@ class ApiCoordinatorshipStatsRepository
         name: s.name,
         done: s.completedTasks,
         total: s.totalTasks,
+        inProgress: s.inProgressTasks,
+        todo: s.notStartedTasks,
         late: s.overdueTasks,
         leads: [
           for (final p in s.coordinators)

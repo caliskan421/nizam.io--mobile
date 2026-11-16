@@ -11,7 +11,8 @@ export '../../../core/domain/upload_types.dart'
 /// Alt görev değişikliği (`PATCH …/subtasks/{id}`). null alan değişmez. [assignee] verilirse
 /// `id` null → atamayı kaldır; [dates] verilirse ikisi birlikte gider (ikisi null → kaldır).
 /// [expectedRevision]: okunan alt görev `edit_revision`'ı; başlık, atanan ya da tarih
-/// verilince zorunlu, yalnız [done]'da gerekmez (ADR-0027).
+/// verilince zorunlu, yalnız [done]'da gerekmez (ADR-0027). [evidenceRequired]: kanıt bayrağı
+/// (yönetim alanı; sürüm ister).
 @immutable
 final class SubtaskPatch {
   const SubtaskPatch({
@@ -19,8 +20,11 @@ final class SubtaskPatch {
     this.assignee,
     this.dates,
     this.done,
+    this.evidenceRequired,
     this.expectedRevision,
   });
+
+  final bool? evidenceRequired;
 
   final int? expectedRevision;
   final String? title;
@@ -269,13 +273,15 @@ final class MemberEnrollment {
 /// yerel durumu değiştirmek için kullanılmaz (iyimser güncelleme yok; çağıran yeniden okur).
 /// Hatalar `ApiError` olarak fırlar.
 abstract interface class TaskWriteRepository {
-  /// [via] ucuyla durum geçişi; [closeSubtasks] yalnız `tamamlandi` hedefinde.
+  /// [via] ucuyla durum geçişi; [closeSubtasks] yalnız `tamamlandi` hedefinde. [pullEndDate]:
+  /// erken onayda bitişi bugüne çek (`pull_end_date`; geç onayda sunucu kendisi iter).
   Future<void> changeStatus(
     TaskItem task,
     StatusEndpoint via,
     TaskStatus to, {
     String? reason,
     bool closeSubtasks = false,
+    bool pullEndDate = false,
   });
 
   /// [requestKey]: işlem anahtarı (`Idempotency-Key`, ADR-0027); aynı eylemin tekrarı aynı
@@ -296,10 +302,12 @@ abstract interface class TaskWriteRepository {
 
   Future<void> deleteNote(TaskItem task, String noteId);
 
+  /// [evidenceRequired]: alt görev bağlı dosya olmadan kapatılamaz (WORK-K70).
   Future<void> createSubtask(
     TaskItem task,
     String title, {
     required String requestKey,
+    bool evidenceRequired = false,
   });
 
   Future<void> updateSubtask(
@@ -356,11 +364,28 @@ abstract interface class TaskWriteRepository {
     String? reason,
   });
 
-  /// Şirket yöneticisi kararı (S1).
-  Future<void> reviewDateChange(String requestId, {required bool approve});
+  /// Şirket yöneticisi kararı (S1); [reason] karar gerekçesi (`review_reason` olarak döner).
+  Future<void> reviewDateChange(
+    String requestId, {
+    required bool approve,
+    String? reason,
+  });
+
+  /// Atananlara anlık hatırlatma (`POST …/remind`, S3); kuyruğa alınan alıcı sayısı döner.
+  Future<int> remind(TaskItem task);
 
   /// İncelenmiş talebi siler (şirket yöneticisi, S1).
   Future<void> deleteDateChange(String requestId);
+
+  /// Çağıranın [departmentId] departmanındaki tarih talepleri (`GET …/mine`, S3; koordinatör).
+  Future<List<DateChangeRequest>> listMyDateRequests(
+    String programId,
+    String departmentId,
+  );
+
+  /// Bitişi [days] gün uzatır (`POST …/extend`, S3; koordinatör ya da yönetici); okunan tarih
+  /// sürümü `expected_dates_revision`, [requestKey] işlem anahtarı. Bağımlılar zincirle ötelenir.
+  Future<void> extend(TaskItem task, int days, {required String requestKey});
 
   // ---- dosya (records, S3, görevin departmanı) -----------------------------------------
 

@@ -20,37 +20,6 @@ extension HomeTexts on AppLocalizations {
   String dateKicker(DateTime day) =>
       DateFormat('d MMMM y, EEEE', 'tr').format(day).toLowerCase();
 
-  /// "79 görevin 39'u bitti".
-  String kpiDoneCaption(TaskTotals t) =>
-      '${t.total} $uiHomeKpiDoneOf ${t.done}${possessive(t.done)} '
-      '$uiHomeKpiDoneTail';
-
-  /// "25 tanesi zamanında"; sayı bilinmiyorsa (kesik görev listesi) "–".
-  String kpiDoingCaption(TaskTotals t) =>
-      '${t.inProgressOnTime ?? '–'} $uiHomeKpiDoingTail';
-
-  /// "Açık görevlerin %38'i".
-  String kpiLateCaption(TaskTotals t) {
-    final ratio = t.open == 0 ? 0.0 : t.late / t.open;
-    return '$uiHomeKpiLateLead ${percent(ratio)}'
-        '${possessive((ratio * 100).round())}';
-  }
-
-  /// Sayıdan sonra üçüncü tekil iyelik eki, okunuşa göre ("39'u", "%38'i", "2'si").
-  static String possessive(int n) {
-    const units = ['', "'i", "'si", "'ü", "'ü", "'i", "'sı", "'si", "'i", "'u"];
-    const tens = ['', "'u", "'si", "'u", "'ı", "'si", "'ı", "'i", "'i", "'ı"];
-    if (n == 0) return "'ı";
-    if (n % 10 != 0) return units[n % 10];
-    if (n % 100 != 0) return tens[(n ~/ 10) % 10];
-    if (n % 1000 != 0) return "'ü";
-    return "'i";
-  }
-
-  /// "18 kullanıcı · 11 koordinatörlük".
-  String teamSummary(HomeDashboard d, TeamTotals team) =>
-      '${team.users} $uiHomeUsers · ${d.coordinatorships.length} $uiHomeCoordinatorshipsLc';
-
   /// "11 koordinatörlük · 18 kullanıcı (2 admin, 15 koordinatör, 3 üye)".
   /// Ekip sayıları bilinmiyorsa (yönetici olmayan hesap) yalnız koordinatörlük sayısı.
   String footerSummary(HomeDashboard d) => switch (d.team) {
@@ -75,10 +44,6 @@ extension HomeTexts on AppLocalizations {
     CoordinatorshipSort.progress => uiHomeSortProgress,
     CoordinatorshipSort.name => uiHomeSortName,
   };
-
-  /// Çekmecedeki sezon kartının alt satırı: "2026 sezonu" (yıl yoksa kapsam değiştirme).
-  String seasonCaption(int? year, String fallback) =>
-      year == null ? fallback : '$year $uiHomeSeasonTail';
 
   /// "Takvim mobilde sonraki adımda eklenecek".
   String soon(String what) => '$what $uiHomeSoonTail';

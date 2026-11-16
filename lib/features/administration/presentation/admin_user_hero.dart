@@ -6,6 +6,7 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/nz_avatar.dart';
+import '../../scope/scope.dart' show DepartmentRole;
 import '../../tasks/tasks.dart';
 import 'admin_user_identity.dart';
 
@@ -30,7 +31,12 @@ class AdminUserHero extends StatelessWidget {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final user = identity.user;
-    final names = identity.departmentNames(catalog, programId);
+    final memberships = user.teams.where((m) => m.programId == programId);
+    String label(DepartmentRole role) => switch (role) {
+      DepartmentRole.coordinator => l.uiUsersCoordinator,
+      DepartmentRole.member => l.uiUsersMember,
+      DepartmentRole.unknown => l.uiUsersMembershipUnknown,
+    };
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -82,28 +88,17 @@ class AdminUserHero extends StatelessWidget {
                         dot: context.colors.roleAdmin,
                         maxWidth: constraints.maxWidth,
                       ),
-                    if (identity.coordinator)
-                      _IdentityBadge(
-                        label: l.uiUsersCoordinator,
-                        dot: context.colors.avatar1,
-                        maxWidth: constraints.maxWidth,
-                      ),
-                    if (identity.member)
-                      _IdentityBadge(
-                        label: l.uiUsersMember,
-                        dot: context.colors.roleMember,
-                        maxWidth: constraints.maxWidth,
-                      ),
-                    if (names.isEmpty)
+                    if (memberships.isEmpty)
                       _IdentityBadge(
                         label: l.uiUsersUnassigned,
                         icon: NzIcons.coordinatorships,
                         maxWidth: constraints.maxWidth,
                       )
                     else
-                      for (final name in names)
+                      for (final membership in memberships)
                         _IdentityBadge(
-                          label: name,
+                          label:
+                              '${membership.displayName.isNotEmpty ? membership.displayName : catalog.coordinatorship(membership.departmentId)?.name ?? l.uiUsersMembershipUnknown} · ${label(membership.role)}',
                           icon: NzIcons.coordinatorships,
                           maxWidth: constraints.maxWidth,
                         ),

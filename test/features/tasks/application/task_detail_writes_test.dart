@@ -100,20 +100,22 @@ void main() {
       expect(h.backend.count('POST', '/v1/work-items/w1/transitions'), 0);
     });
 
-    test('matris dışı hedef ve aktörsüz yönetici: istek yok', () async {
-      final s = TaskDetailServer()
-        ..role = 'uye'
-        ..assignees = ['acc-1'];
-      final (h, _, ctl) = await _open(s);
-      expect((await ctl.setStatus(TaskStatus.done)).kind, WriteKind.invalid);
-      expect(h.backend.requests, isEmpty);
+    test(
+      'matris dışı hedef: istek yok; yönetici aktörü transitions ile geçirir',
+      () async {
+        final s = TaskDetailServer()
+          ..role = 'uye'
+          ..assignees = ['acc-1'];
+        final (h, _, ctl) = await _open(s);
+        expect((await ctl.setStatus(TaskStatus.done)).kind, WriteKind.invalid);
+        expect(h.backend.requests, isEmpty);
 
-      final a = TaskDetailServer()..admin = true;
-      final (h2, _, ctl2) = await _open(a..role = 'yok');
-      expect(ctl2.permissions.statusTargets(TaskStatus.inProgress), isEmpty);
-      expect((await ctl2.setStatus(TaskStatus.done)).kind, WriteKind.invalid);
-      expect(h2.backend.requests, isEmpty);
-    });
+        final a = TaskDetailServer()..admin = true;
+        final (h2, _, ctl2) = await _open(a..role = 'yok');
+        expect((await ctl2.setStatus(TaskStatus.done)).ok, isTrue);
+        expect(h2.backend.count('POST', '/v1/work-items/w1/transitions'), 1);
+      },
+    );
 
     test(
       'tamamlandı çıkışı ≥3 karakter gerekçe ister; gerekçe gövdede',
@@ -312,12 +314,31 @@ void main() {
       },
     );
 
+    test(
+      'alt görev ana görevin başlangıcından önce başlayamaz (istek yok)',
+      () async {
+        final s = TaskDetailServer();
+        final (h, _, ctl) = await _open(s);
+        final before = h.backend.requests.length;
+        expect(
+          (await ctl.setSubtaskStart('s1', DateTime(2026, 10, 31))).kind,
+          WriteKind.invalid,
+        );
+        expect(
+          (await ctl.setSubtaskEnd('s2', DateTime(2026, 10, 30))).kind,
+          WriteKind.invalid,
+          reason: 'başlangıçsız alt görevde bitiş başlangıca da yazılır',
+        );
+        expect(h.backend.requests.length, before);
+      },
+    );
+
     test('kişi ve tarih: atama kaldırma boş dize; tarihler birlikte gider', () async {
       final s = TaskDetailServer()..assignees = ['u2', 'acc-1'];
       final (h, _, ctl) = await _open(s);
       await ctl.setSubtaskAssignee('s1', 'u2');
       await ctl.setSubtaskAssignee('s2', null);
-      await ctl.setSubtaskStart('s1', DateTime(2026, 10, 25));
+      await ctl.setSubtaskStart('s1', DateTime(2026, 11, 3));
       await ctl.clearSubtaskDates('s2');
       final bodies = [
         for (final r in h.backend.requests)
@@ -329,8 +350,8 @@ void main() {
           {'assignee_account_id': 'u2', 'expected_revision': 1},
           {'assignee_account_id': '', 'expected_revision': 1},
           {
-            'start_on': '2026-10-25',
-            'end_on': '2026-10-25',
+            'start_on': '2026-11-03',
+            'end_on': '2026-11-03',
             'expected_revision': 1,
           },
         ],

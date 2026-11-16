@@ -25,14 +25,16 @@ import '../application/task_details_controller.dart';
 import '../application/task_lifecycle_controller.dart';
 import '../domain/task_catalog.dart';
 import 'detail/detail_actions.dart';
+import 'detail/detail_decision.dart';
 import 'detail/detail_subtasks.dart';
 import 'detail/detail_tabs.dart';
+import 'detail/task_date_request_card.dart';
 import 'task_texts.dart';
 
 /// Görev ayrıntısı (prototip `detail`): üst çubukta kod + düzenle/diğer işlemler;
 /// koordinatörlük, başlık, durum ve öncelik seçicileri, tarih talebi/hatırlat daireleri ve
 /// "Kanıt yükle"; bekleyen tarih değişikliği talebi kartı (Reddet/Onayla); Özet / Alt görev /
-/// Dosya / Not sekmeleri. Silinen görevde "silinen kayıtlara taşındı" + Geri al. Alt menüde
+/// Arşiv / Not sekmeleri. Silinen görevde "silinen kayıtlara taşındı" + Geri al. Alt menüde
 /// "Görevler"e yeniden dokunmak bu görevin kısayol menüsünü açar.
 class TaskDetailPage extends ConsumerWidget {
   const TaskDetailPage({super.key, required this.code});
@@ -63,11 +65,12 @@ class TaskDetailPage extends ConsumerWidget {
                 icon: NzIcons.checkCircle,
                 onSelected: actions.openStatus,
               ),
-            NzFlyoutItem(
-              label: l.uiTasksRemind,
-              icon: NzIcons.bell,
-              onSelected: actions.remind,
-            ),
+            if (actions.canRemind)
+              NzFlyoutItem(
+                label: l.uiTasksRemind,
+                icon: NzIcons.bell,
+                onSelected: actions.remind,
+              ),
             if (actions.canManageTask)
               NzFlyoutItem(
                 label: l.uiTasksEditTask,
@@ -192,7 +195,7 @@ class TaskDetailPage extends ConsumerWidget {
   }
 }
 
-/// Özet / Alt görev / Dosya / Not sekmeleri (yapışkan şerit).
+/// Özet / Alt görev / Arşiv / Not sekmeleri (yapışkan şerit).
 class _Tabs extends ConsumerWidget {
   const _Tabs({required this.task});
 
@@ -298,7 +301,8 @@ class _Body extends StatelessWidget {
                 semanticLabel:
                     '${l.uiTasksFlyStatus}: ${l.statusLabel(task.status)}',
                 leading: NzDot(color: statusTone(task.status).color(c)),
-                onTap: actions.openStatus,
+                // Geçiş yoksa seçici açılmaz, alan pasif görünür.
+                onTap: actions.canChangeStatus ? actions.openStatus : null,
               ),
             ),
             Expanded(
@@ -324,12 +328,15 @@ class _Body extends StatelessWidget {
               ),
               const Gap(NizamioSpacing.space2),
             ],
-            NzIconButton.circle(
-              icon: NzIcons.bell,
-              semanticLabel: l.uiTasksRemind,
-              onPressed: actions.remind,
-            ),
-            const Gap(NizamioSpacing.space2),
+            // Gerçek hatırlatma (WORK-K90): koordinatör ya da şirket yöneticisi.
+            if (actions.canRemind) ...[
+              NzIconButton.circle(
+                icon: NzIcons.bell,
+                semanticLabel: l.uiTasksRemind,
+                onPressed: actions.remind,
+              ),
+              const Gap(NizamioSpacing.space2),
+            ],
             Expanded(
               child: NzButton.primary(
                 label: l.uiTasksUpload,
@@ -341,15 +348,26 @@ class _Body extends StatelessWidget {
             ),
           ],
         ),
-        if (req != null && req.isPending) ...[
+        // Koordinatör: karar bloğu (onay bekleyen) ve bağımlılık kilidi.
+        DetailDecisionSection(task: task, catalog: catalog),
+        // Bekleyen talep kararıyla; reddedilen talep ret gerekçesiyle (salt okunur) görünür.
+        if (req != null &&
+            (req.isPending ||
+                (req.state == DateRequestState.rejected &&
+                    req.reviewReason.isNotEmpty))) ...[
           const Gap(NizamioSpacing.space5),
-          _RequestCard(
+          TaskDateRequestCard(
             request: req,
             by: req.by == null
                 ? ''
                 : catalog.nameOf(req.by!) ?? l.uiTasksUnknownPerson,
-            onReject: actions.canReviewDate ? actions.rejectRequest : null,
-            onApprove: actions.canReviewDate ? actions.approveRequest : null,
+            onReject: actions.canReviewDate && req.isPending
+                ? actions.rejectRequest
+                : null,
+            onApprove: actions.canReviewDate && req.isPending
+                ? actions.approveRequest
+                : null,
+            waiting: !actions.canReviewDate && req.isPending,
           ),
         ],
         // Sekme şeridi kaynakta `gap 20` + `margin-top: -6px` (tablet).
@@ -394,10 +412,10 @@ class _Picker extends StatelessWidget {
           constraints: const BoxConstraints(minHeight: NizamioSize.controlMd),
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: c.surface,
+              color: onTap == null ? c.surfaceRaised : c.surface,
               borderRadius: BorderRadius.circular(NizamioRadius.pill),
               border: Border.all(
-                color: c.borderControl,
+                color: onTap == null ? c.border : c.borderControl,
                 width: NizamioSize.borderWidth,
               ),
             ),
@@ -420,147 +438,15 @@ class _Picker extends StatelessWidget {
                       ),
                     ),
                   ),
-                  NzIcon(
-                    NzIcons.chevronDown,
-                    size: NizamioSize.iconSizeSm,
-                    color: c.textMuted,
-                  ),
+                  if (onTap != null)
+                    NzIcon(
+                      NzIcons.chevronDown,
+                      size: NizamioSize.iconSizeSm,
+                      color: c.textMuted,
+                    ),
                 ],
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Bekleyen tarih değişikliği talebi kartı (prototip `.rp-reqcard`).
-class _RequestCard extends StatelessWidget {
-  const _RequestCard({
-    required this.request,
-    required this.by,
-    required this.onReject,
-    required this.onApprove,
-  });
-
-  final DateChangeRequest request;
-  final String by;
-
-  /// null → karar düğmeleri yok (yalnız şirket yöneticisi karar verir).
-  final VoidCallback? onReject;
-  final VoidCallback? onApprove;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    final r = request;
-    final plus = DateTime.utc(r.due.year, r.due.month, r.due.day)
-        .difference(DateTime.utc(r.oldDue.year, r.oldDue.month, r.oldDue.day))
-        .inDays;
-    return Semantics(
-      container: true,
-      label: l.uiTasksRequestTitle,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          color: c.warning.withValues(alpha: 0.08),
-          borderRadius: BorderRadius.circular(NizamioRadius.card),
-          border: Border.all(
-            color: c.warning.withValues(alpha: 0.4),
-            width: NizamioSize.borderWidth,
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(NizamioSpacing.rowPad),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: NizamioSpacing.space3,
-            children: [
-              Row(
-                children: [
-                  NzIconTile(icon: NzIcons.eventRepeat, color: c.warning),
-                  const Gap(NizamioSpacing.gapMd),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l.uiTasksRequestTitle,
-                          style: t.bodyMd.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                        Text(
-                          [
-                            by,
-                            if (r.at case final at?)
-                              '${TaskDates.short(at)} ${TaskDates.time(at)}',
-                          ].where((s) => s.isNotEmpty).join(' · '),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.caption.copyWith(color: c.textMuted),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              Wrap(
-                spacing: NizamioSpacing.space2,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    TaskDates.full(r.oldDue),
-                    style: t.mono.copyWith(
-                      color: c.textMuted,
-                      decoration: TextDecoration.lineThrough,
-                      decorationColor: c.textMuted,
-                    ),
-                  ),
-                  ExcludeSemantics(
-                    child: Text(
-                      '→',
-                      style: t.mono.copyWith(color: c.textMuted),
-                    ),
-                  ),
-                  Text(
-                    TaskDates.full(r.due),
-                    style: t.mono.copyWith(
-                      color: c.accentText,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    l.plusDays(plus),
-                    style: t.caption.copyWith(color: c.textMuted),
-                  ),
-                ],
-              ),
-              Text(
-                '“${r.reason.isEmpty ? l.uiTasksNoReason : r.reason}”',
-                style: t.caption.copyWith(color: c.textMuted),
-              ),
-              if (onReject != null && onApprove != null)
-                Row(
-                  spacing: NizamioSpacing.space2,
-                  children: [
-                    Expanded(
-                      child: NzButton.secondary(
-                        label: l.uiTasksReject,
-                        expand: true,
-                        onPressed: onReject,
-                      ),
-                    ),
-                    Expanded(
-                      child: NzButton.primary(
-                        label: l.uiTasksApprove,
-                        expand: true,
-                        onPressed: onApprove,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
           ),
         ),
       ),

@@ -14,4 +14,5 @@ export 'domain/records.dart' show RecordFile, ArchiveAttachmentFilter;
 export 'presentation/archive_folder_page.dart' show ArchiveFolderPage;
 export 'presentation/archive_page.dart' show ArchivePage;
 export 'presentation/open_archive_file.dart' show openArchiveFile;
+export 'presentation/open_task_archive.dart' show openTaskArchive;
 export 'presentation/person_files.dart' show PersonFiles;

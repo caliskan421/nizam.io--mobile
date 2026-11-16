@@ -9,7 +9,9 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
+import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
+import '../../scope/scope.dart' show DepartmentRole;
 import '../../tasks/tasks.dart';
 import '../application/coord_member_controller.dart';
 import '../domain/department.dart';
@@ -61,6 +63,17 @@ class _MemberPicker extends ConsumerStatefulWidget {
 class _MemberPickerState extends ConsumerState<_MemberPicker> {
   String _search = '';
 
+  /// Süzgeçler (görev formu satır kartı kalıbı): kaynak koordinatörlük ve rol; `null` = tümü.
+  String? _coord;
+  DepartmentRole? _role;
+  bool _coordOpen = false;
+
+  static const _roles = [
+    null,
+    DepartmentRole.coordinator,
+    DepartmentRole.member,
+  ];
+
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
@@ -92,17 +105,23 @@ class _MemberPickerState extends ConsumerState<_MemberPicker> {
         pool.when(
           skipLoadingOnRefresh: false,
           data: (page) {
-            final people = page.items
-                .where(
-                  (p) =>
-                      p.fullName.toLowerCase().contains(query) ||
-                      sources(p).toLowerCase().contains(query),
-                )
-                .toList();
+            final people =
+                filterMemberCandidates(
+                      page.items,
+                      coordinatorship: _coord,
+                      role: _role,
+                    )
+                    .where(
+                      (p) =>
+                          p.fullName.toLowerCase().contains(query) ||
+                          sources(p).toLowerCase().contains(query),
+                    )
+                    .toList();
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               spacing: NizamioSpacing.space3,
               children: [
+                _filters(page.items, catalog),
                 if (page.truncated)
                   NzBanner.warning(message: l.uiListsTruncated),
                 if (people.isEmpty)
@@ -148,6 +167,66 @@ class _MemberPickerState extends ConsumerState<_MemberPicker> {
             message: errorText(l, toApiError(error)),
             actionLabel: l.uiCommonRetry,
             onAction: () => ref.invalidate(coordMemberCandidatesProvider(code)),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _filters(List<AssignableAccount> pool, TaskCatalog? catalog) {
+    final l = context.l10n;
+    final present = candidateCoordinatorships(pool);
+    final codes = [
+      for (final co
+          in catalog?.coordinatorships ?? const <CoordinatorshipRef>[])
+        if (present.contains(co.code)) co.code,
+    ];
+    String name(String code) => catalog?.coordinatorship(code)?.name ?? code;
+    void pick(String? code) => setState(() {
+      _coord = code;
+      _coordOpen = false;
+    });
+    return NzFormRows(
+      expandedIndex: _coordOpen ? 0 : null,
+      onToggle: (_) => setState(() => _coordOpen = !_coordOpen),
+      rows: [
+        NzFormRow(
+          label: l.uiTasksFieldCoord,
+          icon: NzIcons.coordinatorships,
+          value: _coord == null ? l.uiCoordStAll : name(_coord!),
+          valueSet: _coord != null,
+          content: QuickPane(
+            child: Column(
+              children: [
+                TaskCheckRow(
+                  label: l.uiCoordStAll,
+                  caption: '${pool.length} ${l.uiTasksPeopleLc}',
+                  radio: true,
+                  selected: _coord == null,
+                  onTap: () => pick(null),
+                ),
+                for (final code in codes)
+                  TaskCheckRow(
+                    label: name(code),
+                    caption:
+                        '${filterMemberCandidates(pool, coordinatorship: code).length} ${l.uiTasksPeopleLc}',
+                    radio: true,
+                    selected: _coord == code,
+                    onTap: () => pick(code),
+                  ),
+              ],
+            ),
+          ),
+        ),
+        NzFormRow.custom(
+          label: l.uiTasksIvRole,
+          icon: NzIcons.person,
+          trailing: TaskSegmented(
+            compact: true,
+            semanticLabel: l.uiTasksIvRole,
+            labels: [l.uiCoordStAll, l.uiCoordLeadRole, l.uiCoordMemberRole],
+            selected: _roles.indexOf(_role),
+            onSelected: (i) => setState(() => _role = _roles[i]),
           ),
         ),
       ],

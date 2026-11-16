@@ -5,6 +5,7 @@ import '../../extensions/context_ext.dart';
 import '../nz_icon.dart';
 import '../nz_icons.dart';
 import '../nz_size.dart';
+import 'nz_pill_field_style.dart';
 
 /// Arama girdisi (bundle.css `.m-search`; prototip hap biçimi): `bg-surface` dolgu, 1 px
 /// `border-control` kenar, köşe hap, görsel yükseklik 44 (dokunma 48). Etiket ipucu metni olarak
@@ -112,15 +113,8 @@ class _NzSearchFieldState extends State<NzSearchField> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final style = _resolveStyle(context, widget.size);
+    final style = nzPillFieldText(context, widget.size);
     final label = widget.label ?? l.uiInputsSearch;
-    OutlineInputBorder pill(Color color, [double? width]) => OutlineInputBorder(
-      borderRadius: BorderRadius.circular(NizamioRadius.pill),
-      borderSide: BorderSide(
-        color: color,
-        width: width ?? NizamioSize.borderWidth,
-      ),
-    );
     // Görsel yükseklik `m-tap` 44 (hap); dokunma alanı dış kutuyla 48.
     return ConstrainedBox(
       constraints: const BoxConstraints(minHeight: NizamioSpacing.space12),
@@ -139,28 +133,14 @@ class _NzSearchFieldState extends State<NzSearchField> {
               controller: _controller,
               focusNode: widget.focusNode,
               enabled: widget.enabled,
-              style: style.text,
+              style: style,
               textInputAction: TextInputAction.search,
               keyboardType: TextInputType.text,
               autocorrect: false,
               onChanged: widget.onChanged,
               onSubmitted: _submit,
-              decoration: InputDecoration(
+              decoration: nzPillFieldDecoration(context, text: style).copyWith(
                 hintText: widget.hint ?? label,
-                filled: true,
-                fillColor: c.surface,
-                isDense: true,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: NizamioSpacing.space4,
-                  vertical: _vertical(style),
-                ),
-                constraints: const BoxConstraints(
-                  minHeight: NizamioSize.controlMd,
-                ),
-                border: pill(c.borderControl),
-                enabledBorder: pill(c.borderControl),
-                disabledBorder: pill(c.border),
-                focusedBorder: pill(c.focusRing, NizamioSize.focusRingWidth),
                 prefixIcon: NzIcon(
                   NzIcons.search,
                   size: NizamioSize.iconSizeSm,
@@ -192,30 +172,3 @@ class _NzSearchFieldState extends State<NzSearchField> {
 /// İpucu etiketten farklıysa etiket ayrıca okuyucuya bağlanır (ipucu zaten okunur).
 Widget _labelled(String? label, Widget child) =>
     label == null ? child : Semantics(label: label, child: child);
-
-/// Görsel yüksekliği 44'e oturtan dikey dolgu (metin satırı ölçeksiz yüksekliğinden).
-double _vertical(({TextStyle text, double vertical}) style) {
-  final t = style.text;
-  final line = (t.fontSize ?? 0) * (t.height ?? 1);
-  final fit = (NizamioSize.controlMd - line) / 2;
-  return fit > 0 ? fit : style.vertical;
-}
-
-/// Boyuta göre yazı rolü ve dikey iç boşluk (tek görünüm fark noktası).
-({TextStyle text, double vertical}) _resolveStyle(
-  BuildContext context,
-  NzSize size,
-) => (
-  // `.m-search input` 16/21 (`m-input`); sm daha küçük rol.
-  text: size.pick(
-    sm: context.text.bodyMd,
-    md: context.text.bodyLg,
-    lg: context.text.bodyLg,
-  ),
-  // Hap içi dikey dolgu: 44 yükseklikte metin ortalanır (sm/md 14 + 16 satır, lg 12 + 21).
-  vertical: size.pick(
-    sm: NizamioSpacing.rowPad,
-    md: NizamioSpacing.space3,
-    lg: NizamioSpacing.space3,
-  ),
-);

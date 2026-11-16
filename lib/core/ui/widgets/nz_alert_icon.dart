@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 import '../../theme/generated/tokens.gen.dart';
 
 /// Ünlem ikonu (daire içinde ünlem): kaynak `design/icons/unlem-ikon.svg` (24×24, çizgi 2.2,
-/// yuvarlak uç). Projede SVG çizici yok (ikonlar Material); yol aynı ölçülerle elde çizilir.
+/// yuvarlak uç). NzIcon hata simgesini de bu ortak çizimle gösterir.
 /// [tinted] → ikon, rozetlerle aynı yarı saydam ton dolgulu dairenin içinde
 /// ([NzStatusLabel.badge] dolgusu: renk %16).
 class NzAlertIcon extends StatelessWidget {
@@ -42,7 +42,12 @@ class NzAlertIcon extends StatelessWidget {
 
   Widget _glyph() => SizedBox.square(
     dimension: size,
-    child: CustomPaint(painter: _AlertPainter(color)),
+    child: Center(
+      child: CustomPaint(
+        size: Size.square(size),
+        painter: _AlertPainter(color),
+      ),
+    ),
   );
 }
 

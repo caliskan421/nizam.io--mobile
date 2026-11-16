@@ -7,7 +7,11 @@ export 'application/meetings_controller.dart'
     show meetingsBoardControllerProvider;
 export 'application/meetings_nav_caption.dart' show meetingsNavCaptionProvider;
 export 'application/meetings_providers.dart' show meetingsRepositoryProvider;
-export 'domain/meeting.dart' show Meeting, MeetingDepartment;
-export 'domain/meeting_board.dart' show MeetingsBoard;
+export 'domain/meeting.dart'
+    show Meeting, MeetingDepartment, MeetingSummary, SummaryConferenceStatus;
+export 'domain/meeting_board.dart' show MeetingsBoard, MeetingsTab;
+export 'presentation/conference_dock.dart' show ConferenceDock;
+export 'presentation/conference_page.dart' show ConferencePage;
+export 'presentation/meeting_card.dart' show MeetingCard;
 export 'presentation/meeting_page.dart' show MeetingPage;
 export 'presentation/meetings_page.dart' show MeetingsPage;

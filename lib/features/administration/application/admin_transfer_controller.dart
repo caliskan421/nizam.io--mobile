@@ -132,8 +132,7 @@ class AdminTransferController extends Notifier<AdminTransferState> {
   }
 
   void _authorize() {
-    if (ref.read(taskCatalogControllerProvider).value?.access?.companyAdmin !=
-        true) {
+    if (!ref.read(effectiveAccessProvider).canAdminister) {
       throw ApiError('program.not_authorized');
     }
   }

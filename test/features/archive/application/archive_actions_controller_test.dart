@@ -112,6 +112,35 @@ void main() {
     expect(repo.calls.where((x) => x.$1 == 'files').length, before + 1);
   });
 
+  test('profil silmesi dosyanın departmanını kullanır', () async {
+    final repo = FakeArchiveRepository();
+    final c = archiveContainer(repo, catalog: archiveCatalog(admin: true));
+    final result = await _ctrl(c)
+        .deleteFile(archiveFile('mine'), department: 'd2');
+    expect(result.ok, isTrue);
+    expect(repo.calls.firstWhere((c) => c.$1 == 'delete'), (
+      'delete',
+      'd2',
+      'mine',
+    ));
+  });
+
+  test('etiket değişimi sunucuda; aynı etiket istek göndermez', () async {
+    final repo = FakeArchiveRepository();
+    final c = archiveContainer(repo);
+    final ctrl = _ctrl(c);
+    final same = await ctrl.retagFile(archiveFile('f1'), RecordTag.plan);
+    expect(same.ok, isFalse);
+    expect(repo.calls.where((x) => x.$1 == 'retag'), isEmpty);
+    final r = await ctrl.retagFile(archiveFile('f1'), RecordTag.sonuc);
+    expect(r.ok, isTrue);
+    expect(repo.calls.firstWhere((x) => x.$1 == 'retag'), (
+      'retag',
+      'd1',
+      ('f1', RecordTag.sonuc),
+    ));
+  });
+
   group('yükleme', () {
     UploadSource src(String name, {int size = 10}) =>
         UploadSource(path: '/tmp/$name', name: name, sizeBytes: size);

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
+import '../../../core/domain/effective_role.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
@@ -16,14 +17,17 @@ import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
+import '../application/effective_access.dart';
 import '../application/task_catalog_controller.dart';
 import '../application/task_list_filter.dart';
 import '../application/tasks_list_controller.dart';
+import '../domain/coordinator_board.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_query.dart';
 
 import 'quick_action_sheets.dart';
 import 'tasks/task_card_grid.dart';
+import 'tasks/tasks_coordinator_header.dart';
 import 'tasks/tasks_filter_sheet.dart';
 import 'tasks/tasks_list_parts.dart';
 import 'tasks/tasks_shortcuts.dart';
@@ -169,6 +173,11 @@ class _TasksPageState extends ConsumerState<TasksPage> {
       );
     });
     final state = ref.watch(_provider);
+    // Etkin görünüm: koordinatörde görünüm/sıralama kümesi, kapsam başlığı ve satır eylemleri.
+    final role = ref.watch(
+      effectiveAccessProvider.select((a) => a.known ? a.role : null),
+    );
+    final coordinator = role == EffectiveRole.coordinator;
     // Görünüm: paylaşılan katalog + bu ekranın departman süzgeci (task_list_filter.dart).
     final catalog = ref.watch(taskListCatalogProvider);
     final result = ref.watch(tasksListResultOf(_provider));
@@ -187,6 +196,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
         result: result,
         catalog: catalog,
         canCreate: canCreate,
+        coordinator: coordinator,
+        role: role,
         columns: TaskCardGrid.columnsFor(
           box.maxWidth -
               2 * NzPaneScope.sideInset(context, box, NzContentWidth.wide),
@@ -202,6 +213,8 @@ class _TasksPageState extends ConsumerState<TasksPage> {
     required TaskQueryResult? result,
     required AsyncValue<TaskCatalog> catalog,
     required bool canCreate,
+    required bool coordinator,
+    required EffectiveRole? role,
     required int columns,
   }) {
     final l = context.l10n;
@@ -277,6 +290,7 @@ class _TasksPageState extends ConsumerState<TasksPage> {
           ),
         ),
         const Gap(NizamioSpacing.space5),
+        if (coordinator) const TasksCoordinatorHeader(),
         if (data != null && result != null)
           ...tasksListChildren(
             context,
@@ -291,6 +305,15 @@ class _TasksPageState extends ConsumerState<TasksPage> {
             onOpen: nav.openTask,
             onFilter: _openFilters,
             columns: columns,
+            coordinator: coordinator,
+            member: role == EffectiveRole.member,
+            views: taskViewsFor(role: role),
+            sortOverride: resolveTaskSort(
+              state.sort,
+              picked: state.sortPicked,
+              coordinator: coordinator,
+              member: role == EffectiveRole.member,
+            ),
           )
         else
           NzAsyncView<TaskCatalog>(

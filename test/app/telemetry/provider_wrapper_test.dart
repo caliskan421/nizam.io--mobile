@@ -77,10 +77,10 @@ void main() {
       }
 
       test(
-        'varsayılan devre dışı etkinlik kaynağı gerçek yoldan 0 rapor',
+        'yönetici olmayana kapalı işlem geçmişi (ActivityUnavailable) 0 rapor',
         () async {
           final p = FutureProvider<ActivityLog>(
-            (ref) => const UnavailableActivityLogRepository().load(),
+            (ref) => throw const ActivityUnavailable(),
           );
           container.listen(p, (_, _) {});
           await settle();

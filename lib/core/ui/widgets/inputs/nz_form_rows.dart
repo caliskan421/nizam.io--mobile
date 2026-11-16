@@ -5,6 +5,7 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../layout/nz_pane.dart';
 import '../../theme/nz_motion.dart';
+import '../buttons/nz_tap.dart';
 import '../nz_icon.dart';
 import '../nz_icons.dart';
 import '../surfaces/nz_reveal.dart';
@@ -154,9 +155,15 @@ class NzFormRows extends StatelessWidget {
     required this.rows,
     this.expandedIndex,
     this.onToggle,
+    this.backgroundColor,
+    this.radius = NizamioRadius.row,
   });
 
   final List<NzFormRow> rows;
+  final Color? backgroundColor;
+
+  /// Outer shape; standalone selectors share the text-field pill radius.
+  final double radius;
   final int? expandedIndex;
   final ValueChanged<int>? onToggle;
 
@@ -168,9 +175,9 @@ class NzFormRows extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = context.colors;
     return ClipRRect(
-      borderRadius: BorderRadius.circular(NizamioRadius.row),
+      borderRadius: BorderRadius.circular(radius),
       child: ColoredBox(
-        color: c.surfaceRaised,
+        color: backgroundColor ?? c.surfaceRaised,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
@@ -230,7 +237,7 @@ class _RowView extends StatelessWidget {
           label: row.label,
           onTap: tap,
           excludeSemantics: true,
-          child: InkWell(
+          child: NzTap(
             onTap: tap,
             child: _RowLine(
               row: row,
@@ -277,7 +284,7 @@ class _RowView extends StatelessWidget {
           label: value == null ? row.label : '${row.label}, $value',
           onTap: tap,
           excludeSemantics: true,
-          child: InkWell(
+          child: NzTap(
             onTap: tap,
             // Etiket solda doğal genişliğinde; değer kalan genişlikte sağa yaslı, tek satır.
             child: _RowLine(

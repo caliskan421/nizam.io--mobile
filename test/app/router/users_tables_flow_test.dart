@@ -1,19 +1,26 @@
-// Tablolar rotaları: liste ve ayrıntı açılır, geri liste konumuna döner. Sahte ağ her isteğe
-// 404 verdiği için sayfalar sunucu hatası durumunu çizer (veri mantığı controller
-// testlerindedir: test/features/tables/application/).
+import 'dart:io';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nizamio/core/app_phase.dart';
+import 'package:nizamio/core/ui/widgets/inputs/nz_search_field.dart';
+import 'package:nizamio/features/tables/application/tables_controller.dart';
+import 'package:nizamio/features/tables/domain/table_document.dart';
 import 'package:nizamio/features/tables/presentation/table_page.dart';
 import 'package:nizamio/features/tables/presentation/tables_page.dart';
 
 import '../../core/ui/widgets/feedback/feedback_test_support.dart';
+import '../../support/tablet_harness.dart' show hostPng;
 import 'router_test_support.dart';
 
 void main() {
   setUpFonts();
   for (final size in const [Size(390, 844), Size(1180, 820)]) {
-    testWidgets('Tablolar liste → ayrıntı → geri: $size', (tester) async {
+    testWidgets('Tablolar liste, salt okunur ve geri: $size', (tester) async {
       final phase = ValueNotifier(AppPhase.scoped);
       addTearDown(phase.dispose);
       final router = await pumpRouter(
@@ -25,15 +32,241 @@ void main() {
       router.go('/tables');
       await settle(tester);
       expect(find.byType(TablesPage), findsOneWidget);
-      router.go('/tables/t-1');
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(TablesPage)),
+      );
+      final shared = container
+          .read(tablesControllerProvider)
+          .documents
+          .firstWhere((d) => !d.editable);
+      router.go('/tables/${shared.id}');
       await settle(tester);
       expect(find.byType(TablePage), findsOneWidget);
+      expect(find.text('Yalnızca görüntüleme'), findsOneWidget);
+      if (const bool.fromEnvironment('NIZAMIO_TABLET_HOST_SHOTS')) {
+        File('/tmp/nizam-tables-${size.width.toInt()}.png')
+            .writeAsBytesSync(await hostPng(tester));
+      }
+      expect(find.text('Satır ekle'), findsNothing);
       expect(tester.takeException(), isNull);
       await tester.binding.handlePopRoute();
       await settle(tester);
       expect(locationOf(router), '/tables');
       expect(tester.takeException(), isNull);
     });
+  }
+
+  for (final size in const [Size(360, 640), Size(1180, 820)]) {
+    for (final share in [false, true]) {
+      testWidgets(
+        'Yeni tablo özel varsayılan ve paylaşım seçimi: $size / $share',
+        (tester) async {
+          final phase = ValueNotifier(AppPhase.scoped);
+          addTearDown(phase.dispose);
+          final router = await pumpRouter(
+            tester,
+            phase,
+            width: size.width,
+            height: size.height,
+          );
+          router.go('/tables');
+          await settle(tester);
+          final container = ProviderScope.containerOf(
+            tester.element(find.byType(TablesPage)),
+          );
+          await tester.tap(find.bySemanticsLabel('Yeni tablo').first);
+          await settle(tester);
+          expect(find.text('Yalnızca ben'), findsOneWidget);
+          expect(find.text('Hedef'), findsNothing);
+          await tester.enterText(
+            find.byType(TextField).last,
+            'Yeni özel tablo',
+          );
+          await settle(tester);
+          if (share) {
+            await tester.tap(find.text('Paylaşım'));
+            await settle(tester);
+            expect(find.text('Kadir Özbek'), findsNothing);
+            await tester.ensureVisible(find.text('Altyapı ve tesisat').last);
+            await tester.tap(find.text('Altyapı ve tesisat').last);
+            await settle(tester);
+            await tester.ensureVisible(find.text('Kadir Özbek').last);
+            await tester.tap(find.text('Kadir Özbek').last);
+            await settle(tester);
+            await tester.ensureVisible(find.text('Düzenleme').last);
+            await tester.tap(find.text('Düzenleme').last);
+            await tester.ensureVisible(find.text('Koordinatörlük').last);
+            await tester.tap(find.text('Koordinatörlük').last);
+            await settle(tester);
+            await tester.ensureVisible(find.text('Tablonun koordinatörlüğü'));
+            await tester.tap(find.text('Tablonun koordinatörlüğü'));
+            await settle(tester);
+            await tester.ensureVisible(find.text('Altyapı ve tesisat').last);
+            await tester.tap(find.text('Altyapı ve tesisat').last);
+            await settle(tester);
+          }
+          if (const bool.fromEnvironment('NIZAMIO_TABLET_HOST_SHOTS')) {
+            File('/tmp/nizam-table-create-${size.width.toInt()}-$share.png')
+                .writeAsBytesSync(await sheetPng(tester));
+          }
+          expect(tester.takeException(), isNull);
+          await tester.tap(find.text('Oluştur'));
+          await settle(tester);
+          final created = container
+              .read(tablesControllerProvider)
+              .documents
+              .firstWhere((d) => d.title == 'Yeni özel tablo');
+          expect(created.area, share ? TableArea.coord : TableArea.personal);
+          expect(created.teamAccess, TableAccess.off);
+          expect(
+            created.people,
+            share ? {const TablePersonId('demo-1'): TableAccess.edit} : isEmpty,
+          );
+          expect(created.programAccess, TableAccess.off);
+          expect(tester.takeException(), isNull);
+        },
+      );
+    }
+  }
+  testWidgets('Tabloda satır ve hücre düzenleme', (tester) async {
+    final phase = ValueNotifier(AppPhase.scoped);
+    addTearDown(phase.dispose);
+    final router = await pumpRouter(tester, phase, width: 390, height: 844);
+    router.go('/tables');
+    await settle(tester);
+    final container = ProviderScope.containerOf(
+      tester.element(find.byType(TablesPage)),
+    );
+    final controller = container.read(tablesControllerProvider.notifier);
+    final id = controller.create(
+      title: 'Deneme',
+      area: TableArea.personal,
+      fields: const [TableField(id: 'name', name: 'Ad')],
+    )!;
+    router.go('/tables/$id');
+    await settle(tester);
+    await tester.tap(find.text('Satır ekle'));
+    await settle(tester);
+    await tester.enterText(find.byType(TextField).last, 'Yeni değer');
+    await tester.tap(find.text('Kaydet'));
+    await settle(tester);
+    expect(
+      container
+          .read(tablesControllerProvider)
+          .document(id)!
+          .rows
+          .single
+          .cells[const TableFieldId('name')],
+      'Yeni değer',
+    );
+    expect(find.text('Yeni değer'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+  for (final size in const [Size(390, 844), Size(1180, 820)]) {
+    testWidgets('Tablo detayı araması filtreyi temizler ve kapanır: $size', (
+      tester,
+    ) async {
+      final phase = ValueNotifier(AppPhase.scoped);
+      addTearDown(phase.dispose);
+      final router = await pumpRouter(
+        tester,
+        phase,
+        width: size.width,
+        height: size.height,
+      );
+      router.go('/tables');
+      await settle(tester);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(TablesPage)),
+      );
+      final controller = container.read(tablesControllerProvider.notifier);
+      final id = controller.create(
+        title: 'Arama tablosu',
+        area: TableArea.personal,
+        fields: const [TableField(id: 'name', name: 'Ad')],
+      )!;
+      final first = controller.addRow(id)!;
+      final second = controller.addRow(id)!;
+      controller.cell(id, first, 'name', 'Elma');
+      controller.cell(id, second, 'name', 'Armut');
+      router.go('/tables/$id');
+      await settle(tester);
+      await tester.tap(find.bySemanticsLabel('Tablolarda ara').first);
+      await settle(tester);
+      final field = find.descendant(
+        of: find.byType(NzSearchField),
+        matching: find.byType(TextField),
+      );
+      expect(tester.widget<TextField>(field).focusNode!.hasFocus, isTrue);
+      await tester.enterText(field, 'Elma');
+      await settle(tester);
+      expect(
+        find.byWidgetPredicate((w) => w is Text && w.data == 'Elma'),
+        findsOneWidget,
+      );
+      expect(find.text('Armut'), findsNothing);
+      await tester.tap(find.byTooltip('Aramayı temizle'));
+      await settle(tester);
+      expect(find.text('Armut'), findsOneWidget);
+      await tester.enterText(field, 'Elma');
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await settle(tester);
+      expect(find.byType(NzSearchField), findsNothing);
+      expect(find.text('Armut'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Tablolarda ara').first);
+      await settle(tester);
+      expect(
+        tester
+            .widget<TextField>(
+              find.descendant(
+                of: find.byType(NzSearchField),
+                matching: find.byType(TextField),
+              ),
+            )
+            .controller!
+            .text,
+        isEmpty,
+      );
+      expect(tester.takeException(), isNull);
+    });
+  }
+  for (final size in const [Size(360, 640), Size(1180, 820)]) {
+    testWidgets(
+      'Açık tablo formunun alt eylemi eski lease ile kullanılamaz: $size',
+      (tester) async {
+        final phase = ValueNotifier(AppPhase.scoped);
+        addTearDown(phase.dispose);
+        final router = await pumpRouter(
+          tester,
+          phase,
+          width: size.width,
+          height: size.height,
+        );
+        router.go('/tables');
+        await settle(tester);
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(TablesPage)),
+        );
+        expect(tester.takeException(), isNull);
+        await tester.tap(find.bySemanticsLabel('Yeni tablo').first);
+        await settle(tester);
+        expect(tester.takeException(), isNull);
+        await tester.enterText(find.byType(TextField).last, 'Eski taslak');
+        await settle(tester);
+        expect(find.text('Oluştur'), findsOneWidget);
+        container.invalidate(tablesControllerProvider);
+        await settle(tester);
+        expect(find.text('Oluştur'), findsNothing);
+        expect(
+          container
+              .read(tablesControllerProvider)
+              .documents
+              .any((d) => d.title == 'Eski taslak'),
+          isFalse,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
   }
   testWidgets('Menüden Tablolar açılır', (tester) async {
     final phase = ValueNotifier(AppPhase.scoped);
@@ -49,4 +282,16 @@ void main() {
     expect(find.byType(TablesPage), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
+}
+
+Future<List<int>> sheetPng(WidgetTester tester) async {
+  final view = tester.binding.renderViews.single;
+  final layer = view.debugLayer! as OffsetLayer;
+  final bytes = await tester.runAsync(() async {
+    final image = await layer.toImage(Offset.zero & view.size);
+    final data = await image.toByteData(format: ui.ImageByteFormat.png);
+    image.dispose();
+    return data!.buffer.asUint8List();
+  });
+  return bytes!;
 }

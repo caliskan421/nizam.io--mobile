@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:meta/meta.dart';
 
+import '../../../core/domain/effective_role.dart';
 import '../../../core/domain/turkish_collation.dart';
 import 'task_catalog.dart';
 
@@ -9,37 +10,84 @@ import 'task_catalog.dart';
 enum TaskView {
   all,
   late,
+
+  /// İade edilenler (üye kümesi; diğer rollerde "Devam" iadeyi de sayar).
+  returned,
   inProgress,
   review,
   dateRequest,
   notStarted,
-  done;
+  done,
+
+  /// Atanmamış açık görevler (koordinatör görünümü; sorumlu bekliyor).
+  unassigned;
 
   bool matches(TaskItem t) => switch (this) {
     TaskView.all => true,
     TaskView.late => !t.isDone && t.isOverdue,
+    TaskView.returned => t.status == TaskStatus.returned,
     TaskView.inProgress =>
       t.status == TaskStatus.inProgress || t.status == TaskStatus.returned,
     TaskView.review => t.status == TaskStatus.review,
     TaskView.dateRequest => t.hasPendingRequest,
     TaskView.notStarted => t.status == TaskStatus.todo,
     TaskView.done => t.isDone,
+    TaskView.unassigned =>
+      !t.isDone && t.status != TaskStatus.unknown && t.assignees.isEmpty,
   };
+
+  /// Etkin role göre eşleşme (tek yer): Üye görünümünde "İade" ayrı kutucuk olduğundan
+  /// "Devam" yalnız `devam_ediyor` sayar; diğer rollerde [matches].
+  bool matchesFor(TaskItem t, EffectiveRole? role) =>
+      this == TaskView.inProgress && role == EffectiveRole.member
+      ? t.status == TaskStatus.inProgress
+      : matches(t);
 }
+
+/// Kişiye göre gruplu listenin grup anahtarı: sorumlu (ilk atanan) kişi; atanmamış görevler
+/// ayrı grupta (anahtar `person:`).
+abstract final class TaskPersonGroup {
+  static const _prefix = 'person:';
+
+  /// [TaskGroup.coordinatorship] alanındaki grup anahtarı.
+  static String keyOf(TaskItem t) => '$_prefix${t.assignees.firstOrNull ?? ''}';
+
+  /// Anahtarın kişisi: boş dize atanmamış; kişi grubu değilse null.
+  static String? personOf(String key) =>
+      key.startsWith(_prefix) ? key.substring(_prefix.length) : null;
+}
+
+/// Kişi grubu içindeki durum sırası: onay bekleyen, devam, iade, başlamadı, tamamlandı,
+/// tanımsız.
+int _statusRank(TaskItem t) => switch (t.status) {
+  TaskStatus.review => 0,
+  TaskStatus.inProgress => 1,
+  TaskStatus.returned => 2,
+  TaskStatus.todo => 3,
+  TaskStatus.done => 4,
+  TaskStatus.unknown => 5,
+};
 
 /// Sıralama ölçütü; [defaultDescending] ölçüt seçildiğindeki yön.
 enum TaskSort {
   created(defaultDescending: true),
   due(defaultDescending: false),
   start(defaultDescending: false),
-  coordinatorship(defaultDescending: false);
+  coordinatorship(defaultDescending: false),
+
+  /// Kişiye göre gruplu (koordinatör varsayılanı; [TaskPersonGroup]).
+  person(defaultDescending: false);
 
   const TaskSort({required this.defaultDescending});
 
   final bool defaultDescending;
 
-  /// Koordinatörlük sıralaması yönsüzdür (gruplu liste).
-  bool get dated => this != TaskSort.coordinatorship;
+  /// Koordinatörlük ve kişi sıralaması yönsüzdür (gruplu liste).
+  bool get dated => !grouped;
+
+  /// Gruplu liste ([TaskQueryResult.groups] dolu).
+  bool get grouped =>
+      this == TaskSort.coordinatorship || this == TaskSort.person;
 }
 
 /// Liste süzgeci (kişi, koordinatörlük, öncelik; aynı grupta "veya", gruplar arası "ve") ve
@@ -91,24 +139,37 @@ final class TaskFilter {
       return false;
     }
     if (people.isNotEmpty && !t.assignees.any(people.contains)) return false;
-    final q = trLower(query.trim());
-    if (q.isEmpty) return true;
-    final hay = trLower(
-      [
-        t.title,
-        t.code,
-        for (final a in t.assignees) c.nameOf(a) ?? '',
-      ].join(' '),
-    );
-    return hay.contains(q);
+    return taskMatchesQuery(t, c, query);
   }
 }
 
-/// Koordinatörlük grubu (koordinatörlüğe göre sıralı liste).
+/// Görev listesi ve zaman çizelgelerinin ortak metin araması: başlık, görev kodu (iç ve
+/// kısa), atanan kişi adları ve koordinatörlük adı/etiketi; Türkçe küçük harf (`trLower`). Boş sorgu her görevi tutar.
+bool taskMatchesQuery(TaskItem t, TaskCatalog c, String query) {
+  final q = trLower(query.trim());
+  if (q.isEmpty) return true;
+  final hay = trLower(
+    [
+      t.title,
+      t.code,
+      t.displayCode,
+      for (final a in t.assignees) c.nameOf(a) ?? '',
+      if (c.coordinatorship(t.coordinatorship) case final co?) ...[
+        co.name,
+        co.label,
+      ],
+    ].join(' '),
+  );
+  return hay.contains(q);
+}
+
+/// Liste grubu: koordinatörlüğe göre sıralamada koordinatörlük, kişiye göre sıralamada sorumlu
+/// kişi ([TaskPersonGroup.keyOf]).
 @immutable
 final class TaskGroup {
   const TaskGroup(this.coordinatorship, this.tasks);
 
+  /// Grup anahtarı: koordinatörlük kimliği ya da [TaskPersonGroup.keyOf].
   final String coordinatorship;
   final List<TaskItem> tasks;
 }
@@ -128,30 +189,37 @@ final class TaskQueryResult {
   /// Seçili görünümün görevleri (sıralı).
   final List<TaskItem> tasks;
 
-  /// Koordinatörlüğe göre sıralamada gruplar (diğer sıralamalarda boş).
+  /// Gruplu sıralamada gruplar (koordinatörlük ya da kişi; diğer sıralamalarda boş).
   final List<TaskGroup> groups;
 }
 
-/// Listeyi hesaplar (prototip `S_tasks.renderVals`).
+/// Listeyi hesaplar (prototip `S_tasks.renderVals`). [role] görünüm eşleşmesini seçer
+/// ([TaskView.matchesFor]).
 TaskQueryResult queryTasks(
   TaskCatalog c, {
   required TaskView view,
   required TaskSort sort,
   required bool descending,
   required TaskFilter filter,
+  EffectiveRole? role,
 }) {
   final base = [
     for (final t in c.tasks)
       if (filter.matches(t, c)) t,
   ];
   final counts = {
-    for (final v in TaskView.values) v: base.where(v.matches).length,
+    for (final v in TaskView.values)
+      v: base.where((t) => v.matchesFor(t, role)).length,
   };
   final k = descending ? -1 : 1;
   int doneLast(TaskItem a, TaskItem b) =>
       (a.isDone ? 1 : 0) - (b.isDone ? 1 : 0);
   String name(TaskItem t) =>
       c.coordinatorship(t.coordinatorship)?.name ?? t.coordinatorship;
+  String person(TaskItem t) => switch (t.assignees.firstOrNull) {
+    null => '',
+    final id => c.nameOf(id) ?? id,
+  };
   int cmp(TaskItem a, TaskItem b) => switch (sort) {
     TaskSort.created => _or(
       k * _compareNullable(a.createdAt, b.createdAt),
@@ -166,18 +234,29 @@ TaskQueryResult queryTasks(
       trCompare(name(a), name(b)),
       () => _or(doneLast(a, b), () => a.due.compareTo(b.due)),
     ),
+    // Kişiler ada göre, atanmamış en sonda; kişi içinde durum, sonra bitiş.
+    TaskSort.person => _or(
+      _or(
+        (a.assignees.isEmpty ? 1 : 0) - (b.assignees.isEmpty ? 1 : 0),
+        () => trCompare(person(a), person(b)),
+      ),
+      () => _or(_statusRank(a) - _statusRank(b), () => a.due.compareTo(b.due)),
+    ),
   };
-  final list = _stableSort(base.where(view.matches).toList(), cmp);
+  final list = _stableSort(
+    base.where((t) => view.matchesFor(t, role)).toList(),
+    cmp,
+  );
   final groups = <TaskGroup>[];
-  if (sort == TaskSort.coordinatorship) {
+  if (sort.grouped) {
+    String key(TaskItem t) =>
+        sort == TaskSort.person ? TaskPersonGroup.keyOf(t) : t.coordinatorship;
     var run = <TaskItem>[];
     for (var i = 0; i < list.length; i++) {
       run.add(list[i]);
-      final last =
-          i == list.length - 1 ||
-          list[i + 1].coordinatorship != list[i].coordinatorship;
+      final last = i == list.length - 1 || key(list[i + 1]) != key(list[i]);
       if (last) {
-        groups.add(TaskGroup(list[i].coordinatorship, run));
+        groups.add(TaskGroup(key(list[i]), run));
         run = <TaskItem>[];
       }
     }

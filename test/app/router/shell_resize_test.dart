@@ -42,9 +42,10 @@ void main() {
           for (var i = 0; i < 12; i++)
             ArchiveFolder(code: 'd$i', name: 'Klasör $i', files: i),
         ];
+      // Klasör ızgarası yönetici görünümünde (koordinatör düz görev klasörü listesini görür).
       final harness = await real(
         tester,
-        () => pilotHarness(archiveBackend(), signedIn: true),
+        () => pilotHarness(archiveBackend(admin: true), signedIn: true),
       );
       // Port, get_it kaydından tembel okunur (archiveOverrides): ilk okumadan önce değiştirilir.
       useArchiveFakes(harness, repo);
@@ -82,7 +83,9 @@ void main() {
       await settle(tester);
       final view = harness.read(archiveControllerProvider);
       expect(view.query, 'k');
-      final caption = inPage(find.textContaining(_l.uiArchiveFoldersTitle));
+      final caption = inPage(
+        find.textContaining(_l.uiArchiveCoordinatorshipsLc),
+      );
       final captionText = tester.widget<Text>(caption).data;
 
       final state = tester.state(page);
@@ -110,6 +113,8 @@ void main() {
         Size(599, 700),
         Size(1180, 820),
         Size(820, 1180),
+        // 13 inç iPad yatay: en kısa içerik, konum sıkıştırılır.
+        Size(1376, 1032),
         Size(1180, 820),
         Size(375, 820),
         Size(1180, 820),

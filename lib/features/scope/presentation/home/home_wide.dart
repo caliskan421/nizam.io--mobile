@@ -5,7 +5,7 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
-import '../../../../core/ui/widgets/nz_icon.dart';
+import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/home_dashboard.dart';
 import 'home_sections.dart';
@@ -25,21 +25,92 @@ class HomeQuickActionsBar extends StatelessWidget {
   const HomeQuickActionsBar({
     super.key,
     required this.onAction,
-    required this.isAdmin,
+    required this.actions,
     this.compact = false,
+    this.title,
+    this.columns = 0,
+    this.tileAspect = 1,
   });
 
   final ValueChanged<HomeQuickAction> onAction;
-  final bool isAdmin;
+
+  /// Izgara kipinde ([columns] > 0) kartın içinde çizilen başlık; satır kipinde başlık çağıranda.
+  final String? title;
+
+  /// 0 → tek satırda eşit bölmeler; >0 → o kadar sütunlu ızgara (koordinatör: 2×2, kareye yakın).
+  final int columns;
+
+  /// Izgara dokunacının en/boy oranı (1 = kare); null → içerik yüksekliğinde (ikon ve etiket
+  /// alt alta, dar aralıkla; yönetici tableti).
+  final double? tileAspect;
+
+  /// [homeQuickActions] sonucu.
+  final List<HomeQuickAction> actions;
   final bool compact;
 
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
     final c = context.colors;
-    final actions = homeQuickActions(isAdmin: isAdmin);
-    return NzCard.outlined(
-      padding: const EdgeInsets.all(NizamioSpacing.space2),
+    final title = this.title;
+    if (columns > 0) {
+      // Izgara (koordinatör, tablet): başlık kartın içinde, kare dokunaçlar; ayraç yok.
+      Widget cell(int j) => Expanded(
+        child: j < actions.length
+            ? _QuickTile(
+                glyph: quickActionGlyph(actions[j]),
+                label: quickActionLabel(l, actions[j]),
+                aspect: tileAspect,
+                onPressed: () => onAction(actions[j]),
+              )
+            : const SizedBox.shrink(),
+      );
+      Widget row(int i, {bool stretch = false}) => Row(
+        crossAxisAlignment: stretch
+            ? CrossAxisAlignment.stretch
+            : CrossAxisAlignment.center,
+        children: [
+          for (var j = i; j < i + columns; j++) ...[
+            if (j > i) const Gap(NizamioSpacing.space2),
+            cell(j),
+          ],
+        ],
+      );
+      return NzCard.outlined(
+        padding: const EdgeInsets.all(NizamioSpacing.space3),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (title != null) ...[
+              // "Genel durum" başlığıyla aynı biçim ve üst hiza.
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 10, 10, 0),
+                child: Text(
+                  title,
+                  style: context.text.bodyMd.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: c.text,
+                  ),
+                ),
+              ),
+              const Gap(14),
+            ],
+            for (var i = 0; i < actions.length; i += columns) ...[
+              if (i > 0) const Gap(NizamioSpacing.space2),
+              if (tileAspect == null)
+                // İçerik yüksekliğindeki dokunaçlar çiftin yüksekliğini satırlara eşit böler
+                // (yalnız sınırlı yükseklikte: satırın `IntrinsicHeight`'ı).
+                Expanded(child: row(i, stretch: true))
+              else
+                row(i),
+            ],
+          ],
+        ),
+      );
+    }
+    final row = IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -57,7 +128,7 @@ class HomeQuickActionsBar extends StatelessWidget {
               ),
             Expanded(
               child: _QuickAction(
-                icon: quickActionIcon(a),
+                glyph: quickActionGlyph(a),
                 label: quickActionLabel(l, a),
                 compact: compact,
                 onPressed: () => onAction(a),
@@ -67,18 +138,93 @@ class HomeQuickActionsBar extends StatelessWidget {
         ],
       ),
     );
+    return NzCard.outlined(
+      padding: const EdgeInsets.all(NizamioSpacing.space2),
+      child: row,
+    );
+  }
+}
+
+/// Izgara dokunacı: kare, ince kenarlıklı; simge sol üstte, etiket sol altta (kalın).
+class _QuickTile extends StatelessWidget {
+  const _QuickTile({
+    required this.glyph,
+    required this.label,
+    required this.aspect,
+    required this.onPressed,
+  });
+
+  final NzGlyph glyph;
+  final double? aspect;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = context.colors;
+    final radius = BorderRadius.circular(NizamioRadius.tile);
+    final fill = aspect != null;
+    final tile = Material(
+      color: c.surfaceOverlay,
+      shape: RoundedRectangleBorder(
+        borderRadius: radius,
+        side: BorderSide(color: c.border, width: NizamioSize.borderWidth),
+      ),
+      // Basma vurgusu yok; geri bildirim [NzPressable] küçülmesidir.
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onPressed,
+        child: Padding(
+          padding: const EdgeInsets.all(NizamioSpacing.space3),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: fill ? MainAxisSize.max : MainAxisSize.min,
+            mainAxisAlignment: fill
+                ? MainAxisAlignment.spaceBetween
+                : MainAxisAlignment.start,
+            children: [
+              NzGlyphIcon(
+                glyph,
+                size: NizamioSize.iconSize,
+                color: c.textMuted,
+              ),
+              if (!fill) const Gap(NizamioSpacing.space2),
+              Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: context.text.list.copyWith(fontWeight: FontWeight.w600),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    return Semantics(
+      container: true,
+      button: true,
+      label: label,
+      onTap: onPressed,
+      excludeSemantics: true,
+      child: NzPressable(
+        child: switch (aspect) {
+          final a? => AspectRatio(aspectRatio: a, child: tile),
+          null => tile,
+        },
+      ),
+    );
   }
 }
 
 class _QuickAction extends StatelessWidget {
   const _QuickAction({
-    required this.icon,
+    required this.glyph,
     required this.label,
     required this.compact,
     required this.onPressed,
   });
 
-  final IconData icon;
+  final NzGlyph glyph;
   final String label;
   final bool compact;
   final VoidCallback onPressed;
@@ -96,10 +242,10 @@ class _QuickAction extends StatelessWidget {
       child: NzPressable(
         child: Material(
           type: MaterialType.transparency,
-          child: InkWell(
+          // Basma vurgusu yok; geri bildirim [NzPressable] küçülmesidir.
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: onPressed,
-            borderRadius: radius,
-            splashFactory: NoSplash.splashFactory,
             child: Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: NizamioSpacing.space3,
@@ -115,10 +261,12 @@ class _QuickAction extends StatelessWidget {
                     ),
                     child: SizedBox.square(
                       dimension: NizamioSize.iconTileLg,
-                      child: NzIcon(
-                        icon,
-                        size: NizamioSize.iconSizeSm,
-                        color: c.text,
+                      child: Center(
+                        child: NzGlyphIcon(
+                          glyph,
+                          size: NizamioSize.iconSizeSm,
+                          color: c.text,
+                        ),
                       ),
                     ),
                   ),
@@ -153,8 +301,11 @@ class HomeTeamTile extends StatelessWidget {
     required this.label,
     this.onTap,
     this.compact = false,
+    this.prefix = '',
   });
 
+  /// Sayının önüne (kesik listede "≥").
+  final String prefix;
   final Color dot;
   final Color bar;
   final int count;
@@ -173,8 +324,8 @@ class HomeTeamTile extends StatelessWidget {
       ),
       onTap: onTap,
       semanticLabel: onTap == null
-          ? '$count $label'
-          : '$count $label. ${l.uiHomeOpenList}',
+          ? '$prefix$count $label'
+          : '$prefix$count $label. ${l.uiHomeOpenList}',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -183,7 +334,11 @@ class HomeTeamTile extends StatelessWidget {
             child: const Padding(padding: EdgeInsets.all(NizamioSize.dot / 2)),
           ),
           Gap(compact ? NizamioSpacing.space1 : NizamioSpacing.space2),
-          Text('$count', maxLines: 1, style: compact ? t.titleMd : t.titleLg),
+          Text(
+            '$prefix$count',
+            maxLines: 1,
+            style: compact ? t.titleMd : t.titleLg,
+          ),
           Text(
             label,
             maxLines: compact ? 2 : 1,
@@ -195,40 +350,6 @@ class HomeTeamTile extends StatelessWidget {
           NzProgressBar(value: total == 0 ? 0 : count / total, color: bar),
         ],
       ),
-    );
-  }
-}
-
-/// Ekip, geniş düzen (başlık çağıranda, bkz. [HomeQuickActionsBar]): toplam üye + rol başına
-/// [HomeTeamTile]. Dokunma dar düzendeki gibi ([HomeTeam.onOpen]); toplam ve yönetici yalnız
-/// sayıdır.
-class HomeWideTeam extends StatelessWidget {
-  const HomeWideTeam({super.key, required this.team, required this.onOpen});
-
-  final TeamTotals team;
-  final ValueChanged<TeamRole> onOpen;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final total = team.users;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      spacing: NizamioSpacing.space2,
-      children: [
-        for (final w in [
-          HomeTeamTile(
-            dot: c.text,
-            bar: c.textMuted,
-            count: total,
-            total: total,
-            label: l.uiHomeTeamTotal,
-          ),
-          ...homeRoleTiles(context, team, onOpen),
-        ])
-          Expanded(child: w),
-      ],
     );
   }
 }

@@ -8,6 +8,7 @@ import 'package:nizamio/features/timeline/application/timeline_controller.dart';
 import 'package:nizamio/features/timeline/domain/horizontal_timeline.dart';
 import 'package:nizamio/features/timeline/domain/timeline.dart';
 import 'package:nizamio/features/timeline/presentation/gantt/gantt_selection_card.dart';
+import 'package:nizamio/features/timeline/presentation/widgets/timeline_rule_panel.dart';
 import 'package:nizamio/features/timeline/presentation/widgets/timeline_selection_card.dart';
 
 import '../../../../support/harness.dart';
@@ -117,14 +118,22 @@ void main() {
   });
 
   testWidgets(
-    'tablet Talep gönder koordinatör için gerçek tarih talebi oluşturur',
+    'tablet tarih talebi koordinatör için gerekçeyle gerçek talep oluşturur',
     (tester) async {
       final (h, backend, selection) = await _open(tester, admin: false);
       await pumpScreen(tester, h, _page(selection));
       await settle(tester);
-      await tester.tap(find.bySemanticsLabel('bitiş bir gün ileri'));
+      // Başlangıç değişikliği 7 gün kuralı gereği talep formuna gider; gerekçe zorunlu.
+      await tester.tap(find.bySemanticsLabel('başlangıç bir gün ileri'));
       await tester.pump();
-      await tester.tap(find.text('Talep gönder'));
+      await tester.enterText(
+        find.byKey(TimelineRulePanel.reasonKey),
+        'Malzeme gecikti',
+      );
+      await tester.pump();
+      await tester.ensureVisible(find.text('Tarih talebi gönder'));
+      await tester.pump();
+      await tester.tap(find.text('Tarih talebi gönder'));
       await settle(tester);
       expect(h.backend.count('POST', '/v1/date-change-requests'), 1);
       expect(h.read(_provider).draft, isNull);
@@ -248,7 +257,8 @@ void main() {
           onPickEnd: () {},
           onShift: (_) {},
           onSave: () {},
-          onRequest: () {},
+          onRequest: (_) {},
+          onExtendDraft: () {},
           onRemind: null,
           onReset: () {},
         ),
@@ -301,7 +311,8 @@ void main() {
                 onPickEnd: () {},
                 onShift: (_) {},
                 onSave: () {},
-                onRequest: () {},
+                onRequest: (_) {},
+                onExtendDraft: () {},
                 onRemind: null,
                 onReset: () {},
               ),

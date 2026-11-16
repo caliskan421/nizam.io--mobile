@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_surfaces.dart';
+import '../nz_glyph.dart';
 import '../nz_icon.dart';
 import '../nz_size.dart';
 import '../surfaces/nz_glass.dart';
@@ -15,13 +16,15 @@ import 'nz_pressable.dart';
 class NzIconButton extends StatelessWidget {
   const NzIconButton({
     super.key,
-    required this.icon,
+    this.icon,
+    this.glyph,
     required this.semanticLabel,
     required this.onPressed,
     this.size = NzSize.md,
     this.dot,
     this.focusBorder = true,
-  }) : _variant = _IconVariant.plain;
+  }) : assert((icon == null) != (glyph == null)),
+       _variant = _IconVariant.plain;
 
   /// Cam daire (README `m-glassbtn`, yalnız üst çubuktaki menü): `glass-float` dolgu, bulanıklık,
   /// `glass-edge` kenar; 40 görsel, 48 dokunma; basınca `.96`.
@@ -30,7 +33,8 @@ class NzIconButton extends StatelessWidget {
     required this.icon,
     required this.semanticLabel,
     required this.onPressed,
-  }) : size = NzSize.md,
+  }) : glyph = null,
+       size = NzSize.md,
        dot = null,
        focusBorder = true,
        _variant = _IconVariant.glass;
@@ -44,7 +48,8 @@ class NzIconButton extends StatelessWidget {
     required this.semanticLabel,
     required this.onPressed,
     this.dot,
-  }) : size = NzSize.md,
+  }) : glyph = null,
+       size = NzSize.md,
        focusBorder = true,
        _variant = _IconVariant.circle;
 
@@ -55,12 +60,16 @@ class NzIconButton extends StatelessWidget {
     required this.icon,
     required this.semanticLabel,
     required this.onPressed,
-  }) : size = NzSize.md,
+  }) : glyph = null,
+       size = NzSize.md,
        dot = null,
        focusBorder = true,
        _variant = _IconVariant.circleAccent;
 
-  final IconData icon;
+  final IconData? icon;
+
+  /// SVG yolunu standart dokunma alanı, renk ve odak davranışıyla çizer.
+  final NzGlyph? glyph;
   final String semanticLabel;
 
   /// null → devre dışı.
@@ -73,7 +82,6 @@ class NzIconButton extends StatelessWidget {
   final _IconVariant _variant;
 
   static const _disabledContentAlpha = 0.38;
-  static const _overlayAlpha = 0.12;
   static const _focusWidth = NizamioSize.focusRingWidth;
 
   double get _extent => size.pick(
@@ -83,9 +91,9 @@ class NzIconButton extends StatelessWidget {
   );
 
   double get _iconExtent => size.pick(
-    sm: NizamioSpacing.space5,
-    md: NizamioSpacing.space6,
-    lg: NizamioSpacing.space8,
+    sm: NizamioSize.iconSizeSm,
+    md: NizamioSize.iconSize,
+    lg: NizamioSpacing.space6,
   );
 
   ButtonStyle _resolveStyle(BuildContext context) {
@@ -103,13 +111,9 @@ class NzIconButton extends StatelessWidget {
             ? c.text.withValues(alpha: _disabledContentAlpha)
             : c.text,
       ),
-      overlayColor: WidgetStateProperty.resolveWith(
-        (s) =>
-            s.contains(WidgetState.hovered) ||
-                s.contains(WidgetState.pressed) ||
-                s.contains(WidgetState.focused)
-            ? c.text.withValues(alpha: _overlayAlpha)
-            : null,
+      splashFactory: NoSplash.splashFactory,
+      overlayColor: WidgetStatePropertyAll(
+        context.colors.text.withValues(alpha: 0),
       ),
       side: WidgetStateProperty.resolveWith(
         (s) => focusBorder && s.contains(WidgetState.focused)
@@ -129,18 +133,25 @@ class NzIconButton extends StatelessWidget {
     onTap: onPressed,
     excludeSemantics: true,
     child: switch (_variant) {
-      _IconVariant.glass => _GlassCircle(icon: icon, onPressed: onPressed),
+      _IconVariant.glass => _GlassCircle(icon: icon!, onPressed: onPressed),
       _IconVariant.circle || _IconVariant.circleAccent => _SolidCircle(
-        icon: icon,
+        icon: icon!,
         onPressed: onPressed,
         accent: _variant == _IconVariant.circleAccent,
         dot: dot,
       ),
-      _IconVariant.plain => IconButton(
-        onPressed: onPressed,
-        iconSize: _iconExtent,
-        style: _resolveStyle(context),
-        icon: dot == null ? NzIcon(icon) : _Dotted(icon: icon, dot: dot!),
+      _IconVariant.plain => NzPressable(
+        enabled: onPressed != null,
+        child: IconButton(
+          onPressed: onPressed,
+          iconSize: _iconExtent,
+          style: _resolveStyle(context),
+          icon: glyph != null
+              ? NzGlyphIcon(glyph!)
+              : dot == null
+              ? NzIcon(icon)
+              : _Dotted(icon: icon!, dot: dot!),
+        ),
       ),
     },
   );
@@ -198,7 +209,7 @@ class _SolidCircle extends StatelessWidget {
                   (s) =>
                       s.contains(WidgetState.focused) ||
                           s.contains(WidgetState.hovered)
-                      ? ink.withValues(alpha: NzIconButton._overlayAlpha)
+                      ? ink.withValues(alpha: 0.12)
                       : null,
                 ),
                 child: SizedBox.square(
@@ -284,7 +295,6 @@ class _GlassCircle extends StatelessWidget {
           enabled: onPressed != null,
           child: NzGlass.circle(
             tone: NzGlassTone.float,
-            shadow: context.shadows.float,
             child: InkWell(
               onTap: onPressed,
               customBorder: const CircleBorder(),

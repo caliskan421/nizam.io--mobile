@@ -9,7 +9,10 @@ enum NzValidationIssue {
   tooLong,
   mismatch,
   mustAccept,
-  mustChoose;
+  mustChoose,
+
+  /// Biçim kuralına uymayan değer (kural alanın yardım metnindedir).
+  invalid;
 
   String text(AppLocalizations l) => switch (this) {
     NzValidationIssue.required => l.uiInputsValidationRequired,
@@ -19,6 +22,7 @@ enum NzValidationIssue {
     NzValidationIssue.mismatch => l.uiInputsValidationMismatch,
     NzValidationIssue.mustAccept => l.uiInputsValidationMustAccept,
     NzValidationIssue.mustChoose => l.uiInputsValidationMustChoose,
+    NzValidationIssue.invalid => l.uiInputsInvalidValue,
   };
 }
 

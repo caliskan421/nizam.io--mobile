@@ -69,8 +69,8 @@ void main() {
   });
 
   group('operasyon → kapsam sınıfı haritası (spec\'ten)', () {
-    test('f64-faz3-onizleme: 220 işlem; API sürümü v1', () {
-      expect(apiOperations, hasLength(220));
+    test('v0.20.0-api: 227 işlem; API sürümü v1', () {
+      expect(apiOperations, hasLength(227));
       expect(apiVersion, 'v1');
     });
 
@@ -96,9 +96,6 @@ void main() {
 
     test('örnekler', () {
       expect(apiOperations['readProgram']!.scope, ScopeClass.s2);
-      expect(apiOperations['getTable']!.scope, ScopeClass.s3);
-      expect(apiOperations['getPersonalTable']!.scope, ScopeClass.s2);
-      expect(apiOperations['setTablePresence']!.csrf, isTrue);
       expect(apiOperations['login']!.auth, isFalse);
       expect(apiOperations['me']!.scope, ScopeClass.s1);
       expect(apiOperations['refresh']!.csrf, isTrue);
@@ -125,10 +122,10 @@ void main() {
 
   group('tasarım token\'ları', () {
     test('roller tasarım kaynağından ARGB olarak çözülmüş', () {
-      // accent (#c8f53c) iki modda aynı; scrim CSS #16161566 → ARGB 0x66161615.
-      expect(NizamioColors.light.primary, const Color(0xFFC8F53C));
-      expect(NizamioColors.dark.primary, NizamioColors.light.primary);
-      expect(NizamioColors.light.scrim, const Color(0x66161615));
+      // accent tasarım kaynağında koyu #c8f53c, açık #cbe83c; scrim CSS #12131659 → ARGB 0x59121316.
+      expect(NizamioColors.light.primary, const Color(0xFFCBE83C));
+      expect(NizamioColors.dark.primary, const Color(0xFFC8F53C));
+      expect(NizamioColors.light.scrim, const Color(0x59121316));
       expect(NizamioColors.dark.scrim, const Color(0x8C000000));
     });
     test('ThemeExtension lerp/copyWith', () {

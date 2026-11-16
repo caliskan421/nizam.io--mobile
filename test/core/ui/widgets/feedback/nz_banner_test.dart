@@ -84,10 +84,7 @@ void main() {
   group('offline', () {
     testWidgets('metin ARB\'den; onAction yoksa düğme yok', (tester) async {
       await tester.pumpWidget(testApp(const NzBanner.offline()));
-      expect(
-        find.text('Çevrimdışısınız. Sunucuya ulaşılamıyor.'),
-        findsOneWidget,
-      );
+      expect(find.text('İnternete bağlı değilsiniz.'), findsOneWidget);
       expect(find.byType(TextButton), findsNothing);
     });
 

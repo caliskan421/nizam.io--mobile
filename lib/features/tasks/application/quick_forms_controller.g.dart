@@ -62,7 +62,7 @@ final class NewTaskCoordinatorshipsProvider
 }
 
 String _$newTaskCoordinatorshipsHash() =>
-    r'5719067f7b2e63e902a48f6db2c7d369376affbf';
+    r'c005d74f050322f1607485596ccccb042eb5b3c2';
 
 @ProviderFor(NewTaskFormController)
 final newTaskFormControllerProvider = NewTaskFormControllerProvider._();

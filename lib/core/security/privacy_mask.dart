@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 /// Arka plan ekran maskesi altyapısı (F14 kapsam 9; ADR-0006). Uygulama ön planda değilken
 /// (inactive/hidden/paused) [masked] açılır; [PrivacyMask] içeriğin üstüne opak bir katman
-/// koyar — görev değiştiricideki anlık görüntüde içerik görünmez. Ekran yoktur; ekran
+/// ([color]; uygulama kökünde etkin temanın zemini) koyar — görev değiştiricideki anlık görüntüde içerik görünmez. Ekran yoktur; ekran
 /// çalışması bu sarmalayıcıyı kullanır.
 class PrivacyMaskController extends ValueNotifier<bool> {
   PrivacyMaskController() : super(false) {

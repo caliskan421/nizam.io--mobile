@@ -12,6 +12,10 @@ mixin _DateRequestFlow on _$TaskDetailController {
     Future<void> Function(String key) call, {
     required bool list,
   });
+  Future<WriteOutcome> _write(
+    Future<void> Function() call, {
+    required bool list,
+  });
 
   TaskItem? _dateBase;
 
@@ -43,6 +47,11 @@ mixin _DateRequestFlow on _$TaskDetailController {
         !permissions.canRequestDate) {
       return WriteOutcome.invalid;
     }
+    // Sebep zorunlu (ürün kuralı; sunucuda isteğe bağlı): hata formda gösterilir.
+    if (!isValidDecisionReason(d.reason)) {
+      state = state.copyWith(showErrors: true);
+      return WriteOutcome.invalid;
+    }
     final base = _dateBase;
     if (base?.datesRevision == null) {
       return _rejected(ClientErrorCode.serverOutdated);
@@ -59,7 +68,7 @@ mixin _DateRequestFlow on _$TaskDetailController {
         d.start,
         d.due,
         requestKey: key,
-        reason: reason.isEmpty ? null : reason,
+        reason: reason,
       ),
       list: false,
     );
@@ -74,5 +83,43 @@ mixin _DateRequestFlow on _$TaskDetailController {
       state = state.copyWith(dateDraft: () => null);
     }
     return r;
+  }
+
+  // ---- karar ve silme ---------------------------------------------------------------------
+
+  /// Bekleyen talebi onaylar (yalnız şirket yöneticisi). Onay bağımlı görevleri zincirle
+  /// öteleyebilir → liste de yeniden okunur; ret yalnız kalemi etkiler.
+  Future<WriteOutcome> approveRequest() => _review(approve: true);
+
+  /// Reddeder; gerekçe istemci kuralıyla zorunludur (sunucuda isteğe bağlı, ≤ 500 karakter).
+  /// Boş gerekçe istek göndermez.
+  Future<WriteOutcome> rejectRequest(String reason) {
+    final r = reason.trim();
+    if (r.isEmpty || r.length > 500) return Future.value(WriteOutcome.invalid);
+    return _review(approve: false, reason: r);
+  }
+
+  Future<WriteOutcome> _review({required bool approve, String? reason}) async {
+    final t = _task;
+    final r = t?.dateRequest;
+    if (t == null || r == null || !r.isPending) return WriteOutcome.invalid;
+    final id = r.id;
+    if (id == null || !permissions.canReviewDate) return WriteOutcome.invalid;
+    return _write(
+      () => _writes.reviewDateChange(id, approve: approve, reason: reason),
+      list: approve,
+    );
+  }
+
+  /// İncelenmiş talebi siler (yalnız şirket yöneticisi; bekleyen silinemez).
+  Future<WriteOutcome> deleteDateRequest() async {
+    final t = _task;
+    final r = t?.dateRequest;
+    if (t == null || r == null) return WriteOutcome.invalid;
+    final id = r.id;
+    if (id == null || !permissions.canDeleteDateRequest(r)) {
+      return WriteOutcome.invalid;
+    }
+    return _write(() => _writes.deleteDateChange(id), list: false);
   }
 }

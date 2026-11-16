@@ -153,6 +153,7 @@ class PerfBackend {
                     'work_item_id': m[1],
                     'title': 'Alt görev ${k + 1}',
                     'done': k.isEven,
+                    'evidence_required': false,
                     'created_by_account_id': 'acc-1',
                     'created_at': '2026-10-01T08:00:00Z',
                     'updated_at': '2026-10-02T08:00:00Z',

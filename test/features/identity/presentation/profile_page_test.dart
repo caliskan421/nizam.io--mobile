@@ -1,4 +1,4 @@
-// ProfilePage: hesap e-postası (GET /v1/me) ve çıkış (onay diyaloğu). compact + expanded.
+// Profil kimliği, hesap sekmesi ve çıkış akışı; telefon + tablet.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -30,6 +30,9 @@ void main() {
     await settle(tester);
     expect(find.text('a@b.test'), findsOneWidget);
     expect(find.text(_l.uiIdentityProfileEmail), findsOneWidget);
+    expect(find.text('Ayşe Yılmaz'), findsOneWidget);
+    await tester.tap(find.text(_l.uiUsersAccount));
+    await settle(tester);
     expect(find.text(_l.uiIdentitySignOut), findsOneWidget);
     expect(h.backend.count('GET', '/v1/me'), 1);
     expect(tester.takeException(), isNull);
@@ -46,6 +49,9 @@ void main() {
     );
     await pumpScreen(tester, h, const ProfilePage());
     await settle(tester);
+    await tester.tap(find.text(_l.uiUsersAccount));
+    await settle(tester);
+    await tester.ensureVisible(find.text(_l.uiIdentitySignOut));
     await tester.tap(find.text(_l.uiIdentitySignOut));
     await settle(tester);
     expect(find.text(_l.uiIdentitySignOutConfirmMessage), findsOneWidget);
@@ -65,6 +71,51 @@ void main() {
     await settle(tester);
     expect(h.backend.count('POST', '/v1/auth/logout'), 1);
     expect(h.read(appPhaseProvider), AppPhase.serverVerified);
+  }, sizes: pilotSizes);
+
+  testScreens('profil parolası: eşleşme doğrulanır, başarıda form kapanır', (
+    tester,
+    screen,
+  ) async {
+    useScreen(tester, screen);
+    final h = await real(
+      tester,
+      () => pilotHarness(PilotBackend(), signedIn: true),
+    );
+    await pumpScreen(tester, h, const ProfilePage());
+    await settle(tester);
+    await tester.tap(find.text(_l.uiUsersAccount));
+    await settle(tester);
+    await tester.tap(find.text(_l.uiIdentityPasswordTitle));
+    await settle(tester);
+    final fields = find.byType(TextFormField);
+    expect(fields, findsNWidgets(3));
+    await tester.enterText(fields.at(0), 'Current-password-42!');
+    await tester.enterText(fields.at(1), 'New-password-42!');
+    await tester.enterText(fields.at(2), 'Mismatch-password-42!');
+    await tester.ensureVisible(find.text(_l.uiIdentityPasswordSubmit));
+    await tester.tap(find.text(_l.uiIdentityPasswordSubmit));
+    await settle(tester);
+    expect(h.backend.count('POST', '/v1/auth/password'), 0);
+    expect(find.text(_l.uiInputsValidationMismatch), findsOneWidget);
+    await tester.enterText(fields.at(2), 'New-password-42!');
+    await tester.ensureVisible(find.text(_l.uiIdentityPasswordSubmit));
+    await tester.tap(find.text(_l.uiIdentityPasswordSubmit));
+    await settle(tester);
+    expect(h.backend.count('POST', '/v1/auth/password'), 1);
+    expect(
+      h.backend.requests
+          .where((r) => r.path == '/v1/auth/password')
+          .single
+          .body,
+      {
+        'current_password': 'Current-password-42!',
+        'new_password': 'New-password-42!',
+      },
+    );
+    expect(fields, findsNothing);
+    expect(h.read(appPhaseProvider), AppPhase.sessionOpen);
+    expect(tester.takeException(), isNull);
   }, sizes: pilotSizes);
 
   testWidgets(

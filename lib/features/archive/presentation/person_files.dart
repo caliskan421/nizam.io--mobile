@@ -13,8 +13,10 @@ import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
+import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/nz_card.dart';
 import '../../tasks/tasks.dart';
+import '../application/archive_actions_controller.dart';
 import '../application/archive_providers.dart';
 import '../application/person_files_controller.dart';
 import '../domain/records.dart';
@@ -22,14 +24,25 @@ import '../domain/records.dart';
 /// Hesabın yüklediği, oturumun seçili programda okuyabildiği dosyalar. Kendi kaydırmasını
 /// açmaz; profil akışına yerleştirilir. Daha fazla imleci bitene dek korunur.
 class PersonFiles extends ConsumerStatefulWidget {
-  const PersonFiles({super.key, required this.accountId});
+  const PersonFiles({
+    super.key,
+    required this.accountId,
+    this.limit,
+    this.filterArchive = false,
+  });
   final String accountId;
+
+  /// İlk bu kadar dosya; fazlası "Tümünü göster" ile açılır (null → hepsi, sayfalı).
+  final int? limit;
+  final bool filterArchive;
   @override
   ConsumerState<PersonFiles> createState() => _PersonFilesState();
 }
 
 class _PersonFilesState extends ConsumerState<PersonFiles> {
   bool _downloading = false;
+  bool _expanded = false;
+  bool _deleting = false;
 
   Future<void> _download(RecordFile file, String department) async {
     if (_downloading) return;
@@ -60,9 +73,54 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
     }
   }
 
+  Future<void> _delete(RecordFile file, String department) async {
+    if (_deleting) return;
+    final scope = ref.read(scopeStateProvider);
+    final session = ref.read(sessionGenerationProvider);
+    final me = ref.read(taskCatalogControllerProvider).value?.me;
+    if (me == null || file.uploaderId != me) return;
+    bool current() =>
+        mounted &&
+        scope == ref.read(scopeStateProvider) &&
+        session == ref.read(sessionGenerationProvider);
+    setState(() => _deleting = true);
+    try {
+      final l = context.l10n;
+      final yes = await NzDialog.confirm(
+        context,
+        title: l.uiArchiveDelete,
+        message: '${file.displayName} · ${l.uiArchiveDeleteConfirm}',
+        confirmLabel: l.uiArchiveDeleteOk,
+        tone: NzDialogTone.destructive,
+      );
+      if (!yes || !mounted || !current()) return;
+      final container = ProviderScope.containerOf(context, listen: false);
+      final provider = archiveActionsControllerProvider(department);
+      final subscription = container.listen(provider, (_, _) {});
+      try {
+        final result = await container
+            .read(provider.notifier)
+            .deleteFile(file, department: department);
+        if (!mounted || !current()) return;
+        if (result.ok) {
+          NzToast.success(context, l.uiArchiveDeleted);
+        } else if (result.error case final error?) {
+          NzToast.error(context, error);
+        }
+      } finally {
+        subscription.close();
+      }
+    } finally {
+      if (mounted) setState(() => _deleting = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final provider = personFilesControllerProvider(widget.accountId);
+    final provider = personFilesControllerProvider(
+      widget.accountId,
+      filterArchive: widget.filterArchive,
+    );
     ref.watch(provider);
     final value = ref.read(provider.notifier).visible;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
@@ -86,6 +144,13 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
         ],
       );
     }
+    final limit = widget.limit;
+    final collapsed = limit != null && !_expanded;
+    final items = collapsed
+        ? data.files.items.take(limit).toList()
+        : data.files.items;
+    final more =
+        collapsed && (data.files.items.length > limit || data.files.hasMore);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: NizamioSpacing.space2,
@@ -97,7 +162,7 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                for (var i = 0; i < data.files.items.length; i++) ...[
+                for (var i = 0; i < items.length; i++) ...[
                   if (i > 0)
                     Divider(
                       height: NizamioSize.borderWidth,
@@ -105,18 +170,18 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
                       indent: NizamioSpacing.space4,
                       color: context.colors.border,
                     ),
-                  _fileRow(
-                    context,
-                    data.files.items[i],
-                    data.department,
-                    catalog,
-                  ),
+                  _fileRow(context, items[i], data.department, catalog),
                 ],
               ],
             ),
           ),
         if (data.error != null) Text(errorText(l, data.error!)),
-        if (data.files.hasMore)
+        if (more)
+          NzButton.secondary(
+            label: l.uiArchiveShowAll,
+            onPressed: () => setState(() => _expanded = true),
+          )
+        else if (data.files.hasMore)
           NzButton.secondary(
             label: l.uiArchiveLoadMore,
             loading: data.loadingMore,
@@ -133,6 +198,15 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
     TaskCatalog? catalog,
   ) {
     final task = catalog?.task(file.workItemId);
+    // Lehte rol varsayımı yapılmaz: dosya sahipliği ve bilinen görev kapsamı kullanılır.
+    final ownDepartment =
+        task?.departmentId ??
+        task?.coordinatorship ??
+        ref.watch(effectiveAccessProvider).departmentId;
+    final canDelete =
+        file.uploaderId != null &&
+        file.uploaderId == catalog?.me &&
+        ownDepartment != null;
     final dot = file.displayName.lastIndexOf('.');
     final extension = dot < 0 ? '' : file.displayName.substring(dot + 1);
     final kind = file.contentType == 'application/pdf'
@@ -202,6 +276,14 @@ class _PersonFilesState extends ConsumerState<PersonFiles> {
                     ],
                   ),
                 ),
+                if (canDelete)
+                  NzIconButton(
+                    icon: NzIcons.delete,
+                    semanticLabel: context.l10n.uiArchiveDelete,
+                    onPressed: _deleting
+                        ? null
+                        : () => _delete(file, ownDepartment),
+                  ),
                 NzIconButton(
                   icon: NzIcons.download,
                   semanticLabel: context.l10n.uiArchiveDownload,

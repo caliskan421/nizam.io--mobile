@@ -13,13 +13,17 @@ import '../../../core/ui/widgets/surfaces/nz_reveal.dart';
 import '../../tasks/tasks.dart';
 import '../application/gantt_provider.dart';
 import '../application/horizontal_timeline_controller.dart';
+import '../application/timeline_controller.dart';
 import '../domain/horizontal_timeline.dart';
+import '../domain/timeline.dart' show timelineAllCoordinatorships;
 import 'gantt/gantt_chart.dart';
 import 'gantt/gantt_controls.dart';
 import 'gantt/gantt_geometry.dart';
 import 'gantt/gantt_layout_provider.dart';
 import 'gantt/gantt_selection_card.dart';
 import 'gantt/gantt_sheets.dart';
+import 'widgets/timeline_selection_backdrop.dart';
+import 'widgets/timeline_tabs.dart';
 
 /// Tablet yatay zaman çizelgesi (prototip `S_hgantt`, "Yatay zaman çizelgesi · tam genişlik"):
 /// "Görevler" başlığı (sayı satırı, Liste / Zaman çizelgesi anahtarı, ara, yeni görev), araç
@@ -58,6 +62,7 @@ class HorizontalTimelinePage extends ConsumerStatefulWidget {
 
 class _HorizontalTimelinePageState
     extends ConsumerState<HorizontalTimelinePage> {
+  final _chartKey = GlobalKey<GanttChartState>();
   var _center = const GanttCenterRequest(0);
   final _horizontalScroll = ScrollController();
   bool _compactLabels = false;
@@ -140,6 +145,20 @@ class _HorizontalTimelinePageState
     }
   }
 
+  void _pickTask(String code) {
+    ref
+        .read(timelineControllerProvider(timelineAllCoordinatorships).notifier)
+        .select(code);
+    _ctrl.pick(code);
+  }
+
+  void _closeSelection() {
+    ref
+        .read(timelineControllerProvider(timelineAllCoordinatorships).notifier)
+        .closeSelection();
+    _ctrl.clearSelection();
+  }
+
   /// Prototip `go`: seçim kalkar, sonra görev açılır.
   void _open(String code) {
     _ctrl.clearSelection();
@@ -212,6 +231,14 @@ class _HorizontalTimelinePageState
                     ? () => showNewTaskSheet(context, resetTarget: true)
                     : null,
               ),
+              const TimelineTabs(
+                padding: EdgeInsets.fromLTRB(
+                  GanttGeometry.headerPadRight,
+                  0,
+                  GanttGeometry.headerPadRight,
+                  NizamioSpacing.space3,
+                ),
+              ),
               NzReveal(
                 open: _searchOpen,
                 onOpened: _searchFocus.requestFocus,
@@ -274,22 +301,34 @@ class _HorizontalTimelinePageState
                             ),
                             child: ClipRect(
                               child: _chartReady
-                                  ? GanttChart(
+                                  ? KeyedSubtree(
                                       key: HorizontalTimelinePage.chartKey,
-                                      layout: layout,
-                                      horizontalController: _horizontalScroll,
-                                      expandedTasks: _expandedTasks,
-                                      onToggleSubtasks: (code) => setState(() {
-                                        if (!_expandedTasks.remove(code)) {
-                                          _expandedTasks.add(code);
-                                        }
-                                      }),
-                                      onToggleLabels: () => setState(
-                                        () => _compactLabels = !_compactLabels,
+                                      child: GanttChart(
+                                        key: _chartKey,
+                                        layout: layout,
+                                        horizontalController: _horizontalScroll,
+                                        expandedTasks: _expandedTasks,
+                                        onToggleSubtasks: (code) => setState(
+                                          () {
+                                            if (!_expandedTasks.remove(code)) {
+                                              _expandedTasks.add(code);
+                                            }
+                                          },
+                                        ),
+                                        onToggleLabels: () => setState(
+                                          () =>
+                                              _compactLabels = !_compactLabels,
+                                        ),
+                                        center: _center,
+                                        onToggleGroup: ctrl.toggleGroup,
+                                        onPick: _pickTask,
+                                        links:
+                                            ref
+                                                .watch(ganttScheduleProvider)
+                                                .value
+                                                ?.links ??
+                                            const [],
                                       ),
-                                      center: _center,
-                                      onToggleGroup: ctrl.toggleGroup,
-                                      onPick: ctrl.pick,
                                     )
                                   : const SizedBox.expand(),
                             ),
@@ -304,6 +343,15 @@ class _HorizontalTimelinePageState
             ],
           ),
           if (sel != null)
+            Positioned.fill(
+              child: TimelineSelectionBackdrop(
+                selected: sel.task.code,
+                taskAt: (point) => _chartKey.currentState?.taskAt(point),
+                onSelect: _pickTask,
+                onClose: _closeSelection,
+              ),
+            ),
+          if (sel != null)
             Positioned(
               right: GanttGeometry.cardRight,
               bottom: GanttGeometry.cardBottom,
@@ -312,7 +360,7 @@ class _HorizontalTimelinePageState
                 key: HorizontalTimelinePage.cardKey,
                 selection: sel,
                 year: v.year,
-                onClose: ctrl.clearSelection,
+                onClose: _closeSelection,
                 onOpen: () => _open(sel.task.code),
               ),
             ),

@@ -23,6 +23,7 @@ _Chat _$ChatFromJson(Map<String, dynamic> json) => _Chat(
       ? null
       : DateTime.parse(json['last_message_at'] as String),
   createdAt: DateTime.parse(json['created_at'] as String),
+  autoDepartmentId: json['auto_department_id'] as String?,
   role: json['role'] == null ? null : ChatRole.fromJson(json['role'] as String),
   peerOnline: json['peer_online'] as bool?,
   peerLastSeenAt: json['peer_last_seen_at'] == null
@@ -43,6 +44,7 @@ Map<String, dynamic> _$ChatToJson(_Chat instance) => <String, dynamic>{
   'last_seq': instance.lastSeq,
   'last_message_at': ?instance.lastMessageAt?.toIso8601String(),
   'created_at': instance.createdAt.toIso8601String(),
+  'auto_department_id': ?instance.autoDepartmentId,
   'role': ?_$ChatRoleEnumMap[instance.role],
   'peer_online': ?instance.peerOnline,
   'peer_last_seen_at': ?instance.peerLastSeenAt?.toIso8601String(),

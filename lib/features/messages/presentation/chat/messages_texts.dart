@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/errors/api_error.dart';
+import '../../../../core/errors/error_text.dart';
 import '../../../../core/i18n/generated/app_localizations.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../domain/chat.dart';
 import '../../domain/chat_room.dart';
+import '../../domain/chat_send_failure.dart';
 
 /// Mesajlar ekranlarının biçimli metinleri (parçalar ARB'den; tarih `tr`).
 extension MessagesTexts on AppLocalizations {
@@ -77,6 +80,17 @@ extension MessagesTexts on AppLocalizations {
     ChatRefKind.file =>
       c.sizeBytes == null ? uiMessagesRefFile : fileSize(c.sizeBytes!),
     ChatRefKind.department => uiMessagesRefDepartment,
+  };
+
+  /// "Gönderilemedi" nedeni (not 33); sınıflanmayan kod hata metniyle.
+  String sendFailure(String? code) => switch (chatSendFailure(code)) {
+    ChatSendFailure.size => uiMessagesFailSize,
+    ChatSendFailure.type => uiMessagesFailType,
+    ChatSendFailure.unreadable => uiMessagesFailUnreadable,
+    ChatSendFailure.network => uiMessagesFailNetwork,
+    ChatSendFailure.permission => uiMessagesFailPermission,
+    ChatSendFailure.other =>
+      code == null ? uiMessagesSendFailed : errorText(this, ApiError(code)),
   };
 
   /// Boyut: ≥ 1 MB "2,4 MB", altı "300 KB".

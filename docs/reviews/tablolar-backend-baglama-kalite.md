@@ -1,5 +1,12 @@
 # Tablolar backend bağlama ve canlı ortak çalışma — kalite kapısı (2026-11-13)
 
+> **Durum (2026-11-17, main birleşmesi):** Bu dalın tablo uygulaması (`table_controller`,
+> `table_sync_controller`, `table_write_queue`, `table_reference_controller` vb.) main'in
+> `TableDetailController` + workspace uygulamasıyla birleşmede yer değiştirdi; güncel mobil
+> tasarım `docs/yurutme/tablo-workspace-calisma.md`'dir. Bölüm 1–7 (backend sözleşme özeti)
+> geçerli başvurudur; bölüm 8–9 dal geçmişindeki (etiket `yedek/tablolar-birlesme-oncesi-20261117`)
+> tasarımı anlatır ve main uygulamasına taşınacak davranışların listesi olarak okunur.
+
 **Dal:** `ozellik/tablolar-backend-baglama` (taban `origin/main`). **Tasarım belgesi:** [`../architecture/tablolar-backend-ve-canli-calisma.md`](../architecture/tablolar-backend-ve-canli-calisma.md).
 
 **Kapsam:** statik tablolar prototipi backend tablolar API'sine bağlandı: liste/detay/oluşturma/silme, hücre ve satır/sütun komutları, geri alma, canlı senkron (SSE `stream` + `changes` + snapshot), presence, satır yorumları. Akış yeniden bağlanma kuralları `lib/core/domain/stream_reconnect.dart`'a ortaklandı (sohbet davranışı aynı).

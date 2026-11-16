@@ -237,8 +237,9 @@ void main() {
     expect(a.sentJson, {'decision': 'approved'});
 
     (dio, a) = fakeDio({'affected_tasks_count': 0});
-    await ApiTaskWriteRepository(dio).reviewDateChange('r1', approve: false);
-    expect(a.sentJson, {'decision': 'rejected'});
+    await ApiTaskWriteRepository(dio)
+        .reviewDateChange('r1', approve: false, reason: 'Kaynak yok');
+    expect(a.sentJson, {'decision': 'rejected', 'reason': 'Kaynak yok'});
 
     (dio, a) = fakeDio({'status': 'ok'});
     await ApiTaskWriteRepository(dio).deleteDateChange('r1');

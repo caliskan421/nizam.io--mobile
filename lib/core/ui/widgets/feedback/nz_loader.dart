@@ -1,10 +1,11 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../nz_size.dart';
 
-/// Belirsiz ilerleme göstergesi. [NzLoader.page] bulunduğu alanı kaplar ve göstergeyi ortalar.
+/// Platforma uyarlanan belirsiz ilerleme göstergesi (iOS/macOS Cupertino). [NzLoader.page] bulunduğu alanı kaplar ve göstergeyi ortalar.
 class NzLoader extends StatelessWidget {
   const NzLoader({super.key, this.size = NzSize.md, this.semanticLabel})
     : _fill = false;
@@ -28,6 +29,9 @@ class NzLoader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final platform = Theme.of(context).platform;
+    final cupertino =
+        platform == TargetPlatform.iOS || platform == TargetPlatform.macOS;
     final indicator = Semantics(
       label: semanticLabel ?? context.l10n.uiFeedbackLoading,
       liveRegion: true,
@@ -35,10 +39,15 @@ class NzLoader extends StatelessWidget {
       child: SizedBox(
         width: _extent,
         height: _extent,
-        child: CircularProgressIndicator(
-          color: context.colors.accentText,
-          strokeWidth: NizamioSpacing.space1,
-        ),
+        child: cupertino
+            ? CupertinoActivityIndicator(
+                radius: _extent / 2,
+                color: context.colors.accentText,
+              )
+            : CircularProgressIndicator(
+                color: context.colors.accentText,
+                strokeWidth: NizamioSpacing.space1,
+              ),
       ),
     );
     return _fill ? Center(child: indicator) : indicator;

@@ -58,9 +58,8 @@ class _NewTaskFormBodyState extends ConsumerState<NewTaskFormBody> {
         l.uiTasksUnknownPerson;
     final assigneeValue = f.assignees.isEmpty
         ? (coord == null ? l.uiTasksCoordFirst : l.uiTasksPickPerson)
-        : f.assignees.length == 1
-        ? name(f.assignees.first)
-        : '${name(f.assignees.first).split(' ').first} +${f.assignees.length - 1}';
+        // Seçili kişiler satırda yazılmaz (iPad notu 3); seçim açılan listede görünür.
+        : '';
     final dateValue = f.picking
         ? '${TaskDates.short(f.start)} → …'
         : '${TaskDates.short(f.start)} → ${TaskDates.short(f.end)} · '

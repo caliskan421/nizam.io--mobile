@@ -9,7 +9,7 @@ part of 'task_catalog_controller.dart';
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı): yönetici ya da programda en az bir
+/// kapısı; etkin görünüme izdüşürülmüş erişimle): yönetici ya da programda en az bir
 /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
 /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 
@@ -17,14 +17,14 @@ part of 'task_catalog_controller.dart';
 final canCreateTaskProvider = CanCreateTaskProvider._();
 
 /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-/// kapısı): yönetici ya da programda en az bir
+/// kapısı; etkin görünüme izdüşürülmüş erişimle): yönetici ya da programda en az bir
 /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
 /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
 
 final class CanCreateTaskProvider extends $FunctionalProvider<bool, bool, bool>
     with $Provider<bool> {
   /// Seçili kapsamda "Yeni görev" açılabilir mi (giriş noktalarının görünürlüğü ve formun
-  /// kapısı): yönetici ya da programda en az bir
+  /// kapısı; etkin görünüme izdüşürülmüş erişimle): yönetici ya da programda en az bir
   /// departmanın koordinatörü ([TaskAccess.canCreateAnyIn]; üye hayır — WORK-K05; departman
   /// formda açılabilenlerden seçilir). Katalog ya da program yokken hayır (fail-closed).
   CanCreateTaskProvider._()
@@ -60,4 +60,4 @@ final class CanCreateTaskProvider extends $FunctionalProvider<bool, bool, bool>
   }
 }
 
-String _$canCreateTaskHash() => r'138348c492eddbe03d30acdddb41c55c9ef72b64';
+String _$canCreateTaskHash() => r'afcbdfcd73bef0996981cf2eddfe53fb741ee1c9';

@@ -134,41 +134,42 @@ class _FilterBodyState extends ConsumerState<_FilterBody> {
                   ),
               ]),
             ),
-            NzFormRow(
-              label: l.uiTimelineCoord,
-              icon: NzIcons.coordinatorships,
-              value: view.allSelected
-                  ? l.uiTasksAllLc
-                  : '$coordCount ${l.uiTasksSelectedTail}',
-              valueSet: !view.allSelected,
-              content: choices([
-                option(
-                  view.allSelected
-                      ? l.uiTimelineCoordClear
-                      : l.uiTimelineCoordSelectAll,
-                  null,
-                  view.allSelected,
-                  () {
-                    if (view.allSelected || view.noneSelected) {
-                      ctrl.toggleAllCoordinatorships();
-                    } else {
-                      for (final coord in view.coordOptions.where(
-                        (o) => !o.selected,
-                      )) {
-                        ctrl.toggleCoordinatorship(coord.code);
-                      }
-                    }
-                  },
-                ),
-                for (final coord in view.coordOptions)
+            if (!view.locked)
+              NzFormRow(
+                label: l.uiTimelineCoord,
+                icon: NzIcons.coordinatorships,
+                value: view.allSelected
+                    ? l.uiTasksAllLc
+                    : '$coordCount ${l.uiTasksSelectedTail}',
+                valueSet: !view.allSelected,
+                content: choices([
                   option(
-                    coord.name,
-                    coord.count,
-                    coord.selected,
-                    () => ctrl.toggleCoordinatorship(coord.code),
+                    view.allSelected
+                        ? l.uiTimelineCoordClear
+                        : l.uiTimelineCoordSelectAll,
+                    null,
+                    view.allSelected,
+                    () {
+                      if (view.allSelected || view.noneSelected) {
+                        ctrl.toggleAllCoordinatorships();
+                      } else {
+                        for (final coord in view.coordOptions.where(
+                          (o) => !o.selected,
+                        )) {
+                          ctrl.toggleCoordinatorship(coord.code);
+                        }
+                      }
+                    },
                   ),
-              ]),
-            ),
+                  for (final coord in view.coordOptions)
+                    option(
+                      coord.name,
+                      coord.count,
+                      coord.selected,
+                      () => ctrl.toggleCoordinatorship(coord.code),
+                    ),
+                ]),
+              ),
             NzFormRow.custom(
               label: l.uiTimelinePriority,
               leading: const NzPriorityBars(level: 2),

@@ -2,9 +2,12 @@
   "$comment": "Feedback kiti metinleri (yükleniyor, hata, çevrimdışı). ELLE yazılır; make gen ARB'ye birleştirir.",
   "texts": {
     "ui.feedback.loading": "Yükleniyor",
-    "ui.feedback.offline": "Çevrimdışısınız. Sunucuya ulaşılamıyor.",
+    "ui.feedback.offline": "İnternete bağlı değilsiniz.",
     "ui.feedback.error_title": "Bir sorun oluştu",
     "ui.feedback.retry_wait": "Yeniden denemek için bekleyin",
-    "ui.feedback.seconds_unit": "sn"
+    "ui.feedback.seconds_unit": "sn",
+    "ui.feedback.unreachable": "Sunucuya ulaşılamıyor.",
+    "ui.feedback.stale_data": "Son yüklenen veriler gösteriliyor; bağlantı gelince sayfa kendiliğinden yenilenir.",
+    "ui.feedback.connection_wait": "Bağlantı gelince içerik kendiliğinden yüklenecek."
   }
 }

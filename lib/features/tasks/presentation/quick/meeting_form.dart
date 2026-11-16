@@ -12,6 +12,7 @@ import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../application/effective_access.dart';
 import '../../application/meeting_form_controller.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/tasks_providers.dart';
@@ -67,7 +68,10 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
     final coords = catalog?.coordinatorships ?? const <CoordinatorshipRef>[];
     final owners = catalog == null
         ? const <CoordinatorshipRef>[]
-        : meetingOwnerChoices(catalog);
+        : meetingOwnerChoices(
+            catalog,
+            admin: ref.watch(effectiveAccessProvider).isAdminView,
+          );
     final editing = f.editing != null;
     // Kişi kipinde havuz programın kişileridir (yalnız açılışta; düzenlemede katılımcı yok).
     final invitees = !editing && f.mode == MeetingMode.people
@@ -87,11 +91,8 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
                     : '${f.coordinatorships.length} ${l.uiTasksCoordsLc}') +
                 (f.allMembers ? ' · ${l.uiTasksWithMembers}' : '');
     } else {
-      who = f.people.isEmpty
-          ? null
-          : f.people.length == 1
-          ? name(f.people.first)
-          : '${name(f.people.first).split(' ').first} +${f.people.length - 1}';
+      // Seçili kişiler satırda yazılmaz (iPad notu 3); seçim açılan listede görünür.
+      who = f.people.isEmpty ? null : '';
     }
     if (_draft.text != f.agendaDraft) _draft.text = f.agendaDraft;
     final error = f.error;
@@ -163,8 +164,11 @@ class _MeetingFormBodyState extends ConsumerState<MeetingFormBody> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (!editing) ...[
-                      TaskSegmented(
-                        labels: [l.uiTasksGroupCoord, l.uiTasksModePeople],
+                      NzPillTabs(
+                        tabs: [
+                          NzPillTab(label: l.uiTasksGroupCoord),
+                          NzPillTab(label: l.uiTasksModePeople),
+                        ],
                         selected: f.mode.index,
                         onSelected: (i) => ctl.setMode(MeetingMode.values[i]),
                       ),

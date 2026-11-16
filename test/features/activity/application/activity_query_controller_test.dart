@@ -64,18 +64,20 @@ void main() {
     },
   );
 
-  test('görev hedefli kayıt kodu çözülür', () {
-    ActivityEntry e(String target) => ActivityEntry(
+  test('görev konulu kayıt görev kimliğine bağlanır', () {
+    ActivityEntry e(String? kind, String? id) => ActivityEntry(
       at: DateTime(2026),
       kind: ActivityKind.task,
       action: '',
       detail: '',
-      target: target,
+      target: 'Hidrofor montaj',
       actorId: 'ko',
       actorName: 'Kadir Özbek',
+      subjectKind: kind,
+      subjectId: id,
     );
-    expect(taskCodeOf(e('ALT-16 · Hidrofor montaj')), 'ALT-16');
-    expect(taskCodeOf(e('İDA-9')), 'İDA-9');
-    expect(taskCodeOf(e('Haftalık koordinasyon toplantısı')), isNull);
+    expect(taskIdOf(e('work_item', 'w-1')), 'w-1');
+    expect(taskIdOf(e('meeting', 'm-1')), isNull);
+    expect(taskIdOf(e(null, null)), isNull);
   });
 }

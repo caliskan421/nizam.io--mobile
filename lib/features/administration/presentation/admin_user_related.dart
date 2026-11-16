@@ -36,13 +36,16 @@ class _RelatedActionsState extends ConsumerState<AdminUserRelatedActions> {
     final catalog = value.isReloading || value.hasError ? null : value.value;
     final program = ref.watch(scopeStateProvider).programId;
     final access = catalog?.access;
+    // Görev ata etkin görünümle: yönetici görünümü her ekipte, koordinatör görünümü yalnız
+    // koordinatörü olduğu ekipte; üye görünümünde (yönetici dahil) yok.
+    final view = ref.watch(effectiveAccessProvider);
+    bool assignable(String code) =>
+        program != null &&
+        (view.isAdminView ||
+            (view.isCoordinatorView &&
+                (access?.coordinatesIn(program, code) ?? false)));
     final department = catalog?.coordinatorships
-        .where(
-          (d) =>
-              d.team.contains(widget.accountId) &&
-              program != null &&
-              (access?.canCreateIn(program, d.code) ?? false),
-        )
+        .where((d) => d.team.contains(widget.accountId) && assignable(d.code))
         .firstOrNull;
     return Row(
       children: [

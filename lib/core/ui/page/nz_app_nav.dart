@@ -2,7 +2,19 @@ import 'package:flutter/widgets.dart';
 
 /// Görev listesinin açılış görünümü (ana sayfa özet kutuları, çekmece rozetleri). Görünüm
 /// adıdır; hangi görevin hangi görünüme düştüğünü görevler ekranı belirler.
-enum NzTaskView { all, late, inProgress, review, dateRequest, notStarted, done }
+enum NzTaskView {
+  all,
+  late,
+
+  /// İade edilenler (üye görünümü).
+  returned,
+  inProgress,
+  review,
+  dateRequest,
+  notStarted,
+  done,
+  unassigned,
+}
 
 /// Ekranlar arası gezinme niyetleri (feature'lar birbirinin rotasını bilmez; rota tanımları
 /// `app/router`'dadır, B2). Yalnız kimlik taşır (N1). Gerçekleştirme uygulama kökünde
@@ -35,6 +47,9 @@ abstract interface class NzAppNav {
 
   /// Toplantı ayrıntısı ([id] = `meeting_id`).
   void openMeeting(String id);
+
+  /// Toplantının görüntülü görüşme ekranı (tam ekran, kabuk dışı; [meetingId] = `meeting_id`).
+  void openConference(String meetingId);
   void openMessages();
   void openChat(String id);
   void openProfile();
@@ -42,6 +57,9 @@ abstract interface class NzAppNav {
   void openUser(String accountId);
   void openTables();
   void openTable(String id);
+
+  /// Follow a table reference while keeping the source table in back history.
+  void openLinkedTable(String id);
 
   /// Sağdan açılan uygulama menüsü (tüm modüller, kapsam, çıkış); kök sayfaların üst çubuğundaki
   /// cam menü dairesi çağırır.

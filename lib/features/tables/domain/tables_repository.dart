@@ -1,82 +1,138 @@
-import '../../../core/domain/page_slice.dart';
-import 'table_models.dart';
-import 'table_operation.dart';
+import 'table_document.dart';
+import 'table_edit.dart';
+import 'table_workspace.dart';
 
-/// Tablolar uçları (backend `tables` modülü). Her yöntem [TableScope] alır: koordinatörlük
-/// alanı `/v1/tables…` (S3: program + departman), kişisel alan `/v1/personal/tables…` (S2:
-/// program) rotasına gider; kapsam başlıkları istek başına bu değerle sabitlenir.
-/// Gerçekleştirme `data/table_api_repository.dart`. Bütün hatalar `ApiError`.
-///
-/// Yazma uçları `Idempotency-Key` ister ([requestKey], 22–200 bayt): aynı anahtar + aynı
-/// gövde ilk makbuzu `replayed: true` ile döndürür; farklı gövde 409
-/// `tables.idempotency_key_reused`. Sözleşme özeti:
-/// `docs/architecture/tablolar-backend-ve-canli-calisma.md`.
+/// Tabloya ait açık kapsam; seçili departmana örtük düşmez.
+class TableLocation {
+  const TableLocation(this.programId, [this.departmentId = '']);
+  final String programId;
+  final String departmentId;
+  bool get personal => departmentId.isEmpty;
+  @override
+  bool operator ==(Object other) =>
+      other is TableLocation &&
+      other.programId == programId &&
+      other.departmentId == departmentId;
+  @override
+  int get hashCode => Object.hash(programId, departmentId);
+}
+
+class TableWriteReceipt {
+  const TableWriteReceipt(this.tableId, this.schemaVersion);
+  final String tableId;
+  final int schemaVersion;
+}
+
 abstract interface class TablesRepository {
-  /// `GET /v1/tables` · `/v1/personal/tables` — görünür tablolar, imleçli (limit 1–200,
-  /// varsayılan 100). [template] verilirse yalnız şablonlar / şablon olmayanlar.
-  Future<PageSlice<TableMeta>> list(
-    TableScope scope, {
-    PageRequest page = const PageRequest(),
-    bool? template,
+  Future<Map<TableDepartmentId, String>> departments(String program);
+  Future<TableWorkspace> workspace(
+    TableLocation location,
+    String id,
+    String account, {
+    TableReadQuery query = const TableReadQuery(),
   });
-
-  /// `POST /v1/tables` · `/v1/personal/tables` — yeni boş tablo; oluşturan sahip olur.
-  Future<TableReceipt> create(
-    TableScope scope,
-    String name, {
-    required String requestKey,
+  Future<TableOperationReceipt> execute(
+    TableLocation location,
+    String id,
+    TableEdit edit,
+    String key,
+  );
+  Future<TablePageSlice<TableProjectEntry>> projects(
+    TableLocation location, {
+    String? cursor,
   });
-
-  /// `GET /v1/tables/{id}` — tek snapshot sayfası (satır imleci opak). Yanıt 8 MiB'ı
-  /// aşarsa 409 `tables.limit_reached` (limit düşürülür).
-  Future<TableSnapshotPage> snapshot(
-    TableScope scope,
-    String tableId, {
-    PageRequest page = const PageRequest(),
+  Future<String> editProject(
+    TableLocation location,
+    String? id,
+    String? name,
+    String key,
+  );
+  Future<String> copy(
+    TableLocation source,
+    String id,
+    TableLocation target, {
+    required bool full,
+    required String key,
+    String? name,
+    String? project,
   });
-
-  /// `POST /v1/tables/{id}/operations` — tek komut. Çakışmalar: 409
-  /// `tables.cell_conflict` (bayat hücre sürümü, batch geri alınır),
-  /// `tables.schema_conflict` (bayat `expected_schema`); zarf güncel değeri taşımaz.
-  Future<TableReceipt> apply(
-    TableScope scope,
-    String tableId,
-    TableOperation operation, {
-    required String requestKey,
+  Future<TablePageSlice<TableProposalEntry>> proposals(
+    TableLocation location, {
+    String? cursor,
   });
-
-  /// `GET /v1/tables/{id}/changes?after=` — olay günlüğü (yalnız metadata). Ufuk dışı
-  /// imleç 409 `tables.replay_expired` (`fields[0].message`: future|baseline|window|gap) →
-  /// yerel görünüm atılır, tam snapshot okunur.
-  Future<TableChangesPage> changes(
-    TableScope scope,
-    String tableId, {
-    required int after,
-    int? limit,
+  Future<String?> decideProposal(
+    TableLocation location,
+    String id,
+    bool approve,
+    String key,
+  );
+  Future<TablePageSlice<TableCommentEntry>> comments(
+    TableLocation location,
+    String id, {
+    String? row,
+    String? cursor,
   });
-
-  /// `GET /v1/tables/{id}/comments` — `seq` artan; imleç son tüketilen yorumun `seq`'i.
-  Future<PageSlice<TableCommentItem>> comments(
-    TableScope scope,
-    String tableId, {
-    String? rowId,
-    PageRequest page = const PageRequest(),
+  Future<TableChangePage> changes(TableLocation location, String id, int after);
+  Stream<TableLiveEvent> watch(TableLocation location, String id);
+  Future<void> presence(
+    TableLocation location,
+    String id, {
+    String? row,
+    String? column,
+    bool leave = false,
   });
-
-  /// `POST /v1/tables/{id}/presence` — seçili hücre (ikisi birlikte ya da ikisi null).
-  /// İşlem anahtarı yok; aynı oturumdan 1 sn'den sık → 429 `tables.presence_throttled`.
-  Future<void> setPresence(
-    TableScope scope,
-    String tableId, {
-    String? rowId,
-    String? columnId,
+  Future<TableOperationReceipt> upload(
+    TableLocation location,
+    String id, {
+    required String row,
+    required String column,
+    required int version,
+    required String name,
+    required Stream<List<int>> bytes,
+    required int length,
+    required String key,
   });
-
-  /// `DELETE /v1/tables/{id}/presence` — çağıran oturumun kaydı; idempotent.
-  Future<void> leavePresence(TableScope scope, String tableId);
-
-  /// `GET /v1/tables/{id}/stream` — SSE. Açılış hatası (401/403/404/422/429/503) akışın
-  /// ilk hatası olarak gelir; sunucu kapanışı akışın bitişidir (neden bildirilmez).
-  /// Dinleyici bırakınca bağlantı kapanır.
-  Stream<TableStreamEvent> stream(TableScope scope, String tableId);
+  Future<Stream<List<int>>> download(
+    TableLocation location,
+    String id,
+    String attachment,
+  );
+  Future<List<TableDocument>> list(TableLocation location, String accountId);
+  Future<TableDocument> read(
+    TableLocation location,
+    String id,
+    String accountId,
+  );
+  Future<TableWriteReceipt> create(
+    TableLocation location,
+    String name,
+    String key,
+  );
+  Future<TableWriteReceipt> addColumn(
+    TableLocation location,
+    String id,
+    TableField field,
+    int schemaVersion,
+    String key,
+  );
+  Future<void> grant(
+    TableLocation location,
+    String id,
+    String person,
+    TableAccess access,
+    String key,
+  );
+  Future<void> setTeamRole(
+    TableLocation location,
+    String id,
+    TableAccess access,
+    String key,
+  );
+  Future<void> propose(
+    TableLocation location,
+    String id,
+    String department,
+    TableAccess access,
+    String key,
+  );
 }

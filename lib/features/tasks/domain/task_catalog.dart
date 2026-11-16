@@ -101,10 +101,14 @@ final class Subtask {
     this.doneBy,
     this.createdBy,
     this.editRevision,
+    this.evidenceRequired = false,
   });
 
   final String id;
   final String title;
+
+  /// Kanıt bayrağı (`evidence_required`, WORK-K70): açıksa bağlı dosya olmadan kapatılamaz.
+  final bool evidenceRequired;
 
   /// Düzenleme sürümü (`edit_revision`, ADR-0027): başlık/atanan/tarih değişikliği bunu
   /// `expected_revision` olarak geri gönderir. Örnek veride null.
@@ -145,6 +149,7 @@ final class Subtask {
     doneBy: doneBy,
     createdBy: createdBy,
     editRevision: editRevision,
+    evidenceRequired: evidenceRequired,
   );
 }
 

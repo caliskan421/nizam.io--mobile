@@ -112,6 +112,25 @@
     "ui.timeline.gantt_card_assignee": "atanan",
     "ui.timeline.gantt_unassigned": "Atanmamış",
     "ui.timeline.gantt_days_late": "gün gecikti",
-    "ui.timeline.gantt_open_task": "Görev ayrıntısını aç"
+    "ui.timeline.gantt_open_task": "Görev ayrıntısını aç",
+    "ui.timeline.tabs_label": "Görev kümesi",
+    "ui.timeline.tab_department": "Koordinatörlüğün görevleri",
+    "ui.timeline.tab_mine": "Görevlerim",
+    "ui.timeline.my_title": "Zaman çizelgem",
+    "ui.timeline.group_open": "Açık görevler",
+    "ui.timeline.group_done": "Tamamlanan",
+    "ui.timeline.rule_direct": "Bitişi en çok 7 gün ileri alırsın; hemen uygulanır, sorumlu üyeye bildirim gider.",
+    "ui.timeline.rule_request": "7 günü aşan ya da başlangıcı değiştiren her değişiklik yönetici onayına gider; karar gelene kadar eski tarih geçerlidir.",
+    "ui.timeline.extend_seven": "Süre uzat +7",
+    "ui.timeline.extend_go": "Süre uzat ·",
+    "ui.timeline.extend_done": "Süre uzatıldı · sorumluya bildirim gitti",
+    "ui.timeline.pull_today": "Bitişi bugüne çek",
+    "ui.timeline.pulled": "Bitiş bugüne çekildi · plan saklandı",
+    "ui.timeline.request_go": "Tarih talebi gönder",
+    "ui.timeline.reason_label": "Talep gerekçesi",
+    "ui.timeline.reason_hint": "Yönetici bu gerekçeyi görür; karar gelene kadar eski tarih geçerli.",
+    "ui.timeline.reason_needed": "Talep için gerekçe yaz (en az 3 karakter)",
+    "ui.timeline.pending_head": "Tarih talebi bekliyor · yeni bitiş",
+    "ui.timeline.pending_tail": "yöneticide bekliyor"
   }
 }

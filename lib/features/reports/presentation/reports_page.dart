@@ -6,6 +6,7 @@ import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
+import '../../../core/ui/widgets/surfaces/nz_expansion_tile.dart';
 import '../application/reports_providers.dart';
 import 'report_details.dart';
 
@@ -45,7 +46,7 @@ class ReportsPage extends ConsumerWidget {
           Text('İş yükü', style: context.text.labelLg),
           if (report.workload.members.isEmpty) const Text('İş yükü kaydı yok.'),
           for (final member in report.workload.members)
-            ExpansionTile(
+            NzExpansionTile(
               title: Text(member.fullName),
               subtitle: Text('${member.tasks.length} görev'),
               children: [
@@ -64,7 +65,7 @@ class ReportsPage extends ConsumerWidget {
           if (report.tasks.truncated)
             const Text('Görev listesi kesildi. İlk kayıtlar gösteriliyor.'),
           for (final task in report.tasks.tasks)
-            ExpansionTile(
+            NzExpansionTile(
               title: Text(task.title),
               subtitle: Text(task.departmentName),
               children: [ReportTaskDetails(id: task.workItemId)],
@@ -73,7 +74,7 @@ class ReportsPage extends ConsumerWidget {
           if (report.meetings.truncated)
             const Text('Toplantı listesi kesildi. İlk kayıtlar gösteriliyor.'),
           for (final meeting in report.meetings.items)
-            ExpansionTile(
+            NzExpansionTile(
               title: Text(meeting.title),
               subtitle: Text(
                 '${meeting.participantCount} katılımcı · ${meeting.noteCount} not',

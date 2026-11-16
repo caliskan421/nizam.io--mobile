@@ -20,20 +20,6 @@ Future<void> showArchiveFilterSheet(BuildContext context, String code) {
   return NzBottomSheet.show<void>(
     context,
     title: l.uiTasksFilters,
-    headerAction: Consumer(
-      builder: (context, ref, _) => TextButton(
-        onPressed: ref
-            .read(archiveFolderControllerProvider(code).notifier)
-            .clearFileFilters,
-        child: Text(
-          l.uiTasksClearAll,
-          style: context.text.caption.copyWith(
-            color: context.colors.textMuted,
-            decoration: TextDecoration.underline,
-          ),
-        ),
-      ),
-    ),
     actions: (sheet) => [
       Consumer(
         builder: (_, ref, _) => NzButton.secondary(

@@ -681,7 +681,7 @@ final tabletScenes = <TabletScene>[
     await openTimelineFromTasks(s);
     await tapGanttBar(s, 'ALT-5');
     expect(find.bySemanticsLabel('Seçili görev'), findsWidgets);
-    await s.tapText(find.text('Görev ayrıntısını aç'));
+    await s.tapText(find.byTooltip('Görev ayrıntısında aç'));
     // Kaynak istisnası openTaskFromGantt: Görevler modülü + sağda tek ALT-5 detayı.
     await _expectDefaultDetail(s, TabletModule.tasks);
     expect(find.text('Geri: Görevler'), findsNothing, reason: 'Gantt kapandı');

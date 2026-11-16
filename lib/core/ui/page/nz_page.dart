@@ -16,15 +16,19 @@ import '../widgets/feedback/nz_banner.dart';
 import '../widgets/feedback/nz_loader.dart';
 import '../widgets/feedback/nz_toast.dart';
 import '../widgets/surfaces/nz_glass.dart';
+import 'nz_connection_scope.dart';
 
 /// Her ekranın kabuğu (U6: features presentation'da Scaffold yasağının tek karşılığı).
 ///
 /// Scaffold + SafeArea + [NzTextScaleLimit] + yatay `pagePadding` + [NzContentWidth] azami
-/// genişliği (ortalanır) + bağlantı çevrimdışıyken gövdenin üstünde [NzBanner.offline] +
+/// genişliği (ortalanır) + bağlantı yokken gövdenin üstünde [NzBanner.offline] (internet yok ya
+/// da sunucuya ulaşılamıyor; son veri yerinde kalır) +
 /// [loading] iken dokunmayı kesen [NzLoader] örtüsü. Kendi Overlay'i yoktur: şerit ve örtü
 /// sayfa ağacının parçasıdır, `MaterialApp.builder`'daki PrivacyMask'ın altında kalır.
 ///
-/// [onRetry] yalnız kullanıcı dokunuşuyla çalışır (çevrimiçine dönüşte otomatik deneme yok).
+/// Bağlantı geri gelince ([connectionRestored]) sayfa bir kez kendiliğinden yenilenir: [onRetry],
+/// yoksa [onRefresh] (not 47; döngü yok). Gövde [NzConnectionScope] altındadır; hata görünümü
+/// bağlantı tasarımını oradan okur.
 class NzPage extends ConsumerWidget {
   const NzPage({
     super.key,
@@ -211,8 +215,24 @@ class NzPage extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final offline =
-        ref.watch(connectivityStateProvider) == ConnectivityState.offline;
+    final connection = ref.watch(connectivityStateProvider);
+    ref.listen(connectivityStateProvider, (before, now) {
+      if (!connectionRestored(before, now)) return;
+      if (onRetry case final retry?) return retry();
+      onRefresh?.call().ignore();
+    });
+    return NzConnectionScope(
+      state: connection,
+      child: _page(context, connection),
+    );
+  }
+
+  Widget _page(BuildContext context, ConnectivityState connection) {
+    final offline = connection.isDown;
+    final banner = NzBanner.offline(
+      onAction: onRetry,
+      unreachable: connection == ConnectivityState.unreachable,
+    );
     if (_bare) {
       return NzTextScaleLimit(
         child: Scaffold(resizeToAvoidBottomInset: false, body: body),
@@ -226,8 +246,7 @@ class NzPage extends ConsumerWidget {
             physics: const NeverScrollableScrollPhysics(),
             slivers: [
               topBar,
-              if (offline)
-                SliverToBoxAdapter(child: NzBanner.offline(onAction: onRetry)),
+              if (offline) SliverToBoxAdapter(child: banner),
               SliverFillRemaining(
                 hasScrollBody: true,
                 child: PageContentEntrance(
@@ -252,7 +271,9 @@ class NzPage extends ConsumerWidget {
           NzPaneScope.pageBottom(context) +
           (dock == null ? 0 : bottomDockExtent + dockGap);
       final top = switch (pane) {
-        NzPaneRole.master => safe.top + NzTabletMetrics.paneTop,
+        // Liste bölmesinde üst çubuk yok: kaydırma alanı durum çubuğunun altında başlar
+        // (içerik saatin altına kaymaz), dolgu yalnız bölme üst payıdır.
+        NzPaneRole.master => NzTabletMetrics.paneTop,
         NzPaneRole.detail => paneLead ?? NizamioSpacing.gapXl,
         null => NizamioSpacing.gapXl,
       };
@@ -267,7 +288,7 @@ class NzPage extends ConsumerWidget {
           body: LayoutBuilder(
             builder: (context, constraints) {
               final side = NzPaneScope.sideInset(context, constraints, width);
-              final scroll = CustomScrollView(
+              final scrollView = CustomScrollView(
                 // Kısa içerikte de çekilebilsin; iOS'ta esneyen kaydırma.
                 physics: refresh == null
                     ? null
@@ -293,18 +314,27 @@ class NzPage extends ConsumerWidget {
                           fade: fadeContent,
                           child: SliverMainAxisGroup(
                             slivers: [
-                              if (offline)
-                                SliverToBoxAdapter(
-                                  child: NzBanner.offline(onAction: onRetry),
-                                ),
+                              if (offline) SliverToBoxAdapter(child: banner),
                               SliverPadding(
                                 padding: EdgeInsets.fromLTRB(
-                                  side,
+                                  0,
                                   top,
-                                  side,
+                                  0,
                                   pinned == null && after.isEmpty ? bottom : 0,
                                 ),
-                                sliver: SliverList.list(children: children),
+                                sliver: SliverList.list(
+                                  children: [
+                                    for (final child in children)
+                                      child is NzPageBleed
+                                          ? child
+                                          : Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: side,
+                                              ),
+                                              child: child,
+                                            ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
@@ -334,6 +364,17 @@ class NzPage extends ConsumerWidget {
                   ),
                 ],
               );
+              // Ağaç yapısı bölme rolünden bağımsız aynı kalır: telefon ↔ tablet geçişinde
+              // kaydırma State'i (konum, arama) korunur; yalnız dolgu değişir.
+              final master = pane == NzPaneRole.master;
+              final scroll = Padding(
+                padding: EdgeInsets.only(top: master ? safe.top : 0),
+                child: MediaQuery.removePadding(
+                  context: context,
+                  removeTop: master,
+                  child: ClipRect(child: scrollView),
+                ),
+              );
               // Material gösterge cam üst çubuğun altından iner (çubuk kaydırma görünümünün
               // içindedir; yüksekliği NzTopBar ile aynı: güvenli alan + space2 + appbar).
               final content = refresh == null || cupertino
@@ -341,7 +382,7 @@ class NzPage extends ConsumerWidget {
                   : RefreshIndicator(
                       onRefresh: refresh,
                       edgeOffset: pane == NzPaneRole.master
-                          ? safe.top
+                          ? 0
                           : safe.top +
                                 NizamioSpacing.space2 +
                                 NizamioSize.appbar,
@@ -381,7 +422,7 @@ class NzPage extends ConsumerWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (offline) NzBanner.offline(onAction: onRetry),
+                    if (offline) banner,
                     Expanded(
                       // Dolgu ve azami genişlik pencereye değil, gövdeye ayrılan alana göre.
                       child: LayoutBuilder(
@@ -448,4 +489,13 @@ class _LoadingScrim extends StatelessWidget {
       child: const NzLoader.page(),
     ),
   );
+}
+
+/// Feed content that reaches the pane edges, such as a horizontal card rail.
+/// The rail supplies its own initial and final content inset.
+class NzPageBleed extends StatelessWidget {
+  const NzPageBleed({super.key, required this.child});
+  final Widget child;
+  @override
+  Widget build(BuildContext context) => child;
 }

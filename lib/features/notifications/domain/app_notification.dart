@@ -10,6 +10,7 @@ enum NotificationType {
   workItemTransitioned('work.item.transitioned'),
   workItemAssignmentChanged('work.item.assignment_changed'),
   workItemDateChanged('work.item.date_changed'),
+  workTaskReminder('work.task.reminder'),
   workDateChangeRequested('work.date_change.requested'),
   workDateChangeReviewed('work.date_change.reviewed'),
   collaborationMessageSent('collaboration.message.sent'),

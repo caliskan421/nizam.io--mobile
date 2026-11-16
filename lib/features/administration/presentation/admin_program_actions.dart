@@ -6,6 +6,7 @@ import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/widgets/feedback/nz_toast.dart';
+import '../../../core/ui/widgets/surfaces/nz_expansion_tile.dart';
 import '../../scope/scope.dart';
 import '../../tasks/tasks.dart';
 import '../application/admin_controller.dart';
@@ -41,7 +42,7 @@ class AdminProgramActions extends ConsumerWidget {
     }
 
     final command = ref.read(adminCommandProvider.notifier);
-    return ExpansionTile(
+    return NzExpansionTile(
       title: Text(program.name),
       subtitle: const Text('Program yönetimi'),
       children: [

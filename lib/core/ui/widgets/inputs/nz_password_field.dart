@@ -41,7 +41,7 @@ class NzPasswordField extends StatefulWidget {
     this.onSubmitted,
     this.enabled = true,
     this.size = NzSize.md,
-    this.labelAbove = false,
+    this.labelAbove = true,
     this.textInputAction = TextInputAction.done,
     this.focusNode,
     this.invalid = false,
@@ -60,7 +60,7 @@ class NzPasswordField extends StatefulWidget {
     this.onSubmitted,
     this.enabled = true,
     this.size = NzSize.md,
-    this.labelAbove = false,
+    this.labelAbove = true,
     this.textInputAction = TextInputAction.next,
     this.focusNode,
     this.invalid = false,
@@ -138,8 +138,8 @@ class _NzPasswordFieldState extends State<NzPasswordField>
       enableSuggestions: false,
       enableInteractiveSelection: _visible,
       decoration: InputDecoration(
-        labelText: widget.labelAbove ? null : widget.label,
-        hintText: widget.hint,
+        // Yüzen (Material) etiket yok: etiket ya üstte ya yer tutucu (prototip).
+        hintText: widget.labelAbove ? widget.hint : widget.hint ?? widget.label,
         helperText: widget.helper,
         helperMaxLines: 4,
         errorMaxLines: 4,
@@ -174,7 +174,7 @@ class _NzPasswordFieldState extends State<NzPasswordField>
     );
     return widget.labelAbove
         ? NzFieldLabelAbove(label: widget.label, child: field)
-        : field;
+        : Semantics(label: widget.label, child: field);
   }
 }
 

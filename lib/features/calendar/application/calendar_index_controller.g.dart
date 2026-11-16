@@ -13,7 +13,9 @@ part of 'calendar_index_controller.dart';
 /// ve satırlarındaki bekleyen tarih talepleri). Kaynaklardan biri değişince (yeni toplantı,
 /// tamamlanan görev, program değişimi) takvim de güncellenir; biri hata verirse takvim hata
 /// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
-/// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır.
+/// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır. Koordinatör ve Üye
+/// görünümünde yalnız etkin koordinatörlüğün kayıtları ([calendarScope]); görev bitişleri
+/// katalogdan türetilir (takvim ucu yok). Üye görünümünde tarih talebi bölümü yoktur.
 
 @ProviderFor(calendarIndex)
 final calendarIndexProvider = CalendarIndexProvider._();
@@ -23,7 +25,9 @@ final calendarIndexProvider = CalendarIndexProvider._();
 /// ve satırlarındaki bekleyen tarih talepleri). Kaynaklardan biri değişince (yeni toplantı,
 /// tamamlanan görev, program değişimi) takvim de güncellenir; biri hata verirse takvim hata
 /// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
-/// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır.
+/// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır. Koordinatör ve Üye
+/// görünümünde yalnız etkin koordinatörlüğün kayıtları ([calendarScope]); görev bitişleri
+/// katalogdan türetilir (takvim ucu yok). Üye görünümünde tarih talebi bölümü yoktur.
 
 final class CalendarIndexProvider
     extends
@@ -38,7 +42,9 @@ final class CalendarIndexProvider
   /// ve satırlarındaki bekleyen tarih talepleri). Kaynaklardan biri değişince (yeni toplantı,
   /// tamamlanan görev, program değişimi) takvim de güncellenir; biri hata verirse takvim hata
   /// durumundadır (kısmi veriyle devam etmez). Kaynaklardan biri kesikse (toplantı listesi ya da
-  /// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır.
+  /// katalog sayfa tavanında) dizin [CalendarIndex.truncated] taşır. Koordinatör ve Üye
+  /// görünümünde yalnız etkin koordinatörlüğün kayıtları ([calendarScope]); görev bitişleri
+  /// katalogdan türetilir (takvim ucu yok). Üye görünümünde tarih talebi bölümü yoktur.
   CalendarIndexProvider._()
     : super(
         from: null,
@@ -65,4 +71,4 @@ final class CalendarIndexProvider
   }
 }
 
-String _$calendarIndexHash() => r'c49b288bdeb03d7b7331f7a9b1a07d50162ea675';
+String _$calendarIndexHash() => r'021e1d0f8f21d4f494871f436426acfca06c5911';

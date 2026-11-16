@@ -102,6 +102,14 @@ abstract interface class ArchiveRepository {
   /// Dosyayı siler (`deleteFile`; yalnız yükleyen).
   Future<void> deleteFile(String fileId, {required String department});
 
+  /// Etiketi değiştirir (`retagFile`, `PATCH /v1/files/{id}/tag`; RECORDS-K10 yetkisi:
+  /// yönetici, ekibin koordinatörü ya da ekipte satırı olan yükleyen).
+  Future<void> retagFile(
+    String fileId,
+    RecordTag tag, {
+    required String department,
+  });
+
   /// Tek dosyanın içeriği (`downloadFile`).
   Future<Stream<List<int>>> downloadFile(
     String fileId, {

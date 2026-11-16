@@ -23,6 +23,7 @@ import '../application/activity_log_controller.dart';
 import '../application/activity_query_controller.dart';
 import '../domain/activity_log.dart';
 import '../domain/activity_query.dart';
+import 'activity_entry_row.dart';
 import 'activity_texts.dart';
 import 'activity_unavailable_page.dart';
 
@@ -119,7 +120,8 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
     final c = context.colors;
     final t = context.text;
     final commands = ref.read(activityQueryControllerProvider.notifier);
-    final today = ref.read(activityLogControllerProvider).value?.today;
+    final log = ref.read(activityLogControllerProvider).value;
+    final today = log?.today;
     return [
       _Controls(
         view: v,
@@ -135,12 +137,12 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
           count: day.count,
         ),
         for (final (j, e) in day.entries.indexed)
-          _EntryRow(
+          ActivityEntryRow(
             key: ObjectKey(e),
             entry: e,
             divided: j < day.entries.length - 1,
-            onTap: switch (taskCodeOf(e)) {
-              final code? => () => context.appNav.openTask(code),
+            onTap: switch (taskIdOf(e)) {
+              final id? => () => context.appNav.openTask(id),
               null => null,
             },
           ),
@@ -152,11 +154,17 @@ class _ActivityPageState extends ConsumerState<ActivityPage> {
           onAction: commands.clearAll,
         ),
       const Gap(NizamioSpacing.space4),
-      if (v.canShowMore) ...[
+      if (v.canShowMore || (log?.nextCursor != null)) ...[
         NzButton.secondary(
           label: l.uiActivityMore,
           expand: true,
-          onPressed: commands.showMore,
+          onPressed: () async {
+            // Yerel küme bittiyse sunucudan sonraki (daha eski) sayfa okunur.
+            if (!v.canShowMore) {
+              await ref.read(activityLogControllerProvider.notifier).loadMore();
+            }
+            commands.showMore();
+          },
         ),
         const Gap(NizamioSpacing.gapMd),
       ],
@@ -352,126 +360,6 @@ class _DayHeader extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _EntryRow extends StatelessWidget {
-  const _EntryRow({
-    super.key,
-    required this.entry,
-    required this.divided,
-    required this.onTap,
-  });
-
-  final ActivityEntry entry;
-  final bool divided;
-
-  /// Hedef görevse görevi açar; değilse satır dokunulmaz.
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final l = context.l10n;
-    final c = context.colors;
-    final t = context.text;
-    final e = entry;
-    final who = '${e.actorName} · ${e.target}';
-    final kind = l.activityKindLabel(e.kind);
-    final row = DecoratedBox(
-      decoration: BoxDecoration(
-        border: divided
-            ? Border(
-                bottom: BorderSide(
-                  color: c.border,
-                  width: NizamioSize.borderWidth,
-                ),
-              )
-            : null,
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space3),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            NzAvatar.initials(
-              name: e.actorName,
-              tone: NzAvatar.neutralTone,
-              extent: NzAvatarSize.md,
-            ),
-            const Gap(NizamioSpacing.space3),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                spacing: NizamioSpacing.space1 / 2,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          e.action,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.bodyMd.copyWith(fontWeight: FontWeight.w600),
-                        ),
-                      ),
-                      const Gap(NizamioSpacing.space3),
-                      Text(
-                        l.activityTime(e.at),
-                        style: t.monoSm.copyWith(color: c.textMuted),
-                      ),
-                    ],
-                  ),
-                  if (e.detail.isNotEmpty)
-                    Text(
-                      e.detail,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: t.caption.copyWith(color: c.textMuted),
-                    ),
-                  const Gap(NizamioSpacing.space1 / 2),
-                  Row(
-                    children: [
-                      NzStatusLabel.badge(
-                        label: kind,
-                        tone: activityTone(e.kind),
-                      ),
-                      const Gap(NizamioSpacing.space2),
-                      Expanded(
-                        child: Text(
-                          who,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: t.caption.copyWith(color: c.textMuted),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-    final label = [
-      e.action,
-      l.activityTime(e.at),
-      if (e.detail.isNotEmpty) e.detail,
-      kind,
-      who,
-    ].join('. ');
-    final tap = onTap;
-    if (tap == null) {
-      return Semantics(label: label, excludeSemantics: true, child: row);
-    }
-    return Semantics(
-      button: true,
-      label: label,
-      excludeSemantics: true,
-      onTap: tap,
-      child: InkWell(onTap: tap, child: row),
     );
   }
 }

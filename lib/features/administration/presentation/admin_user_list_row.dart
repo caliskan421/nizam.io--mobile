@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
+import '../../../core/ui/widgets/buttons/nz_icon_button.dart';
 import '../../../core/ui/widgets/nz_icon.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/nz_avatar.dart';
@@ -22,8 +23,22 @@ class AdminUserListRow extends StatelessWidget {
     required this.last,
     required this.onOpen,
     required this.onQuick,
+    this.nameSuffix,
+    this.detailAlert = false,
+    this.action,
   });
+
+  /// Satır sonunda şerit yerine çizilen ikincil eylem (Ekibim üye görünümü: "Mesaj").
+  /// Ekran okuyucuda satırın özel eylemidir.
+  final ({IconData icon, String label, VoidCallback onPressed})? action;
+
   final String name;
+
+  /// Adın ardına eklenen kısa ek (Ekibim: "(sen)"); baş harflere katılmaz.
+  final String? nameSuffix;
+
+  /// Alt satırın [departments] parçası uyarı renginde (Ekibim: gecikmiş görev).
+  final bool detailAlert;
   final String roles;
   final String departments;
   final Color avatarColor;
@@ -45,6 +60,7 @@ class AdminUserListRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
+    final shownName = nameSuffix == null ? name : '$name $nameSuffix';
     final radius = BorderRadius.vertical(
       top: first ? const Radius.circular(_radius) : Radius.zero,
       bottom: last ? const Radius.circular(_radius) : Radius.zero,
@@ -54,10 +70,12 @@ class AdminUserListRow extends StatelessWidget {
       excludeSemantics: true,
       onTap: onOpen,
       onLongPress: onQuick,
-      label: '$name, $roles, $departments',
+      label: '$shownName, $roles, $departments',
       hint: context.l10n.uiUsersRowHint,
       customSemanticsActions: {
         CustomSemanticsAction(label: context.l10n.uiUsersQuickActions): onQuick,
+        if (action case final a?)
+          CustomSemanticsAction(label: a.label): a.onPressed,
       },
       child: DecoratedBox(
         decoration: BoxDecoration(
@@ -131,7 +149,7 @@ class AdminUserListRow extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    name,
+                                    shownName,
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: context.text.bodyMd.copyWith(
@@ -157,6 +175,15 @@ class AdminUserListRow extends StatelessWidget {
                                           text: departments.isEmpty
                                               ? ''
                                               : ' · $departments',
+                                          style: detailAlert
+                                              ? context.text.caption.copyWith(
+                                                  fontSize: _subtitleSize,
+                                                  height:
+                                                      _subtitleHeight /
+                                                      _subtitleSize,
+                                                  color: c.danger,
+                                                )
+                                              : null,
                                         ),
                                       ],
                                     ),
@@ -172,11 +199,18 @@ class AdminUserListRow extends StatelessWidget {
                               ),
                             ),
                             const Gap(_gap),
-                            NzIcon(
-                              NzIcons.chevronRight,
-                              size: NizamioSize.iconSizeSm,
-                              color: c.textFaint,
-                            ),
+                            if (action case final a?)
+                              NzIconButton.circle(
+                                icon: a.icon,
+                                semanticLabel: a.label,
+                                onPressed: a.onPressed,
+                              )
+                            else
+                              NzIcon(
+                                NzIcons.chevronRight,
+                                size: NizamioSize.iconSizeSm,
+                                color: c.textFaint,
+                              ),
                           ],
                         ),
                       ),

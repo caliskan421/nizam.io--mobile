@@ -179,12 +179,14 @@ final class CalendarIndex {
   /// Görünür toplantılar + görev kataloğu: bitmemiş her görevin başlangıcı ve bitişi, bekleyen
   /// her tarih talebinin yeni bitişi. [meetingsTruncated]: toplantı listesi sayfa tavanında
   /// kesildi; katalog kesilmesi [TaskCatalog.truncated]'dan okunur (ikisi [truncated]'da birleşir).
+  /// [requests] false (Üye görünümü): tarih talepleri hiç dağıtılmaz, talep bölümü çizilmez.
   factory CalendarIndex.build(
     List<Meeting> meetings,
     TaskCatalog catalog, {
     bool meetingsTruncated = false,
     String? accountId,
     String? coordinatorship,
+    bool requests = true,
   }) {
     final today = calendarDay(catalog.today);
     final by = <DateTime, List<CalendarEntry>>{};
@@ -205,7 +207,7 @@ final class CalendarIndex {
       }
       if (accountId != null && !t.assignees.contains(accountId)) continue;
       filtered.add(t);
-      if (t.dateRequest case final r? when r.isPending) {
+      if (t.dateRequest case final r? when requests && r.isPending) {
         add(
           RequestEntry(
             code: t.code,

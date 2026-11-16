@@ -27,6 +27,15 @@
     "ui.identity.login_email_hint": "ad@alan.com",
     "ui.identity.login_password_hint": "Şifren",
     "ui.identity.login_version_prefix": "v",
-    "ui.identity.login_footer": "Developed by KAYACAN, COSMAN, CALISKAN"
+    "ui.identity.login_footer": "Developed by KAYACAN, COSMAN, CALISKAN",
+    "ui.identity.profile_general": "Genel bilgiler",
+    "ui.identity.profile_work": "İş ve ekip",
+    "ui.identity.profile_roles_intro": "Rollerin program ve koordinatörlüğe göre değişir.",
+    "ui.identity.profile_no_memberships": "Bu programda bir koordinatörlüğe bağlı değilsin.",
+    "ui.identity.profile_personal_work": "Bana atanan görevler",
+    "ui.identity.profile_team_work": "Koordine ettiğim işler",
+    "ui.identity.profile_partial": "Yüklenen görevlerin özeti gösteriliyor; liste eksik olabilir.",
+    "ui.identity.profile_password_intro": "Güvenliğin için mevcut parolanı doğrula. Parola değişince diğer cihazlardaki oturumların kapanır.",
+    "ui.identity.profile_password_saved": "Parolan değiştirildi."
   }
 }

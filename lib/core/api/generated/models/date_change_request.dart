@@ -30,6 +30,9 @@ abstract class DateChangeRequest with _$DateChangeRequest {
     @JsonKey(name: 'new_end_on')
     required DateTime newEndOn,
     String? reason,
+
+    /// İnceleme kararının gerekçesi (WORK-K39); yalnız gerekçeli kararda bulunur.
+    @JsonKey(name: 'review_reason') String? reviewReason,
   }) = _DateChangeRequest;
 
   factory DateChangeRequest.fromJson(Map<String, Object?> json) =>

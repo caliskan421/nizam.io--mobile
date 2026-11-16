@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/cache_owner.dart';
-import '../../../core/providers.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/chat.dart';
@@ -51,10 +50,7 @@ class ChatsController extends _$ChatsController {
 
   ChatRepository get _repo => ref.read(chatRepositoryProvider);
 
-  CacheOwner get _currentOwner => (
-    session: ref.read(sessionGenerationProvider),
-    program: ref.read(scopeStateProvider).programId,
-  );
+  CacheOwner get _currentOwner => _owner.current(ref);
 
   bool _isCurrent(CacheOwner owner, int generation) =>
       ref.mounted && owner == _currentOwner && generation == _generation;

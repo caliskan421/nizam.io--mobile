@@ -175,11 +175,14 @@ void main() {
         ),
       ],
     );
-    expect(meetingOwnerChoices(cat(admin: true)).map((c) => c.code), [
-      'd1',
-      'd2',
-    ]);
-    expect(meetingOwnerChoices(cat(admin: false)).map((c) => c.code), ['d1']);
+    expect(
+      meetingOwnerChoices(cat(admin: true), admin: true).map((c) => c.code),
+      ['d1', 'd2'],
+    );
+    expect(
+      meetingOwnerChoices(cat(admin: false), admin: false).map((c) => c.code),
+      ['d1'],
+    );
   });
 
   test('düzenleme: PATCH, geçmiş gün bugüne çekilir; gündem/kip yok', () async {

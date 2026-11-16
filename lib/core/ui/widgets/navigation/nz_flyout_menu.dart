@@ -5,6 +5,8 @@ import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
 import '../../theme/nz_motion.dart';
 import '../../theme/nz_surfaces.dart';
+import '../buttons/nz_tap.dart';
+import '../nz_glyph.dart';
 import '../nz_icon.dart';
 import '../surfaces/nz_glass.dart';
 import 'nz_floating_nav.dart';
@@ -27,16 +29,23 @@ class NzFlyoutItem extends NzFlyoutEntry {
     required this.label,
     required this.onSelected,
     this.icon,
+    this.glyph,
     this.dot,
     this.caption,
     this.accent = false,
     this.count,
     this.selected = false,
-  }) : assert(icon == null || dot == null, 'ikon ya da nokta');
+  }) : assert(
+         (icon == null || glyph == null) &&
+             (icon == null || dot == null) &&
+             (glyph == null || dot == null),
+         'ikon, SVG ya da nokta',
+       );
 
   final String label;
   final VoidCallback onSelected;
   final IconData? icon;
+  final NzGlyph? glyph;
 
   /// Durum noktası rengi (ör. onay bekliyor `warning`).
   final Color? dot;
@@ -56,16 +65,54 @@ class NzFlyoutItem extends NzFlyoutEntry {
 /// Alt menüden açılan cam kısayol menüsü (README `m-flyout`): `glass-menu`, köşe
 /// `m-r-flyout`, arkada `scrim-soft`; kapsülün üstünden büyüyerek (`easeSpring`) açılır,
 /// `easeExit` ile kapanır. Satır seçilince menü kapanır, sonra eylem çalışır.
+/// [anchor] (genel koordinatta dikdörtgen, ör. sohbetin yazma alanı) verilirse menü onun hemen
+/// üstünde ([below] ise altında) ve yatayda onun kenarında açılır; [alignEnd] sağ kenara
+/// yaslar (büyüme de o köşeden).
 abstract final class NzFlyoutMenu {
   static Future<void> show(
     BuildContext context, {
     required String semanticLabel,
     required List<NzFlyoutEntry> entries,
+    Rect? anchor,
+    bool alignEnd = false,
+    bool below = false,
   }) {
     final navigator = Navigator.of(context, rootNavigator: true);
     // Kök Navigator bağlamı: kabuğun `extendBody` dolgusu (menü yüksekliği) burada yoktur;
     // yalnız cihazın alt güvenli alanı vardır.
-    final reserved = NzFloatingNav.reservedHeight(navigator.context);
+    final overlay = navigator.overlay!.context.findRenderObject()! as RenderBox;
+    final screen = overlay.size;
+    // Kart genel koordinat taşır; menü kök overlay'in yerel alanında çizilir.
+    if (anchor != null) {
+      anchor = Rect.fromPoints(
+        overlay.globalToLocal(anchor.topLeft),
+        overlay.globalToLocal(anchor.bottomRight),
+      );
+      anchor = Rect.fromLTRB(
+        anchor.left.clamp(0.0, screen.width),
+        anchor.top.clamp(0.0, screen.height),
+        anchor.right.clamp(0.0, screen.width),
+        anchor.bottom.clamp(0.0, screen.height),
+      );
+    }
+    final down = below && anchor != null;
+    final reserved = anchor == null
+        ? NzFloatingNav.reservedHeight(navigator.context)
+        : down
+        ? MediaQuery.paddingOf(navigator.context).bottom
+        : screen.height - anchor.top;
+    final corner = switch ((down, alignEnd)) {
+      (true, true) => Alignment.topRight,
+      (true, false) => Alignment.topLeft,
+      (false, true) => Alignment.bottomRight,
+      (false, false) => Alignment.bottomLeft,
+    };
+    // Bağlantıda yatay kenar bağlantının kenarıdır.
+    final left = anchor == null || alignEnd ? null : anchor.left;
+    final right = anchor == null || !alignEnd
+        ? null
+        : screen.width - anchor.right;
+    final top = down ? anchor.bottom + NizamioSpacing.space2 : null;
     return navigator.push(
       PageRouteBuilder<void>(
         opaque: false,
@@ -74,28 +121,24 @@ abstract final class NzFlyoutMenu {
         barrierColor: context.colors.scrimSoft,
         transitionDuration: NzMotion.of(context, NizamioMotion.durSheet),
         reverseTransitionDuration: NzMotion.of(context, NizamioMotion.durExit),
-        pageBuilder: (routeContext, _, _) => _FlyoutPanel(
+        pageBuilder: (routeContext, animation, _) => _FlyoutPanel(
+          animation: animation,
           semanticLabel: semanticLabel,
           entries: entries,
           bottom: reserved + NizamioSpacing.space3,
+          alignment: corner,
+          left: left,
+          right: right,
+          top: top,
         ),
         transitionsBuilder: (_, animation, _, child) {
-          final curved = CurvedAnimation(
-            parent: animation,
-            curve: NizamioMotion.easeSpring,
-            reverseCurve: NzMotion.exitReverse,
-          );
           return FadeTransition(
             opacity: CurvedAnimation(
               parent: animation,
               curve: NizamioMotion.easeOut,
               reverseCurve: NzMotion.exitReverse,
             ),
-            child: ScaleTransition(
-              scale: Tween<double>(begin: 0.6, end: 1).animate(curved),
-              alignment: Alignment.bottomLeft,
-              child: child,
-            ),
+            child: child,
           );
         },
       ),
@@ -105,53 +148,77 @@ abstract final class NzFlyoutMenu {
 
 class _FlyoutPanel extends StatelessWidget {
   const _FlyoutPanel({
+    required this.animation,
     required this.semanticLabel,
     required this.entries,
     required this.bottom,
+    required this.alignment,
+    this.left,
+    this.right,
+    this.top,
   });
 
+  final Animation<double> animation;
   final String semanticLabel;
   final List<NzFlyoutEntry> entries;
   final double bottom;
+  final Alignment alignment;
+  final double? left;
+  final double? right;
+  final double? top;
 
   @override
   Widget build(BuildContext context) {
-    final top = MediaQuery.paddingOf(context).top + NizamioSize.appbar;
+    final top =
+        this.top ?? MediaQuery.paddingOf(context).top + NizamioSize.appbar;
     return Padding(
       padding: EdgeInsets.fromLTRB(
-        NizamioSpacing.gutter,
+        left ?? NizamioSpacing.gutter,
         top,
-        NizamioSpacing.gutter,
+        right ?? NizamioSpacing.gutter,
         bottom,
       ),
       child: Align(
-        alignment: Alignment.bottomLeft,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: NizamioSize.flyoutWidth),
-          child: Semantics(
-            scopesRoute: true,
-            namesRoute: true,
-            explicitChildNodes: true,
-            label: semanticLabel,
-            child: NzGlass(
-              tone: NzGlassTone.menu,
-              borderRadius: BorderRadius.circular(NizamioRadius.flyout),
-              shadow: context.shadows.menu,
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(NizamioSpacing.space2),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    for (var i = 0; i < entries.length; i++)
-                      switch (entries[i]) {
-                        final NzFlyoutSection s => _Section(
-                          label: s.label,
-                          divided: i > 0,
-                        ),
-                        final NzFlyoutItem item => _Row(item: item),
-                      },
-                  ],
+        alignment: alignment,
+        // Dış dolgu ölçeklenmez; büyüme menünün karta bağlı köşesinde kalır.
+        child: ScaleTransition(
+          alignment: alignment,
+          scale: Tween<double>(begin: 0.6, end: 1).animate(
+            CurvedAnimation(
+              parent: animation,
+              curve: NizamioMotion.easeSpring,
+              reverseCurve: NzMotion.exitReverse,
+            ),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: NizamioSize.flyoutWidth,
+            ),
+            child: Semantics(
+              scopesRoute: true,
+              namesRoute: true,
+              explicitChildNodes: true,
+              label: semanticLabel,
+              child: NzGlass(
+                tone: NzGlassTone.menu,
+                borderRadius: BorderRadius.circular(NizamioRadius.flyout),
+                shadow: context.shadows.menu,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(NizamioSpacing.space2),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < entries.length; i++)
+                        switch (entries[i]) {
+                          final NzFlyoutSection s => _Section(
+                            label: s.label,
+                            divided: i > 0,
+                          ),
+                          final NzFlyoutItem item => _Row(item: item),
+                        },
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -232,7 +299,7 @@ class _Row extends StatelessWidget {
         ),
         child: Material(
           type: MaterialType.transparency,
-          child: InkWell(
+          child: NzTap(
             onTap: select,
             borderRadius: BorderRadius.circular(NizamioRadius.group),
             child: ConstrainedBox(
@@ -249,7 +316,15 @@ class _Row extends StatelessWidget {
                     SizedBox(
                       width: NizamioSpacing.space6,
                       child: Center(
-                        child: icon != null
+                        child: item.glyph != null
+                            ? NzGlyphIcon(
+                                item.glyph!,
+                                size: NizamioSize.iconSizeSm,
+                                color: item.accent
+                                    ? c.accentText
+                                    : c.glassInkFaint,
+                              )
+                            : icon != null
                             ? NzIcon(
                                 icon,
                                 size: NizamioSize.iconSizeSm,

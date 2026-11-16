@@ -206,6 +206,7 @@ ChatMessage pendingMessage(
           fileName: upload.name,
           sizeBytes: upload.sizeBytes,
           contentType: upload.contentType,
+          localPath: upload.path,
         ),
     ],
     replyTo: replyTo == null

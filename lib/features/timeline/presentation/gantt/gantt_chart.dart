@@ -13,11 +13,16 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/theme/nz_motion.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
-import '../../../tasks/tasks.dart' show Subtask;
+import '../../../tasks/tasks.dart' show Subtask, TaskDependency;
 import '../../domain/horizontal_timeline.dart';
+import '../chart/timeline_links_painter.dart';
+import '../timeline_texts.dart' show TimelineTexts;
 import 'gantt_geometry.dart';
 import 'gantt_painters.dart';
 import 'gantt_texts.dart';
+
+part 'gantt_date_header.dart';
+part 'gantt_labels.dart';
 
 /// Yapışkan sol sütunun camı: çizelgeyi 10 piksel bulanıklaştırır; dolguyu
 /// satırlar verir (görev satırı `glassBar`, grup satırı aynı saydamlıkta `surface`). Altından
@@ -60,9 +65,13 @@ class GanttChart extends StatefulWidget {
     this.onToggleLabels,
     this.expandedTasks = const {},
     this.onToggleSubtasks,
+    this.links = const [],
   });
 
   final GanttLayout layout;
+
+  /// Gantt bağımlılıkları; iki ucu da çizelgede olanlar ok olarak çizilir.
+  final List<TaskDependency> links;
   final GanttCenterRequest center;
   final ValueChanged<String> onToggleGroup;
   final ValueChanged<String> onPick;
@@ -85,10 +94,10 @@ class GanttChart extends StatefulWidget {
   static ValueKey<String> barKey(String code) => ValueKey('gantt-bar-$code');
 
   @override
-  State<GanttChart> createState() => _GanttChartState();
+  State<GanttChart> createState() => GanttChartState();
 }
 
-class _GanttChartState extends State<GanttChart> {
+class GanttChartState extends State<GanttChart> {
   late final ScrollController _h =
       widget.horizontalController ?? ScrollController();
   final _v = ScrollController();
@@ -100,9 +109,9 @@ class _GanttChartState extends State<GanttChart> {
   }
 
   @override
-  void didUpdateWidget(GanttChart old) {
-    super.didUpdateWidget(old);
-    if (old.center.serial != widget.center.serial) {
+  void didUpdateWidget(GanttChart oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.center.serial != widget.center.serial) {
       _schedule(smooth: widget.center.smooth);
     }
   }
@@ -112,6 +121,30 @@ class _GanttChartState extends State<GanttChart> {
     if (widget.horizontalController == null) _h.dispose();
     _v.dispose();
     super.dispose();
+  }
+
+  /// Yapışkan görev etiketi ya da çubuk; kart dışındaki genel koordinat içindir.
+  String? taskAt(Offset globalPosition) {
+    final box = context.findRenderObject()! as RenderBox;
+    final point = box.globalToLocal(globalPosition);
+    if (!(Offset.zero & box.size).contains(point) ||
+        point.dy < GanttGeometry.stickyHeader) {
+      return null;
+    }
+    final y =
+        point.dy - GanttGeometry.stickyHeader + (_v.hasClients ? _v.offset : 0);
+    final layout = widget.layout;
+    if (point.dx < layout.labelWidth) {
+      final index = y ~/ GanttGeometry.row;
+      if (index < 0 || index >= layout.rows.length) return null;
+      return switch (layout.rows[index].row) {
+        GanttTaskRow(:final task) => task.code,
+        _ => null,
+      };
+    }
+    return layout.barAt(
+      Offset(point.dx + (_h.hasClients ? _h.offset : 0) - layout.labelWidth, y),
+    );
   }
 
   /// Yerleşimden sonra (yeni genişlik ve kaydırma sınırı belliyken) ortalar.
@@ -162,7 +195,9 @@ class _GanttChartState extends State<GanttChart> {
         return SingleChildScrollView(
           key: GanttChart.horizontalKey,
           controller: _h,
-          physics: const ClampingScrollPhysics(),
+          physics: l.view.state.selected == null
+              ? const ClampingScrollPhysics()
+              : const NeverScrollableScrollPhysics(),
           scrollDirection: Axis.horizontal,
           child: SizedBox(
             width: l.totalWidth,
@@ -184,7 +219,9 @@ class _GanttChartState extends State<GanttChart> {
                   child: Scrollable(
                     key: GanttChart.verticalKey,
                     controller: _v,
-                    physics: const ClampingScrollPhysics(),
+                    physics: l.view.state.selected == null
+                        ? const ClampingScrollPhysics()
+                        : const NeverScrollableScrollPhysics(),
                     viewportBuilder: (context, offset) => Stack(
                       fit: StackFit.expand,
                       children: [
@@ -199,6 +236,7 @@ class _GanttChartState extends State<GanttChart> {
                               h: _h,
                               v: _v,
                               onPick: widget.onPick,
+                              links: widget.links,
                             ),
                           ),
                         ),
@@ -242,177 +280,9 @@ class _GanttChartState extends State<GanttChart> {
   }
 }
 
-/// Yapışkan tarih başlığı: sol "koordinatörlük · görev" hücresi, ay adları, gün işaretleri ve
-/// "bugün" hapı.
-class _DateHeader extends StatelessWidget {
-  const _DateHeader({
-    required this.layout,
-    required this.sticky,
-    this.onToggleLabels,
-  });
-
-  final GanttLayout layout;
-  final Widget Function(Widget) sticky;
-  final VoidCallback? onToggleLabels;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    final l = context.l10n;
-    final v = layout.view;
-    final side = BorderSide(color: c.border);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: c.background,
-        border: Border(bottom: side),
-      ),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          Positioned(
-            left: layout.labelWidth,
-            top: 0,
-            width: layout.width,
-            height: GanttGeometry.stickyHeader,
-            child: ExcludeSemantics(
-              child: RepaintBoundary(
-                child: CustomPaint(
-                  key: GanttChart.headerKey,
-                  painter: GanttHeaderPainter(
-                    layout: layout,
-                    monthLabels: [
-                      for (var m = 1; m <= 12; m++) l.ganttMonth(m, v.year),
-                    ],
-                    colors: c,
-                    // Ağırlık rolün kendisinden (600); `copyWith(fontWeight:)`
-                    // gömülü yazı tipinde başka ağırlık dosyası seçmez.
-                    monthStyle: t.labelMd.copyWith(
-                      fontSize: GanttGeometry.monthFontSize,
-                      height:
-                          GanttGeometry.headLine / GanttGeometry.monthFontSize,
-                    ),
-                    tickStyle: t.monoSm.copyWith(
-                      fontSize: GanttGeometry.tickFontSize,
-                      height:
-                          GanttGeometry.headLine / GanttGeometry.tickFontSize,
-                    ),
-                    textScaler: MediaQuery.textScalerOf(context),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: layout.labelWidth + layout.todayX,
-            top: GanttGeometry.tickTop,
-            child: FractionalTranslation(
-              translation: const Offset(-0.5, 0),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: c.ganttLateLine,
-                  borderRadius: BorderRadius.circular(NizamioRadius.pill),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: GanttGeometry.pillPad,
-                  ),
-                  child: Text(
-                    l.uiTimelineGanttTodayPill,
-                    maxLines: 1,
-                    style: t.monoSm.copyWith(
-                      fontSize: GanttGeometry.pillFontSize,
-                      height:
-                          GanttGeometry.headLine / GanttGeometry.pillFontSize,
-                      fontWeight: FontWeight.w600,
-                      color: c.onDanger,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            left: 0,
-            top: 0,
-            width: layout.labelWidth,
-            height: GanttGeometry.stickyHeader,
-            child: sticky(
-              _labelGlass(
-                DecoratedBox(
-                  decoration: BoxDecoration(
-                    color: c.glassBar,
-                    border: Border(right: side, bottom: side),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      GanttGeometry.labelHeadPad,
-                      0,
-                      GanttGeometry.labelHeadPad,
-                      GanttGeometry.labelHeadBottom,
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Expanded(
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(
-                              layout.labelWidth < 300 ? 'KOD' : 'GÖREV',
-                              style: t.kicker,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ),
-                        if (onToggleLabels != null)
-                          Tooltip(
-                            message: layout.labelWidth < 300
-                                ? 'Görev adlarını göster'
-                                : 'Yalnız kodları göster',
-                            child: Semantics(
-                              button: true,
-                              label: layout.labelWidth < 300
-                                  ? 'Görev adlarını göster'
-                                  : 'Yalnız kodları göster',
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  borderRadius: BorderRadius.circular(10),
-                                  splashFactory: NoSplash.splashFactory,
-                                  overlayColor: const WidgetStatePropertyAll(
-                                    Colors.transparent,
-                                  ),
-                                  onTap: onToggleLabels,
-                                  child: SizedBox.square(
-                                    dimension: 32,
-                                    child: CustomPaint(
-                                      painter: _ColumnIconPainter(
-                                        color: c.textMuted,
-                                        expand: layout.labelWidth < 300,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// Gövdeyi dikey kaydırma ofsetiyle gösteren görünüm. Etiket sütunu ([_Labels]) aynı ofseti
 /// kendi görünümünde paylaşır; ikisi de aynı kaydırma sınırını bildirir (içerik boyu
-/// [_GanttChartState] `height`; satırlar görünür alandan kısaysa ikisinde de sınır 0).
+/// [GanttChartState] `height`; satırlar görünür alandan kısaysa ikisinde de sınır 0).
 Widget _scrolled(ViewportOffset offset, Widget child) => Viewport(
   offset: offset,
   slivers: [SliverToBoxAdapter(child: child)],
@@ -427,9 +297,11 @@ class _Body extends StatelessWidget {
     required this.h,
     required this.v,
     required this.onPick,
+    required this.links,
   });
 
   final GanttLayout layout;
+  final List<TaskDependency> links;
   final double height;
 
   /// Görünür alan: yatay kaydırma genişliği × dikey kaydırma yüksekliği.
@@ -453,6 +325,21 @@ class _Body extends StatelessWidget {
             child: CustomPaint(
               key: GanttChart.bodyKey,
               painter: GanttBodyPainter(layout: layout, colors: c),
+            ),
+          ),
+        ),
+        Positioned(
+          left: layout.labelWidth,
+          top: 0,
+          width: layout.width,
+          height: height,
+          child: IgnorePointer(
+            child: CustomPaint(
+              painter: TimelineLinksPainter(
+                links: timelineLinkEnds(links, layout.barOf),
+                color: c.textMuted,
+                crossColor: c.textFaint,
+              ),
             ),
           ),
         ),
@@ -658,383 +545,4 @@ class _BarsState extends State<_Bars> with SingleTickerProviderStateMixin {
       ),
     );
   }
-}
-
-/// Yapışkan sol etiket sütunu (saydam zemin; camı altındaki sabit panel verir) ya da boş
-/// durum metni. Sabit satır yüksekliğiyle yalnız görünür (ve önbellek payındaki) satırlar
-/// kurulur; dikey ofset gövdeyle aynıdır.
-class _Labels extends StatelessWidget {
-  const _Labels({
-    required this.layout,
-    required this.offset,
-    required this.height,
-    required this.onToggleGroup,
-    required this.expandedTasks,
-    required this.onToggleSubtasks,
-    required this.onPick,
-  });
-
-  final GanttLayout layout;
-  final Set<String> expandedTasks;
-  final ValueChanged<String>? onToggleSubtasks;
-  final ViewportOffset offset;
-
-  /// Gövdeyle aynı içerik boyu (boş durumda).
-  final double height;
-  final ValueChanged<String> onToggleGroup;
-  final ValueChanged<String> onPick;
-
-  @override
-  Widget build(BuildContext context) {
-    final rows = layout.rows;
-    return Viewport(
-      key: GanttChart.labelsKey,
-      offset: offset,
-      slivers: [
-        if (layout.view.empty)
-          SliverToBoxAdapter(
-            child: SizedBox(
-              height: height,
-              child: Stack(
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    left: 0,
-                    top: 0,
-                    right: 0,
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: GanttGeometry.emptyPad,
-                      ),
-                      child: Text(
-                        context.l10n.uiTimelineGanttEmpty,
-                        textAlign: TextAlign.center,
-                        style: context.text.bodyMd.copyWith(
-                          color: context.colors.textMuted,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          )
-        else
-          SliverFixedExtentList(
-            itemExtent: GanttGeometry.row,
-            delegate: SliverChildBuilderDelegate(
-              (context, i) => switch (rows[i].row) {
-                final GanttHeadRow h => _GroupLabel(
-                  head: h,
-                  compact: layout.labelWidth < 300,
-                  onTap: () => onToggleGroup(h.code),
-                ),
-                final GanttSubtaskRow s => _SubtaskLabel(subtask: s.subtask),
-                final GanttTaskRow r => _TaskLabel(
-                  row: r,
-                  expanded: expandedTasks.contains(r.task.code),
-                  onToggleSubtasks: onToggleSubtasks == null
-                      ? null
-                      : () => onToggleSubtasks!(r.task.code),
-                  compact: layout.labelWidth < 300,
-                  onTap: () => onPick(r.task.code),
-                ),
-              },
-              childCount: rows.length,
-            ),
-          ),
-      ],
-    );
-  }
-}
-
-/// Grup başlığı (prototip `button[aria-expanded]`): ok, kod, ad, gecikme sayısı, görev sayısı.
-class _GroupLabel extends StatelessWidget {
-  const _GroupLabel({
-    required this.head,
-    required this.onTap,
-    required this.compact,
-  });
-
-  final GanttHeadRow head;
-  final bool compact;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    final l = context.l10n;
-    final side = BorderSide(color: c.border);
-    final late = head.late > 0 ? l.ganttGroupLate(head.late) : null;
-    return Semantics(
-      button: true,
-      expanded: head.open,
-      label: [
-        if (head.label != head.name) head.label,
-        head.name,
-        ?late,
-        '${head.count}',
-      ].join(' '),
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: _groupGlass(c),
-            border: Border(top: side, right: side),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.only(
-              left: GanttGeometry.groupPadLeft,
-              right: GanttGeometry.groupPadRight,
-            ),
-            child: Row(
-              children: [
-                AnimatedRotation(
-                  turns: head.open ? 0.25 : 0,
-                  duration: NzMotion.of(context, GanttGeometry.chevronDuration),
-                  curve: NizamioMotion.easeSpring,
-                  child: NzIcon(
-                    NzIcons.chevronRight,
-                    size: NizamioSize.iconSizeSm,
-                    color: c.textFaint,
-                  ),
-                ),
-                const Gap(NizamioSpacing.space2),
-                // Etiket ve ad tek satır: sığmazsa sonu soluklaşır (satır dışına taşmaz).
-                // Departman kodu yoksa etiket addır; o zaman yalnız ad yazılır.
-                Expanded(
-                  child: Text.rich(
-                    TextSpan(
-                      children: [
-                        if (head.label != head.name) ...[
-                          TextSpan(
-                            text: head.label,
-                            style: t.monoSm.copyWith(color: c.textFaint),
-                          ),
-                          const TextSpan(text: '  '),
-                        ],
-                        if (head.name.isNotEmpty) ...[
-                          TextSpan(
-                            text: head.name,
-                            style: t.labelMd.copyWith(
-                              fontSize: GanttGeometry.groupNameSize,
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    maxLines: 1,
-                    softWrap: false,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                if (late != null && !compact) ...[
-                  const Gap(NizamioSpacing.space2),
-                  Text(
-                    late,
-                    style: t.monoSm.copyWith(
-                      fontSize: GanttGeometry.tickFontSize,
-                      color: c.danger,
-                    ),
-                  ),
-                ],
-                const Gap(NizamioSpacing.space2),
-                ConstrainedBox(
-                  constraints: const BoxConstraints(
-                    minWidth: GanttGeometry.countMinWidth,
-                  ),
-                  child: Text(
-                    '${head.count}',
-                    textAlign: TextAlign.right,
-                    style: t.monoSm.copyWith(color: c.textMuted),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Görev satırının sol etiketi (prototip `button[aria-pressed]`): gri anahtar (koordinatörlük
-/// etiketi + sıra; gecikmede kırmızı) ve beyaz, kalın başlık; dokununca seçer. Uzun etiket ve
-/// başlık sonda soluklaşır, numara görünür kalır.
-class _TaskLabel extends StatelessWidget {
-  const _TaskLabel({
-    required this.row,
-    required this.onTap,
-    required this.compact,
-    required this.expanded,
-    this.onToggleSubtasks,
-  });
-
-  final GanttTaskRow row;
-  final bool expanded;
-  final VoidCallback? onToggleSubtasks;
-  final bool compact;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    final t = context.text;
-    final task = row.task;
-    final keyStyle = t.monoSm.copyWith(
-      color: task.late ? c.danger : c.textFaint,
-    );
-    return Semantics(
-      button: true,
-      selected: row.selected,
-      label: context.l10n.ganttRowLabel(row),
-      excludeSemantics: false,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: c.glassBar,
-            border: Border(right: BorderSide(color: c.border)),
-          ),
-          child: Tooltip(
-            message: compact ? '${row.key} · ${task.item.title}' : '',
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: [
-                  SizedBox(
-                    width: 48,
-                    child: Text(
-                      row.key.toLowerCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: keyStyle,
-                    ),
-                  ),
-                  const Gap(10),
-                  DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: ganttStatusColor(c, task.status),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const SizedBox.square(dimension: 8),
-                  ),
-                  if (compact && task.item.subtaskTotal > 0) const Spacer(),
-                  if (!compact) ...[
-                    const Gap(10),
-                    Expanded(
-                      child: Text(
-                        task.item.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: t.bodyMd.copyWith(
-                          fontSize: GanttGeometry.rowTitleSize,
-                          fontWeight: FontWeight.w600,
-                          color: c.text,
-                        ),
-                      ),
-                    ),
-                  ],
-                  if (task.item.subtaskTotal > 0 && onToggleSubtasks != null)
-                    Tooltip(
-                      message: expanded
-                          ? 'Alt görevleri kapat'
-                          : 'Alt görevleri göster',
-                      child: InkWell(
-                        onTap: onToggleSubtasks,
-                        borderRadius: BorderRadius.circular(8),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 5,
-                          ),
-                          child: Text(
-                            '${task.item.subtaskDoneTotal}/${task.item.subtaskTotal}',
-                            style: t.monoSm.copyWith(color: c.textMuted),
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SubtaskLabel extends StatelessWidget {
-  const _SubtaskLabel({required this.subtask});
-  final Subtask subtask;
-
-  @override
-  Widget build(BuildContext context) {
-    final c = context.colors;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: c.glassBar,
-        border: Border(right: BorderSide(color: c.border)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Row(
-          children: [
-            Icon(
-              subtask.done
-                  ? Icons.check_box_rounded
-                  : Icons.check_box_outline_blank_rounded,
-              size: 18,
-              color: subtask.done ? c.taskDone : c.textMuted,
-            ),
-            const Gap(10),
-            Expanded(
-              child: Text(
-                subtask.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: context.text.caption,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ColumnIconPainter extends CustomPainter {
-  const _ColumnIconPainter({required this.color, required this.expand});
-  final Color color;
-  final bool expand;
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.save();
-    canvas.translate((size.width - 24) / 2, (size.height - 24) / 2);
-    final p = Paint()
-      ..color = color
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.75
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-    canvas.drawRect(const Rect.fromLTWH(4, 4, 16, 16), p);
-    canvas.drawLine(const Offset(9, 4), const Offset(9, 20), p);
-    final path = Path()
-      ..moveTo(expand ? 13 : 15, 10)
-      ..lineTo(expand ? 15 : 13, 12)
-      ..lineTo(expand ? 13 : 15, 14);
-    canvas.drawPath(path, p);
-    canvas.restore();
-  }
-
-  @override
-  bool shouldRepaint(_ColumnIconPainter old) =>
-      old.color != color || old.expand != expand;
 }

@@ -62,14 +62,25 @@ golang_pin() { # go sürümü → golang:<sürüm>-bookworm digest'i
 }
 distroless_ref="gcr.io/distroless/static-debian12:nonroot@sha256:afa5c872c891853ca7fcf1f12c3edb23f7eeef36189728842dd51042ff57f7ab"
 syntax_ref="docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e"
-golang_digest="$(golang_pin "$go_version")"
-if [[ -z "$golang_digest" ]]; then
-  echo "HATA: go.mod Go $go_version için taban imaj pini yok; test_integration/backend/up.sh golang_pin güncellenmeli" >&2
-  exit 1
-fi
-golang_ref="golang:${go_version}-bookworm@${golang_digest}"
-
 dockerfile="$state/src/build/Dockerfile"
+# v0.19.0-api'den beri etiketin Dockerfile'ı tabanları kendisi digest'le anar (toolchain sürümüyle,
+# ör. golang:1.26.11). O durumda satır olduğu gibi kalır; denetim o referansla yapılır.
+pinned_from() { # aşama → "imaj@sha256:…" (etiket pinlemiyorsa boş)
+  grep -E "^FROM [^ ]+@sha256:[0-9a-f]{64} AS $1\$" "$dockerfile" | awk '{print $2}' || true
+}
+build_pinned="$(pinned_from build)"
+runtime_pinned="$(pinned_from runtime)"
+if [[ -n "$build_pinned" ]]; then
+  golang_ref="${build_pinned#docker.io/library/}"
+else
+  golang_digest="$(golang_pin "$go_version")"
+  if [[ -z "$golang_digest" ]]; then
+    echo "HATA: go.mod Go $go_version için taban imaj pini yok; test_integration/backend/up.sh golang_pin güncellenmeli" >&2
+    exit 1
+  fi
+  golang_ref="golang:${go_version}-bookworm@${golang_digest}"
+fi
+[[ -n "$runtime_pinned" ]] && distroless_ref="$runtime_pinned"
 pin_from() { # beklenen-satır yeni-satır
   local expected="$1" replacement="$2" count
   count="$(grep -cxF "$expected" "$dockerfile" || true)"
@@ -82,8 +93,16 @@ pin_from() { # beklenen-satır yeni-satır
   mv "$dockerfile.pinned" "$dockerfile"
   echo "== taban: $replacement"
 }
-pin_from 'FROM golang:${GO_VERSION}-bookworm AS build' "FROM $golang_ref AS build"
-pin_from 'FROM gcr.io/distroless/static-debian12:nonroot AS runtime' "FROM $distroless_ref AS runtime"
+if [[ -n "$build_pinned" ]]; then
+  echo "== taban (etikette pinli): FROM $build_pinned AS build"
+else
+  pin_from 'FROM golang:${GO_VERSION}-bookworm AS build' "FROM $golang_ref AS build"
+fi
+if [[ -n "$runtime_pinned" ]]; then
+  echo "== taban (etikette pinli): FROM $runtime_pinned AS runtime"
+else
+  pin_from 'FROM gcr.io/distroless/static-debian12:nonroot AS runtime' "FROM $distroless_ref AS runtime"
+fi
 
 image="nizamio-f14/backend:$tag"
 bootstrap_image="nizamio-f14/bootstrap:$tag"

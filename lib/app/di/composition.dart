@@ -94,7 +94,10 @@ class Composition {
       apiDio: () => container.read(apiDioProvider),
     );
     registerScopeModule(locator, apiDio: () => container.read(apiDioProvider));
-    registerActivityModule(locator);
+    registerActivityModule(
+      locator,
+      apiDio: () => container.read(apiDioProvider),
+    );
     registerReportsModule(
       locator,
       apiDio: () => container.read(apiDioProvider),
@@ -127,8 +130,8 @@ class Composition {
       locator,
       apiDio: () => container.read(apiDioProvider),
     );
-    registerTablesModule(locator, apiDio: () => container.read(apiDioProvider));
     registerTasksModule(locator, apiDio: () => container.read(apiDioProvider));
+    registerTablesModule(locator, apiDio: () => container.read(apiDioProvider));
     registerTimelineModule(locator);
     container = ProviderContainer(
       // Otomatik yeniden deneme YOK (A3 / CLAUDE.md): Riverpod 3 varsayılanı hata veren
@@ -184,11 +187,11 @@ class Composition {
         ...meetingsOverrides(locator),
         ...messagesOverrides(locator),
         ...notificationsOverrides(locator),
-        ...tablesOverrides(locator),
         ...tasksOverrides(
           locator,
           apiDio: () => container.read(apiDioProvider),
         ),
+        ...tablesOverrides(locator),
         ...timelineOverrides(
           locator,
           apiDio: () => container.read(apiDioProvider),

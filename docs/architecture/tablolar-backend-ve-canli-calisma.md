@@ -1,5 +1,12 @@
 # Tablolar: backend sözleşmesi ve canlı ortak çalışma (mobil)
 
+> **Durum (2026-11-17, main birleşmesi):** Bu dalın tablo uygulaması (`table_controller`,
+> `table_sync_controller`, `table_write_queue`, `table_reference_controller` vb.) main'in
+> `TableDetailController` + workspace uygulamasıyla birleşmede yer değiştirdi; güncel mobil
+> tasarım `docs/yurutme/tablo-workspace-calisma.md`'dir. Bölüm 1–7 (backend sözleşme özeti)
+> geçerli başvurudur; bölüm 8–9 dal geçmişindeki (etiket `yedek/tablolar-birlesme-oncesi-20261117`)
+> tasarımı anlatır ve main uygulamasına taşınacak davranışların listesi olarak okunur.
+
 Mobil tablolar diliminin hafızası. Bölüm 1–7 backend sözleşmesinin mobil için özetidir;
 bölüm 8–9 mobil tasarımıdır. Yetkili kaynak backend'dir; buradaki her başvuru backend
 deposuna göredir (`nizam.io--backend/`, dal `f64/ortak-calisma-faz3`). Kısaltmalar:

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
@@ -16,18 +18,23 @@ import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../scope/scope.dart';
+import '../../tasks/tasks.dart' show effectiveAccessProvider;
 import '../application/archive_controller.dart';
 import '../application/archive_folders_controller.dart';
 import '../application/archive_providers.dart';
+import '../application/archive_summary_provider.dart';
 import '../domain/archive.dart';
-import 'archive/archive_folder_card.dart';
+import '../domain/archive_summary.dart';
+import 'archive/archive_coordinator_contents.dart';
 import 'archive/archive_folder_grid.dart';
 import 'archive/archive_outcome.dart';
-import 'archive/archive_texts.dart';
+import 'archive/archive_role_views.dart';
+import 'archive/archive_storage.dart';
+import 'archive/archive_upload.dart';
 
-/// Arşiv (prototip `archive`): başlık + ara + yükle, dosya/klasör özeti, klasör kartları
-/// (sunucunun klasör özeti) → klasör ayrıntısı. Alt menüde modül sekmesine yeniden dokunmak
-/// kısayol menüsünü açar. Görev bağlamı olmayan yükleme "yakında"dır.
+/// Arşiv (prototip `archive`): başlık + ara + yükle; yöneticide etiket süzgeci, depolama kartı
+/// ve sıralanabilir koordinatörlük kartları → klasör ayrıntısı. Alt menüde modül sekmesine yeniden dokunmak
+/// kısayol menüsünü açar. Yükleme önce görev seçtirir, sonra dosya ([startArchiveRootUpload]).
 class ArchivePage extends ConsumerStatefulWidget {
   const ArchivePage({super.key});
 
@@ -85,7 +92,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
           label: l.uiArchiveUpload,
           icon: NzIcons.upload,
           accent: true,
-          onSelected: () => _toast(l.uiArchiveUploadSoon),
+          onSelected: () => startArchiveRootUpload(context, ref),
         ),
         // Dönemin tam arşivi yalnız şirket yöneticisine açıktır (RECORDS-K24).
         if (admin)
@@ -99,12 +106,15 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
           icon: NzIcons.search,
           onSelected: _toggleSearch,
         ),
-        NzFlyoutSection(l.uiArchiveSectionGo),
-        NzFlyoutItem(
-          label: l.uiArchiveGoCoordinatorships,
-          icon: NzIcons.coordinatorships,
-          onSelected: context.appNav.openCoordinatorships,
-        ),
+        // Koordinatörlükler listesi yalnız yönetici görünümünün menüsünde.
+        if (ref.read(effectiveAccessProvider).seesAllDepartments) ...[
+          NzFlyoutSection(l.uiArchiveSectionGo),
+          NzFlyoutItem(
+            label: l.uiArchiveGoCoordinatorships,
+            icon: NzIcons.coordinatorships,
+            onSelected: context.appNav.openCoordinatorships,
+          ),
+        ],
       ],
     );
   }
@@ -116,6 +126,9 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
       if (next?.tab != ArchivePage.shellTab || !visible) return;
       _shortcuts();
     });
+    ref.listen(archiveControllerProvider.select((s) => s.query), (_, query) {
+      if (_search.text != query) _search.text = query;
+    });
     final l = context.l10n;
     // Kök yalnız arama açıklığını izler; klasörler kendi dilimini izler (aramada her tuş
     // vuruşu yalnız klasör ızgarasını yeniden kurar).
@@ -123,6 +136,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
       archiveControllerProvider.select((v) => v.searchOpen),
     );
     final folders = ref.watch(archiveFoldersControllerProvider);
+    final member = ref.watch(effectiveAccessProvider).isMemberView;
     void retry() => retryArchive(ref);
     return NzPage.feed(
       width: NzContentWidth.wide,
@@ -131,7 +145,8 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
       topBar: const RootTopBar(),
       children: [
         NzPageHeader(
-          title: l.uiArchiveTitle,
+          // Üye menüsünde "Dosyalarım" (aynı modül).
+          title: member ? l.uiArchiveMyFiles : l.uiArchiveTitle,
           actions: [
             Semantics(
               selected: searchOpen,
@@ -144,7 +159,7 @@ class _ArchivePageState extends ConsumerState<ArchivePage> {
             NzIconButton.circleAccent(
               icon: NzIcons.arrowUp,
               semanticLabel: l.uiArchiveUpload,
-              onPressed: () => _toast(l.uiArchiveUploadSoon),
+              onPressed: () => startArchiveRootUpload(context, ref),
             ),
           ],
         ),
@@ -186,38 +201,99 @@ class _Folders extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final view = ref.watch(effectiveAccessProvider);
+    // Koordinatör: görev klasörleri ve aynı sayfada arşiv dosyaları.
+    if (view.isCoordinatorView) {
+      final own =
+          all.where((f) => f.code == view.departmentId).firstOrNull ??
+          all.where((f) => !f.isVirtual).firstOrNull;
+      if (own != null) {
+        return ArchiveCoordinatorContents(
+          key: ValueKey((view.programId, own.code)),
+          folder: own,
+        );
+      }
+    }
+    // Üye: önce kendi dosyaları, sonra sanal "Görevlerim" klasörünün görev kartları;
+    // depolama kartı atanmış görevlerin bütün dosyalarını sayar.
+    if (view.isMemberView) {
+      final mine = all.where((f) => f.isVirtual).firstOrNull ?? all.firstOrNull;
+      if (mine != null) {
+        final l = context.l10n;
+        // Depolama kartı atandığı görevlerin bütün dosyalarını sayar (K4); "Dosyalarım"
+        // listesi yalnız kendi yükledikleri. Etiket süzgeci kartı ve görev klasörlerini süzer.
+        final stats = ref.watch(archiveStatsProvider).value;
+        final tagged = ref.watch(archiveTaggedTasksProvider);
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const ArchiveTagChip(),
+            const Gap(NizamioSpacing.space5),
+            ArchiveStorageCard(stats: stats, folders: 1, showFolders: false),
+            const Gap(NizamioSpacing.space6),
+            const ArchiveMyFiles(),
+            const Gap(NizamioSpacing.space6),
+            NzAsyncView<Set<String>?>(
+              value: tagged,
+              skeletonOnReload: true,
+              onRetry: () => retryArchive(ref),
+              data: (ids) => ArchiveTaskFolderList(
+                folder: mine,
+                empty: l.uiArchiveEmptyAssigned,
+                onlyTasks: ids,
+              ),
+            ),
+          ],
+        );
+      }
+    }
     final query = ref.watch(archiveControllerProvider.select((v) => v.query));
+    final (sort, descending) = ref.watch(
+      archiveControllerProvider.select((v) => (v.sort, v.descending)),
+    );
+    final tags = ref.watch(archiveControllerProvider.select((v) => v.tags));
+    // Yönetici: etiket süzgeci, depolama kartı, sıralanabilir koordinatörlük kartları.
+    final stats = ref.watch(archiveStatsProvider).value;
     final l = context.l10n;
     final c = context.colors;
     final t = context.text;
-    final files = all.fold<int>(0, (s, f) => s + f.files);
-    final list = visibleFolders(all, query: query);
+    final list = sortArchiveFolders(
+      visibleFolders(all, query: query),
+      stats: stats,
+      sort: sort,
+      descending: descending,
+    );
+    final largest = all.fold(
+      0,
+      (m, f) => math.max(m, stats?.folder(f.code).bytes ?? 0),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Semantics(
-          label: l.uiArchiveStorage,
-          container: true,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: c.surfaceRaised,
-              borderRadius: BorderRadius.circular(NizamioRadius.row),
-            ),
-            child: Text(
-              l.storageCaption(files, all.length),
-              style: t.bodyMd.copyWith(color: c.textMuted),
-            ),
-          ),
-        ),
+        const ArchiveTagChip(),
         const Gap(NizamioSpacing.space5),
-        NzKicker('${l.uiArchiveFoldersTitle} · ${list.length}'),
+        ArchiveStorageCard(stats: stats, folders: all.length),
         const Gap(NizamioSpacing.space6),
+        Row(
+          children: [
+            Expanded(
+              child: NzKicker(
+                '${l.uiArchiveCoordinatorshipsLc} · ${list.length}',
+              ),
+            ),
+            const ArchiveSortControl(),
+          ],
+        ),
+        const Gap(NizamioSpacing.space4),
         ArchiveFolderGrid(
           children: [
             for (final folder in list)
-              ArchiveFolderCard(
+              ArchiveStatFolderCard(
                 folder: folder,
+                stats: stats?.folder(folder.code),
+                total: stats?.bytes ?? 0,
+                largest: largest,
+                filtered: tags.isNotEmpty,
                 onTap: () => context.appNav.openArchiveFolder(folder.code),
               ),
           ],

@@ -24,28 +24,39 @@ final class MeetingsView {
     this.tab = MeetingsTab.upcoming,
     this.query = '',
     this.searchOpen = false,
+    this.unitOnly = false,
   });
 
   final MeetingsTab tab;
   final String query;
   final bool searchOpen;
 
-  MeetingsView copyWith({MeetingsTab? tab, String? query, bool? searchOpen}) =>
-      MeetingsView(
-        tab: tab ?? this.tab,
-        query: query ?? this.query,
-        searchOpen: searchOpen ?? this.searchOpen,
-      );
+  /// Birim süzgeci: yalnız etkin koordinatörlüğün bağlı olduğu toplantılar (Koordinatör/Üye
+  /// görünümü; yöneticide kullanılmaz).
+  final bool unitOnly;
+
+  MeetingsView copyWith({
+    MeetingsTab? tab,
+    String? query,
+    bool? searchOpen,
+    bool? unitOnly,
+  }) => MeetingsView(
+    tab: tab ?? this.tab,
+    query: query ?? this.query,
+    searchOpen: searchOpen ?? this.searchOpen,
+    unitOnly: unitOnly ?? this.unitOnly,
+  );
 
   @override
   bool operator ==(Object other) =>
       other is MeetingsView &&
       other.tab == tab &&
       other.query == query &&
-      other.searchOpen == searchOpen;
+      other.searchOpen == searchOpen &&
+      other.unitOnly == unitOnly;
 
   @override
-  int get hashCode => Object.hash(tab, query, searchOpen);
+  int get hashCode => Object.hash(tab, query, searchOpen, unitOnly);
 }
 
 @Riverpod(keepAlive: true)
@@ -56,6 +67,8 @@ class MeetingsViewController extends _$MeetingsViewController {
   void selectTab(MeetingsTab tab) => state = state.copyWith(tab: tab);
 
   void setQuery(String q) => state = state.copyWith(query: q);
+
+  void setUnitOnly(bool on) => state = state.copyWith(unitOnly: on);
 
   /// Arama kapanınca sorgu da temizlenir (prototip `toggleSearch`).
   void toggleSearch() => state = state.searchOpen
@@ -93,7 +106,7 @@ class MeetingsBoardController extends _$MeetingsBoardController {
     final since = _generation;
     final repo = ref.read(meetingsRepositoryProvider);
     final catalog = await ref.read(taskCatalogControllerProvider.future);
-    final admin = catalog.access?.companyAdmin ?? false;
+    final admin = catalog.viewIn(ref.read(scopeStateProvider)).canAdminister;
     final (visible, truncated) = await _all(repo.listMeetings);
     final deleted = admin
         ? (await _all(repo.adminListDeletedMeetings)).$1
@@ -175,6 +188,32 @@ class MeetingsBoardController extends _$MeetingsBoardController {
         ],
       ),
     );
+  }
+
+  /// Anlık toplantı (prototip kamera düğmesi): şimdi, [departmentId] sahip, koordinatörlere
+  /// mesaj gitmez (`is_instant`); konferans hemen başlar. Dönen: yeni toplantının kimliği.
+  /// Konferans başlatılamazsa toplantı yine açılır (ayrıntıdan yeniden başlatılır).
+  Future<String> startInstant({
+    required String departmentId,
+    required String title,
+  }) async {
+    final repo = ref.read(meetingsRepositoryProvider);
+    final created = await repo.createMeeting(
+      MeetingDraft(
+        title: title,
+        meetingDate: DateTime.now(),
+        departmentIds: [departmentId],
+        isInstant: true,
+      ),
+    );
+    final id = created.meeting.id;
+    try {
+      await repo.startConference(id);
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.meetings);
+    }
+    if (ref.mounted) ref.invalidateSelf();
+    return id;
   }
 
   /// Silinmiş toplantıyı geri yükler (yalnız yönetici); liste yeniden okunur.

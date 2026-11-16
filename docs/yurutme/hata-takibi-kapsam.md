@@ -9,9 +9,9 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | Sahip | Yol sayısı |
 |---|---|
 | denetim akışı | 1 |
-| iletilir | 16 |
+| iletilir | 15 |
 | istisna | 61 |
-| rapor | 190 |
+| rapor | 207 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -55,6 +55,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/coordinatorships/application/coordinatorship_detail_controller.dart::coordinatorshipDetail#asyncError` | 2 | YENİDEN: kaynak sağlayıcı hatası aynı nesneyle taşınır. |
 | `features/identity/application/logout_controller.dart::LogoutController.signOut#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; AsyncError durumu providerDidFail ile raporlanır (test: provider_error_observer_test). |
 | `features/identity/application/password_change_controller.dart::PasswordChangeController.submit#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; beklenmeyen hata providerDidFail ile raporlanır, yanlış parola/doğrulama (ApiError) süzülür. |
+| `features/meetings/data/livekit_conference_link.dart::LiveKitConferenceLink.connect#catch` | 1 | LiveKit bağlantı hatasının ham metni (WebSocket/doğrulama adresi) katılım token'ını access_token sorgusu olarak taşıyabilir; token rapora, log'a ve hata metnine yazılmaz (COLLABORATION-K49). Hata sabit client.conference_connect_failed koduna çevrilip fırlatılır; çağıran (ConferenceController.join) onu toReportedApiError ile işler. |
 | `features/messages/application/chat_actions_controller.dart::ChatActionsController._queue#onError` | 1 | Kendi API`mizin ApiError geri çağrısı (hata yutma değil): `_fly` hatayı raporlayıp çağıranlara iletir; geri çağrı yalnız anket-kapalı gibi beklenen kodlara tepki verir. |
 | `features/messages/application/chat_actions_controller.dart::ChatActionsController._vote#onError` | 1 | Kendi API`mizin ApiError geri çağrısı: yalnız messaging.poll_closed beklenen koduna tepki verir; hata başka yerde yutulmaz. |
 | `features/messages/application/messages_providers.dart::chatUnreadBadges#asyncError` | 1 | YENİDEN: kaynak sağlayıcı hatası aynı nesneyle taşınır. |
@@ -64,8 +65,6 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/scope/application/scope_selection_controller.dart::ScopeSelectionController.clear#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; AsyncError durumu providerDidFail ile raporlanır. |
 | `features/scope/application/scope_selection_controller.dart::ScopeSelectionController.select#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; AsyncError durumu providerDidFail ile raporlanır. |
 | `features/server/application/server_connect_controller.dart::ServerConnectController.connect#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; sunucu bağ doğrulama hatalarının beklenenleri (ApiError) süzülür, beklenmeyen providerDidFail ile raporlanır. |
-| `features/tables/application/table_controller.dart::TableController._reload#onError` | 1 | KUYRUK: snapshot okuma zincirinin sürmesi için ayrılmış kol; aynı hata `run` geleceğiyle çağırana (yakalama, komut yan okuması, çakışma çözümü) gider ve orada raporlanır. |
-| `features/tables/data/table_api_repository.dart::ApiTablesRepository.stream#rawDio` | 1 | text/event-stream için ham Dio (üretilmiş istemci akışı okuyamaz); hata `streamApiError` ile sınıflandırılır ve işlem kimliği isteğin doğrulanmış `openapi.operationId` (streamTableChanges / streamPersonalTableChanges) metaverisinden gelir. |
 | `features/tasks/application/task_list_filter.dart::taskListCatalog#asyncError` | 1 | YENİDEN: kaynak sağlayıcı hatası aynı nesneyle taşınır. |
 | `features/tasks/data/download_sink.dart::FileDownloadSink._reserve#catch` | 1 | Özel oluşturma çakışması (ad dolu) FileSystemException ile gelir ve sıradaki kopya adına geçilir; ad dolu DEĞİLSE aynı hata koşulsuz kanıtla (typeSync) yeniden fırlatılır ve `save` çağıranı raporlar. Çakışma normal akıştır, yarışta tek sahip. |
 | `features/tasks/data/download_sink.dart::FileDownloadSink._save#catchError` | 3 | Hata sonrası geçici dosya temizliği (en iyi çaba). Asıl yerel dosya sistemi hatası `save` içinde FileSystemException olarak raporlanıp yeniden fırlatılır; temizlik hatası ikincil ve eyleme dönüşmez. |
@@ -73,6 +72,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/data/task_catalog_api_repository.dart::ApiTaskCatalogRepository._teams#catchError` | 1 | Ekip üyeleri isteğe bağlı zenginleştirmedir: apiCall beklenmeyen hatayı ZATEN işlem kimliğiyle raporlamıştır; bu kol yalnız eksik ekibi boş liste yapar. |
 | `features/tasks/data/upload_digest.dart::uploadDigest#catch` | 1 | Kullanıcının seçtiği geçici dosya özet çıkarılırken okunamadı (silindi/taşındı): client.file_unreadable beklenen durumdur; dosya yolu/adı rapora girmez. |
 | `features/tasks/presentation/task_detail_page.dart::TaskDetailPage.build#catch` | 1 | GÖZLEMCİ: taskDetailsProvider hatası sayfadaki banner ile gösterilir ve providerDidFail ile raporlanır; çekme-yenile closure`ı yalnız tekrar fırlatmayı keser. |
+| `features/timeline/application/gantt_provider.dart::_TimelineSnapshot.pending#asyncError` | 1 | YENİDEN: kaynak (görev kataloğu/zaman çizelgesi) sağlayıcısının hatası ve yığını aynı nesneyle taşınır; yeni hata üretilmez, rapor kaynak sağlayıcıdadır. |
 
 ## Tüm yollar (dosya → işlev → tür → sahip)
 
@@ -137,7 +137,9 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `core/stale_clock.dart` | `StaleClock.refreshIfStale` | catch | rapor | 1 |
 | `core/storage/flutter_secure_store.dart` | `FlutterSecureStore._guard` | catch | rapor | 1 |
 | `core/ui/page/nz_page.dart` | `_guardedRefresh` | catch | rapor | 1 |
+| `features/activity/application/activity_log_controller.dart` | `ActivityLogController.loadMore` | catch | rapor | 1 |
 | `features/activity/application/activity_query_controller.dart` | `activityView` | asyncError | istisna | 1 |
+| `features/activity/data/audit_api_repository.dart` | `ApiActivityLogRepository.load` | catch | rapor | 1 |
 | `features/administration/application/admin_controller.dart` | `<top>` | catch | rapor | 1 |
 | `features/administration/application/admin_controller.dart` | `AdminUsersController.build` | catch | iletilir | 1 |
 | `features/administration/application/admin_controller.dart` | `AdminUsersController.loadMore` | asyncError | istisna | 1 |
@@ -146,7 +148,6 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/administration/application/admin_transfer_controller.dart` | `AdminTransferController.execute` | catch | iletilir | 1 |
 | `features/administration/application/user_account_draft_controller.dart` | `UserAccountDraftController.save` | catch | denetim akışı | 1 |
 | `features/administration/application/user_account_draft_controller.dart` | `UserAccountDraftController.save` | catch | rapor | 2 |
-| `features/administration/presentation/admin_deleted_records.dart` | `_AdminDeletedRecordsState.build` | catch | rapor | 1 |
 | `features/administration/presentation/admin_management_tools.dart` | `AdminManagementTools.build` | catch | rapor | 1 |
 | `features/administration/presentation/admin_program_actions.dart` | `AdminProgramActions.build` | catch | rapor | 1 |
 | `features/administration/presentation/admin_transfer_panel.dart` | `_AdminTransferPanelState.build` | catch | rapor | 1 |
@@ -154,15 +155,18 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/administration/presentation/admin_user_actions.dart` | `AdminUserActions.build` | catch | rapor | 1 |
 | `features/administration/presentation/admin_user_memberships.dart` | `AdminUserMemberships.build` | catch | rapor | 2 |
 | `features/administration/presentation/admin_user_profile_page.dart` | `_AdminUserProfilePageState.build` | asyncError | istisna | 2 |
-| `features/administration/presentation/admin_user_report.dart` | `exportAdminUserReport` | catch | rapor | 1 |
 | `features/administration/presentation/administration_page.dart` | `_AdministrationPageState.build` | asyncError | istisna | 1 |
 | `features/administration/presentation/administration_page.dart` | `_AdministrationPageState.build` | catch | rapor | 1 |
+| `features/administration/presentation/deleted/deleted_record_tabs.dart` | `DeletedTasksTab.build` | catch | rapor | 1 |
+| `features/administration/presentation/deleted/deleted_record_tabs.dart` | `_admin` | catch | rapor | 1 |
+| `features/administration/presentation/team_member_actions.dart` | `TeamRemoveAction._remove` | catch | rapor | 2 |
 | `features/archive/application/archive_actions_controller.dart` | `ArchiveActionsController._run` | catch | rapor | 1 |
 | `features/archive/application/archive_actions_controller.dart` | `ArchiveActionsController._send` | catch | rapor | 2 |
 | `features/archive/application/archive_controller.dart` | `ArchiveController.downloadAll` | catch | rapor | 1 |
 | `features/archive/application/archive_files_controller.dart` | `ArchiveFilesController.loadMore` | catch | rapor | 1 |
 | `features/archive/application/person_files_controller.dart` | `PersonFilesController.loadMore` | catch | rapor | 1 |
 | `features/archive/presentation/open_archive_file.dart` | `openArchiveFile` | catch | rapor | 1 |
+| `features/archive/presentation/open_task_archive.dart` | `openTaskArchive` | catch | rapor | 1 |
 | `features/archive/presentation/person_files.dart` | `_PersonFilesState._download` | catch | rapor | 1 |
 | `features/assistant/application/assistant_controller.dart` | `AssistantController.delete` | catch | rapor | 1 |
 | `features/assistant/application/assistant_controller.dart` | `AssistantController.open` | catch | rapor | 1 |
@@ -184,8 +188,11 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/identity/application/login_controller.dart` | `LoginController.submit` | guard | rapor | 1 |
 | `features/identity/application/logout_controller.dart` | `LogoutController.signOut` | guard | istisna | 1 |
 | `features/identity/application/password_change_controller.dart` | `PasswordChangeController.submit` | guard | istisna | 1 |
+| `features/meetings/application/conference_controller.dart` | `ConferenceController.endForAll` | catch | rapor | 1 |
+| `features/meetings/application/conference_controller.dart` | `ConferenceController.join` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.addAgenda` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.deleteAgenda` | catch | rapor | 1 |
+| `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.renameAgenda` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.toggleAgenda` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_controller.dart` | `MeetingRoomController._commitDelete` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_controller.dart` | `MeetingRoomController.addNote` | catch | rapor | 1 |
@@ -199,7 +206,15 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.purge` | catch | rapor | 1 |
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.refresh` | catch | rapor | 1 |
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.restore` | catch | rapor | 1 |
+| `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.startInstant` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._keepAwake` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._teardown` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.connect` | catch | istisna | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.flipCamera` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setCamera` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setMicrophone` | catch | rapor | 1 |
 | `features/meetings/presentation/meeting_people.dart` | `_MeetingPeopleState._showAdd` | catch | rapor | 1 |
+| `features/meetings/presentation/meetings_page.dart` | `_MeetingsPageState._instant` | catch | rapor | 1 |
 | `features/messages/application/chat_actions_controller.dart` | `ChatActionsController._closePoll` | catch | iletilir | 1 |
 | `features/messages/application/chat_actions_controller.dart` | `ChatActionsController._fly` | catch | rapor | 1 |
 | `features/messages/application/chat_actions_controller.dart` | `ChatActionsController._queue` | onError | istisna | 1 |
@@ -234,12 +249,14 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/messages/presentation/chat/chat_group_source_info.dart` | `_ChatGroupSourceInfoState._change` | catch | rapor | 1 |
 | `features/messages/presentation/chat/chat_info_sheet.dart` | `_Members._run` | catch | rapor | 1 |
 | `features/messages/presentation/chat/new_chat_sheet.dart` | `_NewChatState._run` | catch | rapor | 1 |
-| `features/messages/presentation/chat_page.dart` | `_ChatPageState._actions` | catch | rapor | 1 |
 | `features/messages/presentation/chat_page.dart` | `_ChatPageState._send` | catch | rapor | 1 |
 | `features/messages/presentation/chat_page.dart` | `_ChatPageState._try` | catch | rapor | 1 |
+| `features/messages/presentation/chat_page_actions.dart` | `_ChatPageActions._actions` | catch | rapor | 1 |
 | `features/messages/presentation/messages_page.dart` | `_MessagesPageState._markAllRead` | catch | rapor | 1 |
 | `features/messages/presentation/messages_page.dart` | `_MessagesPageState.build` | asyncError | istisna | 1 |
+| `features/messages/presentation/open_department_chat.dart` | `openDepartmentChat` | catch | rapor | 1 |
 | `features/messages/presentation/open_person_chat.dart` | `openPersonChat` | catch | rapor | 1 |
+| `features/notifications/application/notification_preferences_controller.dart` | `NotificationPreferencesController.setMuted` | catch | rapor | 1 |
 | `features/notifications/application/notifications_controller.dart` | `NotificationUnreadController.refresh` | catch | rapor | 1 |
 | `features/notifications/application/notifications_controller.dart` | `NotificationsController.loadMore` | catch | rapor | 1 |
 | `features/notifications/application/notifications_controller.dart` | `NotificationsController.markAllRead` | catch | rapor | 1 |
@@ -253,30 +270,29 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/scope/application/home_dashboard_controller.dart` | `HomeDashboardController._refresh` | catch | rapor | 2 |
 | `features/scope/application/scope_selection_controller.dart` | `ScopeSelectionController.clear` | guard | istisna | 1 |
 | `features/scope/application/scope_selection_controller.dart` | `ScopeSelectionController.select` | guard | istisna | 1 |
+| `features/scope/application/scope_service.dart` | `ScopeService.restoreLast` | catch | rapor | 1 |
 | `features/server/application/server_connect_controller.dart` | `ServerConnectController.connect` | guard | istisna | 1 |
-| `features/tables/application/table_cell_writes.dart` | `TableCellWrites._drain` | catch | rapor | 1 |
-| `features/tables/application/table_cell_writes.dart` | `TableCellWrites._resolveConflict` | catch | rapor | 1 |
-| `features/tables/application/table_cell_writes.dart` | `TableCellWrites._sendFailed` | catch | rapor | 1 |
-| `features/tables/application/table_cell_writes.dart` | `TableCellWrites._send` | catch | rapor | 1 |
-| `features/tables/application/table_commands.dart` | `TableCommands._command` | catch | rapor | 1 |
-| `features/tables/application/table_commands.dart` | `TableCommands._sideRead` | catch | rapor | 1 |
-| `features/tables/application/table_controller.dart` | `TableController._reload` | onError | istisna | 1 |
-| `features/tables/application/table_controller.dart` | `TableController._resolveScope` | catch | rapor | 1 |
-| `features/tables/application/table_controller.dart` | `TableController.catchUp` | catch | rapor | 1 |
-| `features/tables/application/table_controller.dart` | `TableController.loadMore` | catch | rapor | 1 |
-| `features/tables/application/table_sync_controller.dart` | `TableSyncController._leavePresence` | catch | rapor | 1 |
-| `features/tables/application/table_sync_controller.dart` | `TableSyncController._run` | onError | rapor | 1 |
-| `features/tables/application/table_sync_controller.dart` | `TableSyncController._sendPresence` | catch | rapor | 1 |
-| `features/tables/application/table_sync_controller.dart` | `TableSyncController._sync` | catch | rapor | 1 |
-| `features/tables/application/tables_list_controller.dart` | `TablesListController.create` | catch | rapor | 1 |
-| `features/tables/application/tables_list_controller.dart` | `TablesListController.loadMore` | catch | rapor | 1 |
-| `features/tables/application/tables_list_controller.dart` | `TablesListController.refresh` | catch | rapor | 1 |
-| `features/tables/data/table_api_repository.dart` | `ApiTablesRepository._event` | catch | rapor | 1 |
-| `features/tables/data/table_api_repository.dart` | `ApiTablesRepository.stream` | catch | iletilir | 1 |
-| `features/tables/data/table_api_repository.dart` | `ApiTablesRepository.stream` | catch | rapor | 2 |
-| `features/tables/data/table_api_repository.dart` | `ApiTablesRepository.stream` | rawDio | istisna | 1 |
-| `features/tables/presentation/table_sheets.dart` | `tableRun` | catch | rapor | 1 |
-| `features/tables/presentation/tables_page.dart` | `TablesPage._create` | catch | rapor | 1 |
+| `features/tables/application/table_attachment_flow.dart` | `uploadTableSource` | catch | rapor | 1 |
+| `features/tables/application/table_attachment_flow.dart` | `uploadTableSource` | handleError | rapor | 1 |
+| `features/tables/application/table_detail_controller.dart` | `TableDetailController._sendPending` | catch | rapor | 1 |
+| `features/tables/application/table_detail_controller.dart` | `TableDetailController.active` | catchError | rapor | 1 |
+| `features/tables/application/table_detail_controller.dart` | `TableDetailController.loadRemaining` | catch | rapor | 1 |
+| `features/tables/application/table_detail_controller.dart` | `TableDetailController.refresh` | catch | rapor | 1 |
+| `features/tables/application/table_detail_live.dart` | `_TableDetailLive._connect` | onError | rapor | 1 |
+| `features/tables/application/table_detail_live.dart` | `_TableDetailLive._publishPresence` | catch | rapor | 1 |
+| `features/tables/application/table_detail_live.dart` | `_TableDetailLive._sync` | catch | rapor | 1 |
+| `features/tables/application/table_folder_pages.dart` | `<top>` | catch | rapor | 1 |
+| `features/tables/application/table_library_controller.dart` | `TableLibraryWrites.retry` | catch | rapor | 1 |
+| `features/tables/application/tables_controller.dart` | `TablesController.reloadServer` | catch | rapor | 1 |
+| `features/tables/data/tables_collaboration_api.dart` | `_TableCollaborationApi.download` | catch | rapor | 1 |
+| `features/tables/data/tables_collaboration_api.dart` | `_TableCollaborationApi.watch` | catch | rapor | 1 |
+| `features/tables/presentation/table_create_sheet.dart` | `showCreateTableSheet` | catch | rapor | 1 |
+| `features/tables/presentation/table_library_tools.dart` | `_LibraryPagesState._load` | catch | rapor | 1 |
+| `features/tables/presentation/table_project_picker.dart` | `_TableProjectPickerState._load` | catch | rapor | 1 |
+| `features/tables/presentation/table_workspace_attachments.dart` | `workspaceAttachment` | catch | rapor | 2 |
+| `features/tables/presentation/table_workspace_comments.dart` | `_CommentsPanelState._load` | catch | rapor | 1 |
+| `features/tables/presentation/table_workspace_forms.dart` | `tableActionForm` | catch | rapor | 1 |
+| `features/tables/presentation/table_workspace_forms.dart` | `tableUiAction` | catch | rapor | 1 |
 | `features/tasks/application/invite_form_controller.dart` | `InviteFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/meeting_form_controller.dart` | `MeetingFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/quick_forms_controller.dart` | `NewTaskFormController.submit` | catch | rapor | 3 |
@@ -299,12 +315,12 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/data/file_upload_picker.dart` | `FileUploadPicker.pick` | catch | istisna | 1 |
 | `features/tasks/data/task_catalog_api_repository.dart` | `ApiTaskCatalogRepository._teams` | catchError | istisna | 1 |
 | `features/tasks/data/upload_digest.dart` | `uploadDigest` | catch | istisna | 1 |
-| `features/tasks/presentation/deleted_tasks_page.dart` | `DeletedTasksPage.build` | catch | rapor | 2 |
+| `features/tasks/presentation/decision/task_decision_flows.dart` | `TaskDecisionFlows._readFiles` | catch | rapor | 1 |
 | `features/tasks/presentation/detail/task_dependencies.dart` | `TaskDependencies.build` | catch | rapor | 1 |
 | `features/tasks/presentation/task_detail_page.dart` | `TaskDetailPage.build` | catch | istisna | 1 |
+| `features/timeline/application/gantt_provider.dart` | `_TimelineSnapshot.pending` | asyncError | istisna | 1 |
+| `features/timeline/application/timeline_controller.dart` | `TimelineController._extend` | catch | rapor | 1 |
+| `features/timeline/application/timeline_controller.dart` | `TimelineController._reload` | catch | rapor | 1 |
 | `features/timeline/application/timeline_controller.dart` | `TimelineController.requestDates` | catch | rapor | 3 |
-| `features/timeline/presentation/gantt/gantt_selection_card.dart` | `_GanttSelectionCardState._request` | catch | rapor | 1 |
-| `features/timeline/presentation/gantt/gantt_selection_card.dart` | `_GanttSelectionCardState._save` | catch | rapor | 1 |
-| `features/timeline/presentation/timeline_page.dart` | `_TimelinePageState._request` | catch | rapor | 1 |
-| `features/timeline/presentation/timeline_page.dart` | `_TimelinePageState._save` | catch | rapor | 1 |
 | `features/timeline/presentation/timeline_page.dart` | `_TimelinePageState._undo` | catch | rapor | 1 |
+| `features/timeline/presentation/widgets/timeline_selection_host.dart` | `_TimelineSelectionHostState._run` | catch | rapor | 1 |

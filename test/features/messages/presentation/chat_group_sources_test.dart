@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_page.dart';
+import 'package:nizamio/core/ui/widgets/inputs/inputs.dart';
 import 'package:nizamio/features/messages/messages.dart';
 import 'package:nizamio/features/messages/presentation/chat/new_chat_sheet.dart';
 
@@ -125,10 +126,7 @@ void main() {
     ) async {
       final server = _Backend()..chats.role = 'admin';
       await _open(tester, server, width: width, scale: 2);
-      await tester.enterText(
-        find.widgetWithText(TextField, _l.uiMessagesGroupName),
-        'Saha ekibi',
-      );
+      await tester.enterText(_groupName, 'Saha ekibi');
       await _tap(tester, find.text(_l.uiMessagesGroupsSource));
       await _tap(tester, find.text(_l.uiMessagesGroupsDepartment));
       await _tap(tester, find.text(_l.uiMessagesGroupsPickDepartment));
@@ -158,10 +156,7 @@ void main() {
     (tester) async {
       final server = _Backend()..failCreate = true;
       await _open(tester, server);
-      await tester.enterText(
-        find.widgetWithText(TextField, _l.uiMessagesGroupName),
-        'Saha',
-      );
+      await tester.enterText(_groupName, 'Saha');
       await _tap(tester, find.text(_l.uiMessagesGroupsSource));
       await _tap(tester, find.text(_l.uiMessagesGroupsProgram));
       await _tap(tester, find.text(_l.uiMessagesCreateGroup));
@@ -200,10 +195,7 @@ void main() {
           },
         ];
       final h = await _open(tester, server);
-      await tester.enterText(
-        find.widgetWithText(TextField, _l.uiMessagesGroupName),
-        'Saha',
-      );
+      await tester.enterText(_groupName, 'Saha');
       await _tap(tester, find.text(_l.uiMessagesGroupsSource));
       await _tap(tester, find.text(_l.uiMessagesGroupsDepartment));
       await _tap(tester, find.text(_l.uiMessagesCreateGroup));
@@ -219,10 +211,7 @@ void main() {
       await settle(tester);
       expect(find.text(_l.uiMessagesGroupsManual), findsOneWidget);
       server.failCreate = false;
-      await tester.enterText(
-        find.widgetWithText(TextField, _l.uiMessagesGroupName),
-        'Yeni saha',
-      );
+      await tester.enterText(_groupName, 'Yeni saha');
       await _tap(tester, find.text(_l.uiMessagesCreateGroup));
       // Create isteğinde kaynak yokluğu sözleşmenin elle üyelik varsayılanıdır.
       expect(_body(server.creates.last)['source'], isNull);
@@ -285,3 +274,9 @@ void main() {
     },
   );
 }
+
+/// Grup adı alanı: etiket alanın üstünde durur (NzTextField), girdi onun içindeki TextField.
+Finder get _groupName => find.descendant(
+  of: find.widgetWithText(NzTextField, _l.uiMessagesGroupName),
+  matching: find.byType(TextField),
+);

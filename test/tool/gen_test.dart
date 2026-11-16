@@ -572,7 +572,7 @@ $op
       }
       expect(
         sensitive,
-        10,
+        11, // v0.19.0-api: RegisterDeviceTokenRequest.token (FCM)
         reason: 'hassas model kümesi değişti: listeyi bilerek güncelleyin',
       );
     });

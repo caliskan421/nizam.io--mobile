@@ -89,6 +89,8 @@ class ApiDashboardReportRepository implements DashboardReportRepository {
         inProgress: statuses[DashboardTaskStatus.inProgress] ?? 0,
         late: r.overdueTasks,
         awaitingApproval: r.pendingApprovals,
+        notStarted: statuses[DashboardTaskStatus.notStarted] ?? 0,
+        dateRequests: r.pendingDateChanges,
       ),
       activeTasks: r.activeTasks,
       pendingDateChanges: r.pendingDateChanges,

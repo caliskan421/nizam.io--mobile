@@ -8,7 +8,9 @@ import 'package:retrofit/retrofit.dart';
 import '../models/count_result.dart';
 import '../models/marked_count.dart';
 import '../models/notification_list.dart';
+import '../models/notification_preferences.dart';
 import '../models/push_public_key.dart';
+import '../models/register_device_token_request.dart';
 import '../models/register_target_request.dart';
 import '../models/target_result.dart';
 
@@ -51,6 +53,30 @@ abstract class NotificationsClient {
           'externalDocsUrl': null,
         },
       };
+  static const Map<String, dynamic> registerDeviceTokenOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["notifications"],
+          'operationId': "registerDeviceToken",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> getNotificationPreferencesOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["notifications"],
+          'operationId': "getNotificationPreferences",
+          'externalDocsUrl': null,
+        },
+      };
+  static const Map<String, dynamic> updateNotificationPreferencesOpenapiExtras =
+      <String, dynamic>{
+        'openapi': <String, dynamic>{
+          'tags': <String>["notifications"],
+          'operationId': "updateNotificationPreferences",
+          'externalDocsUrl': null,
+        },
+      };
   static const Map<String, dynamic> registerPushTargetOpenapiExtras =
       <String, dynamic>{
         'openapi': <String, dynamic>{
@@ -78,7 +104,7 @@ abstract class NotificationsClient {
 
   /// Çağıranın uygulama içi bildirimleri (imleçli; metin taşımaz).
   ///
-  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder.
+  /// [limit] - Sayfa boyu. Bütün imleçli listelerde varsayılan 50, üst sınır 200. Sınır dışı değer modüle göre farklı işlenir: organization (kullanıcılar, silinmiş departman/hesap), program (aktarım geçmişi) ve work (görevler, silinmiş görevler) 200 üstünü sessizce 200 yapar; organization ve program 0, negatif ya da sayı olmayan değeri 422 ile reddeder, work 0 ve negatifi varsayılana çeker, sayı olmayanı 422 ile reddeder. collaboration ve messaging 0 değerini varsayılan sayar; negatif, 200 üstü ve sayı olmayan değer 422 `collaboration.input_invalid` / `messaging.input_invalid` alır. notifications 1–200 dışını ve sayı olmayan değeri 422 `notifications.input_invalid` ile reddeder; audit de 1–200 dışını ve sayı olmayanı 422 `audit.input_invalid` ile reddeder.
   ///
   /// [cursor] - Opak imleç; önceki sayfanın `next_cursor` değeri.
   @GET('/v1/notifications')
@@ -113,6 +139,32 @@ abstract class NotificationsClient {
     @Extras()
     Map<String, dynamic>? extras =
         NotificationsClient.markAllNotificationsReadOpenapiExtras,
+  });
+
+  /// FCM cihaz belirtecini kaydeder (ADR-0042; NOTIFICATIONS-K35). İdempotent; aynı belirteç başka hesaba kayıtlıysa sahiplik çağırana geçer. Cevap belirteci taşımaz; silme `DELETE /v1/notifications/targets/{target_id}`. FCM kapalı kurulumda da kabul edilir.
+  @POST('/v1/notifications/device-tokens')
+  Future<TargetResult> registerDeviceToken({
+    @Body() required RegisterDeviceTokenRequest body,
+    @Extras()
+    Map<String, dynamic>? extras =
+        NotificationsClient.registerDeviceTokenOpenapiExtras,
+  });
+
+  /// Çağıranın push tercihleri: dört grup (`gorev`, `mesaj`, `toplanti`, `sistem`) için `push_muted` (NOTIFICATIONS-K36).
+  @GET('/v1/notifications/preferences')
+  Future<NotificationPreferences> getNotificationPreferences({
+    @Extras()
+    Map<String, dynamic>? extras =
+        NotificationsClient.getNotificationPreferencesOpenapiExtras,
+  });
+
+  /// Çağıranın verilen grup tercihlerini yazar; verilmeyen grup değişmez. Sessize alınan grubun olayı dış kanala (web push, FCM) gitmez, uygulama içi kayıt yine yazılır (NOTIFICATIONS-K36).
+  @PUT('/v1/notifications/preferences')
+  Future<NotificationPreferences> updateNotificationPreferences({
+    @Body() required NotificationPreferences body,
+    @Extras()
+    Map<String, dynamic>? extras =
+        NotificationsClient.updateNotificationPreferencesOpenapiExtras,
   });
 
   /// Cihaz (web push) aboneliği kaydı; kendi hesabına idempotent.

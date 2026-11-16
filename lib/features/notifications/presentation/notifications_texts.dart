@@ -2,6 +2,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/i18n/generated/app_localizations.dart';
 import '../domain/app_notification.dart';
+import '../domain/notification_groups.dart';
 
 /// Bildirim ekranının metinleri. Sunucu bildirim metni taşımaz: başlık olay türünden gelir.
 /// UI metin kaynağı yer tutucu kabul etmediği için sayılı cümleler burada birleşir.
@@ -17,6 +18,7 @@ extension NotificationsTexts on AppLocalizations {
       uiNotificationsTypeWorkItemAssignmentChanged,
     NotificationType.workItemDateChanged =>
       uiNotificationsTypeWorkItemDateChanged,
+    NotificationType.workTaskReminder => uiNotificationsTypeWorkTaskReminder,
     NotificationType.workDateChangeRequested =>
       uiNotificationsTypeWorkDateChangeRequested,
     NotificationType.workDateChangeReviewed =>
@@ -36,6 +38,15 @@ extension NotificationsTexts on AppLocalizations {
     NotificationType.programTransferCompleted =>
       uiNotificationsTypeProgramTransferCompleted,
     NotificationType.unknown => uiNotificationsTypeUnknown,
+  };
+
+  /// Liste başlığı.
+  String notificationGroupLabel(NotificationGroup g) => switch (g) {
+    NotificationGroup.tasks => uiNotificationsGroupTasks,
+    NotificationGroup.dateRequests => uiNotificationsGroupDateRequests,
+    NotificationGroup.meetings => uiNotificationsGroupMeetings,
+    NotificationGroup.team => uiNotificationsGroupTeam,
+    NotificationGroup.other => uiNotificationsGroupOther,
   };
 
   /// "12 Kas · 14:05" (yerel).

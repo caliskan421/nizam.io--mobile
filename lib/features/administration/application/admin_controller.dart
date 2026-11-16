@@ -79,7 +79,7 @@ class AdminUsersController extends AsyncNotifier<PageSlice<KnownUser>> {
     final catalog = ref.read(taskCatalogControllerProvider);
     return !catalog.hasError &&
             !catalog.isReloading &&
-            catalog.value?.access?.companyAdmin == true &&
+            ref.read(effectiveAccessProvider).canAdminister &&
             _owner.owns(ref)
         ? _source
         : null;
@@ -94,7 +94,8 @@ class AdminUsersController extends AsyncNotifier<PageSlice<KnownUser>> {
     );
     if (currentOwner != _realOwner) return const AsyncLoading();
     final catalog = ref.read(taskCatalogControllerProvider);
-    if (catalog.value?.access?.companyAdmin != true && !catalog.isLoading) {
+    if (!ref.read(effectiveAccessProvider).canAdminister &&
+        !catalog.isLoading) {
       _clear();
       return AsyncError(
         ApiError('organization.not_authorized'),
@@ -189,7 +190,7 @@ class AdminUsersController extends AsyncNotifier<PageSlice<KnownUser>> {
       final query = ref.watch(adminUserQueryProvider);
       ref.watch(adminUserDepartmentsProvider);
       final catalog = await ref.watch(taskCatalogControllerProvider.future);
-      if (catalog.access?.companyAdmin != true) {
+      if (!catalog.viewIn(scope).canAdminister) {
         _clear();
         throw ApiError('organization.not_authorized');
       }
@@ -343,7 +344,9 @@ class AdminCommandController extends Notifier<bool> {
     if (state) return;
     final catalogState = ref.read(taskCatalogControllerProvider);
     final catalog = catalogState.value;
-    if (catalogState.isLoading || catalog?.access?.companyAdmin != true) {
+    if (catalogState.isLoading ||
+        catalog == null ||
+        !ref.read(effectiveAccessProvider).canAdminister) {
       throw ApiError('organization.not_authorized');
     }
     final session = ref.read(sessionControllerProvider).generation;
@@ -395,7 +398,7 @@ final adminUserProfileProvider = FutureProvider.autoDispose
 
       final admin = await ref.watch(
         taskCatalogControllerProvider.selectAsync(
-          (catalog) => catalog.access?.companyAdmin == true,
+          (catalog) => catalog.viewIn(scope).canAdminister,
         ),
       );
       if (!live()) throw ApiError('client.scope_changed');

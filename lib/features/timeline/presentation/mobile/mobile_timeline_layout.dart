@@ -9,12 +9,12 @@ final class MobileTimelineLayout {
   MobileTimelineLayout(this.view) {
     var y = 0.0;
     for (final group in view.groups) {
-      final tasks =
-          [...view.shown.where((t) => t.item.coordinatorship == group.code)]
-            ..sort((a, b) {
-              final start = a.packStart.compareTo(b.packStart);
-              return start != 0 ? start : a.packEnd.compareTo(b.packEnd);
-            });
+      // Grubun görevleri (koordinatörlük ya da durum grubu; süzgeçlerden geçmiş).
+      final tasks = [for (final (t, _) in group.placed) t]
+        ..sort((a, b) {
+          final start = a.packStart.compareTo(b.packStart);
+          return start != 0 ? start : a.packEnd.compareTo(b.packEnd);
+        });
       if (tasks.isEmpty) continue;
       heads.add(
         MobileTimelineHead(

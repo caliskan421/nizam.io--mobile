@@ -47,7 +47,7 @@ class _AccountInfoState extends State<AdminUserAccountInfo> {
     try {
       final values = await adminForm(context, title, [
         (label: label, initial: initial, secret: secret, required: !secret),
-      ]);
+      ], confirmSecret: secret);
       // adminForm ayrıca açıldığı oturum ve programı denetler. Aynı State başka kişi
       // için kullanılırsa eski diyaloğun sonucu yeni kişinin taslağına taşınmaz.
       if (!mounted ||

@@ -25,6 +25,7 @@ void main() {
           'department_id': 'd1',
           'status': 'iade_edildi',
           'deleted_at': '2026-11-01T08:00:00Z',
+          'deleted_by_department': false,
           'file_count': 4,
         },
         {
@@ -33,6 +34,7 @@ void main() {
           'department_id': 'd2',
           'status': 'bilinmez',
           'deleted_at': '2026-11-02T08:00:00Z',
+          'deleted_by_department': false,
           'file_count': 0,
         },
       ],

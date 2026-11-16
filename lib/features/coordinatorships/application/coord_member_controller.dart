@@ -29,7 +29,7 @@ final coordMemberCandidatesProvider = FutureProvider.autoDispose
       }
       final repo = ref.read(departmentRepositoryProvider);
       PageSlice<AssignableAccount> result;
-      if (!(catalog.access?.companyAdmin ?? false)) {
+      if (!catalog.viewIn(scope).isAdminView) {
         result = await repo.listAssignable(code);
       } else {
         final groups = catalog.coordinatorships;
@@ -87,6 +87,36 @@ final coordMemberCandidatesProvider = FutureProvider.autoDispose
       }
       return result;
     });
+
+/// Aday havuzunu kaynak koordinatörlüğe ve role göre süzer. Bağ biçimi `"departman:rol"`;
+/// iki süzgeç aynı bağda birlikte sağlanır (ör. "ELE'de koordinatör"). `null` süzgeç
+/// her şeyi geçirir; hiç bağı olmayan aday yalnız iki süzgeç de boşken görünür.
+List<AssignableAccount> filterMemberCandidates(
+  Iterable<AssignableAccount> items, {
+  String? coordinatorship,
+  DepartmentRole? role,
+}) {
+  if (coordinatorship == null && role == null) return items.toList();
+  bool matches(String bind) {
+    final i = bind.lastIndexOf(':');
+    if (i <= 0) return false;
+    return (coordinatorship == null ||
+            bind.substring(0, i) == coordinatorship) &&
+        (role == null || bind.substring(i + 1) == role.wire);
+  }
+
+  return [
+    for (final p in items)
+      if (p.roles.any(matches)) p,
+  ];
+}
+
+/// Havuzdaki adayların bağlı olduğu koordinatörlükler (süzgeç seçenekleri).
+Set<String> candidateCoordinatorships(Iterable<AssignableAccount> items) => {
+  for (final p in items)
+    for (final bind in p.roles)
+      if (bind.lastIndexOf(':') case final i when i > 0) bind.substring(0, i),
+};
 
 final coordMemberControllerProvider = NotifierProvider.autoDispose
     .family<CoordMemberController, CoordMemberState, String>(

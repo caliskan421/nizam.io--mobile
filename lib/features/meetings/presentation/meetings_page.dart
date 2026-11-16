@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
 import '../../../core/errors/error_text.dart';
+import '../../../core/telemetry/report_source.dart';
+import '../../../core/telemetry/unexpected_error.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
@@ -23,6 +25,7 @@ import '../application/meetings_controller.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
 import 'meeting_card.dart';
+import 'meetings_scope_bar.dart';
 import 'meetings_texts.dart';
 
 /// Toplantılar (prototip `meetings`): kök üst çubuk, başlık + ara / yeni toplantı, açılır arama,
@@ -67,6 +70,30 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
     if (mounted) NzToast.show(context, msg);
   }
 
+  bool _starting = false;
+
+  /// Anlık toplantı: etkin koordinatörlükte şimdi açılır, konferans başlar, ayrıntı açılır.
+  Future<void> _instant(String departmentId) async {
+    if (_starting) return;
+    final l = context.l10n;
+    final nav = context.appNav;
+    setState(() => _starting = true);
+    try {
+      final id = await ref
+          .read(meetingsBoardControllerProvider.notifier)
+          .startInstant(
+            departmentId: departmentId,
+            title: l.uiMeetingsInstantTitle,
+          );
+      if (mounted) nav.openMeeting(id);
+    } on Object catch (e, st) {
+      final api = toReportedApiError(e, st, source: ReportSource.meetings);
+      if (mounted) NzToast.error(context, api);
+    } finally {
+      if (mounted) setState(() => _starting = false);
+    }
+  }
+
   Future<void> _restore(Meeting m) async {
     final l = context.l10n;
     final e = await ref
@@ -100,7 +127,10 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
     // Başka hesabın/programın listesi görünmez (yükleniyor ya da yalnız hata).
     final board = ref.read(meetingsBoardControllerProvider.notifier).visible;
     final catalog = ref.watch(taskCatalogControllerProvider).value;
+    final access = ref.watch(effectiveAccessProvider);
     final b = board.value;
+    // Anlık toplantı yalnız koordinatör görünümünde, etkin koordinatörlükte (sahip departman).
+    final instantDept = access.isCoordinatorView ? access.departmentId : null;
     // Tablette açık kayıt yokken liste tam genişliktir; kartlar geniş düzene geçer.
     return NzPage.feed(
       width: NzContentWidth.wide,
@@ -122,11 +152,19 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
                 onPressed: _toggleSearch,
               ),
             ),
-            NzIconButton.circleAccent(
-              icon: NzIcons.add,
-              semanticLabel: l.uiMeetingsNew,
-              onPressed: () => showMeetingSheet(context),
-            ),
+            if (instantDept != null)
+              NzIconButton.circle(
+                icon: NzIcons.video,
+                semanticLabel: l.uiMeetingsInstant,
+                onPressed: _starting ? null : () => _instant(instantDept),
+              ),
+            // Toplantı açma yönetici ve koordinatör yüzüdür (üye hayır; COLLABORATION).
+            if (access.canCreateMeeting)
+              NzIconButton.circleAccent(
+                icon: NzIcons.add,
+                semanticLabel: l.uiMeetingsNew,
+                onPressed: () => showMeetingSheet(context),
+              ),
           ],
         ),
         NzReveal(
@@ -157,7 +195,7 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
             data: (_) => const SizedBox.shrink(),
           )
         else
-          ..._content(context, b, view, catalog),
+          ..._content(context, b, view, catalog, access),
       ],
     );
   }
@@ -167,6 +205,7 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
     MeetingsBoard board,
     MeetingsView view,
     TaskCatalog? catalog,
+    EffectiveAccess access,
   ) {
     final l = context.l10n;
     final c = context.colors;
@@ -180,8 +219,13 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
       if (board.deleted != null) MeetingsTab.deleted,
     ];
     final tab = tabs.contains(view.tab) ? view.tab : MeetingsTab.upcoming;
+    // Birim süzgeci yalnız Koordinatör/Üye görünümünde (etkin koordinatörlük).
+    final unit = access.seesAllDepartments ? null : access.departmentId;
+    final unitOnly = unit != null && view.unitOnly;
+    List<Meeting> ofTab(MeetingsTab x) =>
+        meetingsOfUnit(board.of(x, today), unitOnly ? unit : null);
     final list = searchMeetings(
-      board.of(tab, today),
+      ofTab(tab),
       view.query,
       (d) => meetingDeptLabel(catalog, d),
     );
@@ -189,16 +233,27 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
     final filtered = view.query.trim().isNotEmpty;
     final caption = t.caption.copyWith(color: c.textMuted);
     return [
+      if (unit != null) ...[
+        MeetingsScopeBar(
+          unit:
+              catalog?.coordinatorship(unit)?.label ??
+              access.departmentName ??
+              unit,
+          upcoming: ofTab(MeetingsTab.upcoming).length,
+          past: ofTab(MeetingsTab.past).length,
+          coordinator: access.isCoordinatorView,
+          unitOnly: unitOnly,
+          onUnitOnly: _view.setUnitOnly,
+        ),
+        const Gap(NizamioSpacing.space4),
+      ],
       NzPillTabs(
         semanticLabel: l.uiMeetingsTitle,
         selected: tabs.indexOf(tab),
         onSelected: (i) => _view.selectTab(tabs[i]),
         tabs: [
           for (final x in tabs)
-            NzPillTab(
-              label: l.meetingsTabLabel(x),
-              count: board.of(x, today).length,
-            ),
+            NzPillTab(label: l.meetingsTabLabel(x), count: ofTab(x).length),
         ],
       ),
       const Gap(NizamioSpacing.space4),

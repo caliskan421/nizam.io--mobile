@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import '../domain/effective_role.dart';
 import '../storage/secure_store.dart';
 import '../telemetry/report_source.dart';
 import '../telemetry/unexpected_error.dart';
@@ -28,8 +29,10 @@ final class ScopeOwner {
 /// Son seçili kapsamın güvenli depodaki TEK kaydı (ADR-0003 karar 20). Düz tercihe
 /// ([AppPreferences]) yazılmaz: kapsam kimliği oturuma bağlıdır ve oturumla birlikte silinir.
 ///
-/// Kayıt biçimi: `{"account_id","instance_id","program_id"[,"department_id"]}`. Bozuk, eksik
-/// ya da çözülemeyen kayıt [load]'da `null` döner (çağıran siler); hata fırlatmaz.
+/// Kayıt biçimi: `{"account_id","instance_id","program_id"[,"department_id"][,"role"]}`.
+/// `role` ve `department_id` sonradan eklendi: yoksa (eski kayıt) ya da `role` bilinmeyen bir
+/// değerse seçim yine geri yüklenir, eksik alan erişim kaynağında türetilir. Bozuk, eksik ya da
+/// çözülemeyen zorunlu alan [load]'da `null` döner (çağıran siler); hata fırlatmaz.
 class ScopeStore {
   ScopeStore(this._store);
 
@@ -66,6 +69,7 @@ class ScopeStore {
         selection: ScopeSelection(
           programId: program,
           departmentId: department as String?,
+          role: EffectiveRole.fromWire(m['role']),
         ),
       );
     } on FormatException catch (e, st) {
@@ -83,6 +87,7 @@ class ScopeStore {
       'instance_id': owner.instanceId,
       'program_id': selection.programId,
       if (selection.hasDepartment) 'department_id': selection.departmentId,
+      if (selection.role case final role?) 'role': role.wire,
     }),
   );
 

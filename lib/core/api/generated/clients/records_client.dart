@@ -17,6 +17,7 @@ import '../models/archive_uploaders.dart';
 import '../models/file_record.dart';
 import '../models/file_record_list.dart';
 import '../models/rename_file_request.dart';
+import '../models/retag_file_request.dart';
 import '../models/tag.dart';
 
 part 'records_client.g.dart';
@@ -52,6 +53,13 @@ abstract class RecordsClient {
     'openapi': <String, dynamic>{
       'tags': <String>["records"],
       'operationId': "renameFile",
+      'externalDocsUrl': null,
+    },
+  };
+  static const Map<String, dynamic> retagFileOpenapiExtras = <String, dynamic>{
+    'openapi': <String, dynamic>{
+      'tags': <String>["records"],
+      'operationId': "retagFile",
       'externalDocsUrl': null,
     },
   };
@@ -162,6 +170,15 @@ abstract class RecordsClient {
     @Body() required RenameFileRequest body,
     @Extras()
     Map<String, dynamic>? extras = RecordsClient.renameFileOpenapiExtras,
+  });
+
+  /// Sınıflandırma etiketini değiştirir (kapalı küme; depolama nesnesine dokunmaz; aynı etiket değişikliksiz 200). Yetki yeniden adlandırmayla aynıdır (RECORDS-K10): yönetici, ekibin koordinatörü ya da dosyanın `(program, departman)` ekibinde satırı olan yükleyen; aksi 403 `records.not_authorized`. Audit `records.file.tag_changed`.
+  @PATCH('/v1/files/{id}/tag')
+  Future<FileRecord> retagFile({
+    @Path('id') required String id,
+    @Body() required RetagFileRequest body,
+    @Extras()
+    Map<String, dynamic>? extras = RecordsClient.retagFileOpenapiExtras,
   });
 
   /// Dosyayı siler (metadata + nesne). Yalnız yükleyen siler: dosyanın `(program, departman)` ekibinde satırı olan yükleyen ya da yükleyen şirket yöneticisi (aksi 403 `records.not_authorized`); ikinci silme 404 `records.file_not_found` alır.

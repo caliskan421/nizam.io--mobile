@@ -10,6 +10,7 @@ import '../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
 import '../../tasks/tasks.dart';
+import '../application/active_conference.dart';
 import '../application/meeting_room_controller.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
@@ -96,7 +97,7 @@ class MeetingHero extends ConsumerWidget {
 /// Konferans kartı (prototip "Konferans"): durum başlığı ve alt satırı; canlıyken bağlı
 /// kişiler (sayı ve avatar yığını, `conference.connected`, COLLABORATION-K78), bittiyse süre ve
 /// saat aralığı (`last_conference`, K70). Yönetene başlat/bitir, toplantıyı gören herkese katıl.
-/// Katılım ekranı henüz yok (ürün kararı). Açık ekranda taze bağlı kişi görüntüsü eşik
+/// Katıl görüşme ekranını açar; odadaysak "Görüşmeye dön". Açık ekranda taze bağlı kişi görüntüsü eşik
 /// anında ([ConferenceConnected.freshFor]) kendiliğinden eski duruma geçer: o ana tek seferlik
 /// zamanlayıcı kurulur (sürekli yoklama yok), kart kapanınca iptal edilir.
 class MeetingConferenceCard extends ConsumerStatefulWidget {
@@ -208,6 +209,8 @@ class _MeetingConferenceCardState extends ConsumerState<MeetingConferenceCard> {
     };
     final active = conf != null && conf.status != ConferenceStatus.ending;
     final canStart = manage && !active && d.conferenceAvailable;
+    // Bu toplantının odasındaysak (görüşme küçültülmüş) "Görüşmeye dön".
+    final inCall = ref.watch(activeConferenceControllerProvider).inCall == m.id;
     // Canlıyken bağlı kişiler: hesap kimlikleri katılımcı adlarına (yoksa katalog adına) çevrilir.
     final names = {for (final p in d.participants) p.accountId: p.fullName};
     final catalog = ref.watch(taskCatalogControllerProvider).value;
@@ -273,7 +276,9 @@ class _MeetingConferenceCardState extends ConsumerState<MeetingConferenceCard> {
                   Expanded(
                     child: active
                         ? NzButton.primary(
-                            label: l.uiMeetingsConfJoin,
+                            label: inCall
+                                ? l.uiMeetingsConfReturn
+                                : l.uiMeetingsConfJoin,
                             icon: NzIcons.video,
                             expand: true,
                             onPressed: actions.joinConference,

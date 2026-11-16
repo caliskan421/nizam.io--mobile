@@ -5,6 +5,7 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../../core/ui/widgets/lists/lists.dart';
+import '../../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../domain/chat.dart';
@@ -15,56 +16,50 @@ import 'messages_texts.dart';
 /// Ek menüsünün seçimi: galeriden fotoğraf, kamerayla çekim, cihaz dosyası ya da anket.
 enum ChatAttachKind { photos, camera, files, poll, task, department, archive }
 
-/// Yazma alanındaki ek düğmesinin menüsü: görev ayrıntısındaki yüklemeyle aynı kaynak seçimi
+/// Yazma alanındaki ek düğmesinin menüsü (alt menünün kısayol menüsüyle aynı cam bileşen,
+/// [anchor] yazma alanının üstünde, solda): görev ayrıntısındaki yüklemeyle aynı kaynak seçimi
 /// (Fotoğraflar / Kamera / Dosyalar) ve (yalnız grupta) anket.
 Future<ChatAttachKind?> showAttachMenu(
   BuildContext context, {
   required bool group,
-}) {
+  Rect? anchor,
+}) async {
   final l = context.l10n;
-  return NzBottomSheet.show<ChatAttachKind>(
+  ChatAttachKind? picked;
+  NzFlyoutItem item(ChatAttachKind kind, String label, IconData icon) =>
+      NzFlyoutItem(label: label, icon: icon, onSelected: () => picked = kind);
+  await NzFlyoutMenu.show(
     context,
-    title: l.uiMessagesAttach,
-    builder: (sheet) => NzMenuGroup(
-      rows: [
-        NzMenuRow(
-          icon: NzIcons.image,
-          label: l.uiMessagesAttachPhotos,
-          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.photos),
-        ),
-        NzMenuRow(
-          icon: NzIcons.camera,
-          label: l.uiMessagesAttachCamera,
-          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.camera),
-        ),
-        NzMenuRow(
-          icon: NzIcons.folder,
-          label: l.uiMessagesAttachFile,
-          onTap: () => Navigator.of(sheet).pop(ChatAttachKind.files),
-        ),
-        if (group)
-          NzMenuRow(
-            icon: NzIcons.barChart,
-            label: l.uiMessagesAttachPoll,
-            onTap: () => Navigator.of(sheet).pop(ChatAttachKind.poll),
-          ),
-      ],
-    ),
+    semanticLabel: l.uiMessagesAttach,
+    anchor: anchor,
+    entries: [
+      item(ChatAttachKind.photos, l.uiMessagesAttachPhotos, NzIcons.image),
+      item(ChatAttachKind.camera, l.uiMessagesAttachCamera, NzIcons.camera),
+      item(ChatAttachKind.files, l.uiMessagesAttachFile, NzIcons.folder),
+      if (group)
+        item(ChatAttachKind.poll, l.uiMessagesAttachPoll, NzIcons.barChart),
+    ],
   );
+  return picked;
 }
 
-/// Metin alanının içindeki atıf düğmesi: yalnız var olan kayıtları paylaşır.
+/// Metin alanının içindeki atıf düğmesi: yalnız var olan kayıtları paylaşır (kısayol menüsü,
+/// [anchor] yazma alanının üstünde, sağda). Sınır dolduysa yalnız sınır uyarısı.
 Future<ChatAttachKind?> showReferenceMenu(
   BuildContext context, {
   required bool canShare,
-}) {
+  Rect? anchor,
+}) async {
   final l = context.l10n;
-  return NzBottomSheet.show<ChatAttachKind>(
+  ChatAttachKind? picked;
+  await NzFlyoutMenu.show(
     context,
-    title: l.uiMessagesReference,
-    builder: (sheet) => NzMenuGroup(
-      rows: [
-        for (final item in [
+    semanticLabel: l.uiMessagesReference,
+    anchor: anchor,
+    alignEnd: true,
+    entries: [
+      if (canShare)
+        for (final (kind, label, icon) in [
           (ChatAttachKind.task, l.uiMessagesComposeShareTask, NzIcons.tasks),
           (
             ChatAttachKind.department,
@@ -77,25 +72,20 @@ Future<ChatAttachKind?> showReferenceMenu(
             NzIcons.folder,
           ),
         ])
-          if (canShare)
-            NzMenuRow(
-              icon: item.$3,
-              label: item.$2,
-              onTap: () => Navigator.of(sheet).pop(item.$1),
-            )
-          else
-            Semantics(
-              enabled: false,
-              child: Opacity(
-                opacity: 0.38,
-                child: IgnorePointer(
-                  child: NzMenuRow(icon: item.$3, label: item.$2, onTap: () {}),
-                ),
-              ),
-            ),
-      ],
-    ),
+          NzFlyoutItem(
+            label: label,
+            icon: icon,
+            onSelected: () => picked = kind,
+          )
+      else
+        NzFlyoutItem(
+          label: l.uiMessagesComposeRefLimit,
+          icon: NzIcons.info,
+          onSelected: () {},
+        ),
+    ],
   );
+  return picked;
 }
 
 /// Anket taslağı (soru = mesaj gövdesi).

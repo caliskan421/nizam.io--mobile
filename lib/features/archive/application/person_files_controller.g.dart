@@ -16,7 +16,7 @@ final class PersonFilesControllerProvider
     extends $AsyncNotifierProvider<PersonFilesController, PersonFilesState> {
   PersonFilesControllerProvider._({
     required PersonFilesControllerFamily super.from,
-    required String super.argument,
+    required (String, {bool filterArchive}) super.argument,
   }) : super(
          retry: null,
          name: r'personFilesControllerProvider',
@@ -32,7 +32,7 @@ final class PersonFilesControllerProvider
   String toString() {
     return r'personFilesControllerProvider'
         ''
-        '($argument)';
+        '$argument';
   }
 
   @$internal
@@ -51,7 +51,7 @@ final class PersonFilesControllerProvider
 }
 
 String _$personFilesControllerHash() =>
-    r'5b897272dc31df223299df8377bd022f913c6e2e';
+    r'018e62181208567261f9b9fc79a5096adb4534b4';
 
 final class PersonFilesControllerFamily extends $Family
     with
@@ -60,7 +60,7 @@ final class PersonFilesControllerFamily extends $Family
           AsyncValue<PersonFilesState>,
           PersonFilesState,
           FutureOr<PersonFilesState>,
-          String
+          (String, {bool filterArchive})
         > {
   PersonFilesControllerFamily._()
     : super(
@@ -71,8 +71,13 @@ final class PersonFilesControllerFamily extends $Family
         isAutoDispose: true,
       );
 
-  PersonFilesControllerProvider call(String accountId) =>
-      PersonFilesControllerProvider._(argument: accountId, from: this);
+  PersonFilesControllerProvider call(
+    String accountId, {
+    bool filterArchive = false,
+  }) => PersonFilesControllerProvider._(
+    argument: (accountId, filterArchive: filterArchive),
+    from: this,
+  );
 
   @override
   String toString() => r'personFilesControllerProvider';
@@ -80,10 +85,14 @@ final class PersonFilesControllerFamily extends $Family
 
 abstract class _$PersonFilesController
     extends $AsyncNotifier<PersonFilesState> {
-  late final _$args = ref.$arg as String;
-  String get accountId => _$args;
+  late final _$args = ref.$arg as (String, {bool filterArchive});
+  String get accountId => _$args.$1;
+  bool get filterArchive => _$args.filterArchive;
 
-  FutureOr<PersonFilesState> build(String accountId);
+  FutureOr<PersonFilesState> build(
+    String accountId, {
+    bool filterArchive = false,
+  });
   @$mustCallSuper
   @override
   WhenComplete runBuild() {
@@ -97,6 +106,9 @@ abstract class _$PersonFilesController
               Object?,
               Object?
             >;
-    return element.handleCreate(ref, () => build(_$args));
+    return element.handleCreate(
+      ref,
+      () => build(_$args.$1, filterArchive: _$args.filterArchive),
+    );
   }
 }

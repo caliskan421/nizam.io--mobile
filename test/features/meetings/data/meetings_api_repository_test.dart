@@ -249,7 +249,7 @@ void main() {
             {'account_id': 'u1', 'full_name': 'Ali Veli', 'teams': <Object>[]},
           ],
           'agenda': [_agenda(checked: true)],
-          'notes': _notes([_note(role: null)], 'n2'),
+          'notes': noteListWire([_note(role: null)], 'n2'),
           'conference': null,
           'conference_available': false,
         }),
@@ -281,7 +281,7 @@ void main() {
           'viewer_role': 'admin',
           'participants': <Object?>[],
           'agenda': <Object?>[],
-          'notes': _notes(<Object?>[], ''),
+          'notes': noteListWire(<Object?>[]),
           'conference': _conference(status: 'yeni_durum'),
           'conference_available': true,
         }),
@@ -390,7 +390,7 @@ void main() {
       final (repo, a) = _repo((o) {
         if (o.method == 'DELETE') return _empty();
         if (o.method == 'GET') {
-          return _json(_notes([_note(), _note(role: 'boss')], 'c9'));
+          return _json(noteListWire([_note(), _note(role: 'boss')], 'c9'));
         }
         return _json(_note(role: 'coordinator'));
       });

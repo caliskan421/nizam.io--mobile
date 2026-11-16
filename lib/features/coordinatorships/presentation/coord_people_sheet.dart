@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gap/gap.dart';
 
-import '../../../core/providers.dart';
 import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/page/nz_app_nav.dart';
@@ -11,7 +10,7 @@ import '../../../core/ui/widgets/lists/lists.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../core/ui/widgets/surfaces/surfaces.dart';
-import '../../tasks/tasks.dart' show taskCatalogControllerProvider;
+import '../../tasks/tasks.dart' show effectiveAccessProvider;
 import '../application/coordinatorship_detail_controller.dart';
 import '../domain/coordinatorship_board.dart';
 import 'coord_add_member_sheet.dart';
@@ -31,10 +30,8 @@ class CoordMembersTab extends ConsumerWidget {
     final l = context.l10n;
     final leads = people.where((p) => p.lead).toList();
     final members = people.where((p) => !p.lead).toList();
-    final program = ref.watch(scopeStateProvider).programId;
-    final access = ref.watch(taskCatalogControllerProvider).value?.access;
-    final canAdd =
-        program != null && (access?.canCreateIn(program, code) ?? false);
+    // Üye ekle: yönetici görünümü ya da bu birimin koordinatörü (etkin görünüm).
+    final canAdd = ref.watch(coordManagesTeamProvider(code));
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: NizamioSpacing.gapXl,
@@ -81,18 +78,28 @@ class CoordMembersTab extends ConsumerWidget {
 /// Kişi alt sayfası (prototip `isPerson`): avatar, ad, rol; açık/geciken sayıları; "Görevlerini
 /// gör" (Görevler bölümü kişi süzgeciyle) ve "Mesaj gönder". Rol değiştirme ve çıkarma bu
 /// ekranda yok (yönetim yüzü).
+///
+/// Yönetici görünümünde ve etkin koordinatörlüğünün ekibine bakan koordinatör görünümünde
+/// kişiye basmak tam kullanıcı ayrıntısını açar (yönetici: şirket dizini; koordinatör: ekip
+/// satırı, "Ekipten çıkar" orada). Diğer görünümlerde alt sayfa kalır.
 Future<void> showCoordPersonSheet(
   BuildContext context,
   WidgetRef ref,
   String code,
   CoordPerson p,
-) {
+) async {
   final l = context.l10n;
   final nav = context.appNav;
+  final view = ref.read(effectiveAccessProvider);
+  if (view.canAdminister ||
+      (view.isCoordinatorView && view.departmentId == code)) {
+    nav.openUser(p.id);
+    return;
+  }
   final commands = ref.read(
     coordinatorshipDetailControllerProvider(code).notifier,
   );
-  return NzBottomSheet.show<void>(
+  await NzBottomSheet.show<void>(
     context,
     title: p.name,
     showHeader: false,

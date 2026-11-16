@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 
 import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
+import '../../../../core/ui/widgets/buttons/buttons.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../domain/calendar.dart';
@@ -164,128 +165,132 @@ class _PeriodCard extends StatelessWidget {
       ].join(', '),
       excludeSemantics: true,
       onTap: onTap,
-      child: Material(
-        color: c.surface,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(NizamioRadius.sheet),
-          side: BorderSide(color: c.border),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: Padding(
-            padding: const EdgeInsets.all(NizamioSpacing.gapLg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Ortalı hiza: yan yana düzendeki IntrinsicHeight, taban çizgisi hizalı satırda
-                // Gap'in kuru ölçümünü yapamaz.
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        p.label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: t.bodyMd.copyWith(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
+      // Basma vurgusu yok; geri bildirim düğmelerdeki gibi küçülme ([NzPressable]).
+      child: NzPressable(
+        child: Material(
+          color: c.surface,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(NizamioRadius.sheet),
+            side: BorderSide(color: c.border),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Padding(
+              padding: const EdgeInsets.all(NizamioSpacing.gapLg),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Ortalı hiza: yan yana düzendeki IntrinsicHeight, taban çizgisi hizalı satırda
+                  // Gap'in kuru ölçümünü yapamaz.
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          p.label,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: t.bodyMd.copyWith(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
-                    ),
-                    Text(range, style: t.monoSm.copyWith(color: c.textFaint)),
-                    const Gap(NizamioSpacing.space2),
-                    NzIcon(
-                      NzIcons.northEast,
-                      size: NizamioSize.iconSizeSm,
-                      color: c.textFaint,
-                    ),
-                  ],
-                ),
-                const Gap(NizamioSpacing.space4),
-                Row(
-                  children: [
-                    SizedBox.square(
-                      dimension: _ring,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          CustomPaint(
-                            size: const Size.square(_ring),
-                            painter: _RingPainter(
-                              parts: p.ring,
-                              track: c.surfaceRaised,
-                            ),
-                          ),
-                          Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                p.center,
-                                style: t.titleSm.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  fontFeatures: num,
-                                ),
-                              ),
-                              Text(
-                                p.centerCaption,
-                                style: t.caption.copyWith(
-                                  fontSize: 11,
-                                  color: c.textFaint,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
+                      Text(range, style: t.monoSm.copyWith(color: c.textFaint)),
+                      const Gap(NizamioSpacing.space2),
+                      NzIcon(
+                        NzIcons.northEast,
+                        size: NizamioSize.iconSizeSm,
+                        color: c.textFaint,
                       ),
-                    ),
-                    const Gap(NizamioSpacing.gapLg),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        spacing: NizamioSpacing.space1 + 2,
-                        children: [
-                          for (final (label, n, color, hollow) in p.legend)
-                            Row(
+                    ],
+                  ),
+                  const Gap(NizamioSpacing.space4),
+                  Row(
+                    children: [
+                      SizedBox.square(
+                        dimension: _ring,
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            CustomPaint(
+                              size: const Size.square(_ring),
+                              painter: _RingPainter(
+                                parts: p.ring,
+                                track: c.surfaceRaised,
+                              ),
+                            ),
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Container(
-                                  width: _dot,
-                                  height: _dot,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: hollow ? null : color,
-                                    border: hollow
-                                        ? Border.all(color: color, width: 1.5)
-                                        : null,
-                                  ),
-                                ),
-                                const Gap(NizamioSpacing.space2),
-                                Expanded(
-                                  child: Text(
-                                    label,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: t.bodySm.copyWith(
-                                      color: c.textMuted,
-                                    ),
+                                Text(
+                                  p.center,
+                                  style: t.titleSm.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    fontFeatures: num,
                                   ),
                                 ),
                                 Text(
-                                  '$n',
-                                  style: t.bodySm.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: n == 0 ? c.textFaint : c.text,
-                                    fontFeatures: num,
+                                  p.centerCaption,
+                                  style: t.caption.copyWith(
+                                    fontSize: 11,
+                                    color: c.textFaint,
                                   ),
                                 ),
                               ],
                             ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                      const Gap(NizamioSpacing.gapLg),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          spacing: NizamioSpacing.space1 + 2,
+                          children: [
+                            for (final (label, n, color, hollow) in p.legend)
+                              Row(
+                                children: [
+                                  Container(
+                                    width: _dot,
+                                    height: _dot,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: hollow ? null : color,
+                                      border: hollow
+                                          ? Border.all(color: color, width: 1.5)
+                                          : null,
+                                    ),
+                                  ),
+                                  const Gap(NizamioSpacing.space2),
+                                  Expanded(
+                                    child: Text(
+                                      label,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: t.bodySm.copyWith(
+                                        color: c.textMuted,
+                                      ),
+                                    ),
+                                  ),
+                                  Text(
+                                    '$n',
+                                    style: t.bodySm.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                      color: n == 0 ? c.textFaint : c.text,
+                                      fontFeatures: num,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

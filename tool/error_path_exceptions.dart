@@ -173,6 +173,12 @@ const errorPathExceptions = <String, ErrorPathException>{
         1,
         'YENİDEN: kaynak sağlayıcı hatası aynı nesneyle taşınır.',
       ),
+  'features/timeline/application/gantt_provider.dart::_TimelineSnapshot.pending#asyncError':
+      ErrorPathException(
+        1,
+        'YENİDEN: kaynak (görev kataloğu/zaman çizelgesi) sağlayıcısının hatası ve yığını '
+        'aynı nesneyle taşınır; yeni hata üretilmez, rapor kaynak sağlayıcıdadır.',
+      ),
   'features/administration/application/admin_controller.dart::AdminUsersController.loadMore#asyncError':
       ErrorPathException(
         1,
@@ -242,19 +248,6 @@ const errorPathExceptions = <String, ErrorPathException>{
         'text/event-stream için ham Dio; hata `streamApiError` ile sınıflandırılır ve işlem '
         'kimliği isteğin doğrulanmış `openapi.operationId` (streamChatEvents) metaverisinden gelir.',
       ),
-  'features/tables/application/table_controller.dart::TableController._reload#onError':
-      ErrorPathException(
-        1,
-        'KUYRUK: snapshot okuma zincirinin sürmesi için ayrılmış kol; aynı hata `run` geleceğiyle '
-        'çağırana (yakalama, komut yan okuması, çakışma çözümü) gider ve orada raporlanır.',
-      ),
-  'features/tables/data/table_api_repository.dart::ApiTablesRepository.stream#rawDio':
-      ErrorPathException(
-        1,
-        'text/event-stream için ham Dio (üretilmiş istemci akışı okuyamaz); hata '
-        '`streamApiError` ile sınıflandırılır ve işlem kimliği isteğin doğrulanmış '
-        '`openapi.operationId` (streamTableChanges / streamPersonalTableChanges) metaverisinden gelir.',
-      ),
   'features/messages/presentation/messages_page.dart::_MessagesPageState.build#asyncError':
       ErrorPathException(
         1,
@@ -301,6 +294,15 @@ const errorPathExceptions = <String, ErrorPathException>{
         'Hata sonrası geçici dosya temizliği (en iyi çaba). Asıl yerel dosya sistemi hatası '
         '`save` içinde FileSystemException olarak raporlanıp yeniden fırlatılır; temizlik '
         'hatası ikincil ve eyleme dönüşmez.',
+      ),
+  'features/meetings/data/livekit_conference_link.dart::LiveKitConferenceLink.connect#catch':
+      ErrorPathException(
+        1,
+        'LiveKit bağlantı hatasının ham metni (WebSocket/doğrulama adresi) katılım token\'ını '
+        'access_token sorgusu olarak taşıyabilir; token rapora, log\'a ve hata metnine '
+        'yazılmaz (COLLABORATION-K49). Hata sabit client.conference_connect_failed koduna '
+        'çevrilip fırlatılır; çağıran (ConferenceController.join) onu toReportedApiError ile '
+        'işler.',
       ),
   'features/tasks/data/file_upload_picker.dart::FileUploadPicker.pick#catch':
       ErrorPathException(

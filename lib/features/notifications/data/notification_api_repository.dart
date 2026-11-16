@@ -3,12 +3,17 @@ import 'package:dio/dio.dart';
 import '../../../core/api/generated/clients/notifications_client.dart';
 import '../../../core/api/generated/models/keys.dart';
 import '../../../core/api/generated/models/notification.dart';
+import '../../../core/api/generated/models/notification_preference.dart';
+import '../../../core/api/generated/models/notification_preference_group.dart';
+import '../../../core/api/generated/models/notification_preferences.dart'
+    as api;
 import '../../../core/api/generated/models/register_target_request.dart';
 import '../../../core/domain/enum_parse.dart';
 import '../../../core/domain/page_slice.dart';
 import '../../../core/errors/api_error.dart';
 import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../domain/app_notification.dart';
+import '../domain/notification_preferences.dart';
 import '../domain/notification_repository.dart';
 
 /// notifications uçlarına üretilmiş istemciyle erişim. Üretilmiş DTO'lar bu katmanda kalır;
@@ -90,6 +95,40 @@ class ApiNotificationRepository implements NotificationRepository {
     final r = await apiCall(_client.pushPublicKey);
     return PushPublicKeyInfo(publicKey: r.publicKey, enabled: r.enabled);
   }
+
+  @override
+  Future<NotificationPreferences> preferences() async =>
+      _prefs(await apiCall(_client.getNotificationPreferences));
+
+  @override
+  Future<NotificationPreferences> updatePreferences(
+    NotificationPreferences changes,
+  ) async => _prefs(
+    await apiCall(
+      () => _client.updateNotificationPreferences(
+        body: api.NotificationPreferences(
+          preferences: [
+            for (final MapEntry(key: g, value: muted) in changes.entries)
+              NotificationPreference(
+                group: NotificationPreferenceGroup.fromJson(g.name),
+                pushMuted: muted,
+              ),
+          ],
+        ),
+      ),
+    ),
+  );
+
+  /// Sunucunun dönmediği ya da tanınmayan grup açık (sessiz değil) sayılır.
+  static NotificationPreferences _prefs(api.NotificationPreferences r) => {
+    for (final g in NotificationPrefGroup.values)
+      g:
+          r.preferences
+              .where((p) => p.group.json == g.name)
+              .firstOrNull
+              ?.pushMuted ??
+          false,
+  };
 
   static AppNotification _notification(Notification n) => AppNotification(
     id: n.id,

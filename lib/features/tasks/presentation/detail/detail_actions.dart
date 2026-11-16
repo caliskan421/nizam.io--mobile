@@ -6,21 +6,30 @@ import '../../../../core/theme/generated/tokens.gen.dart';
 import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/inputs/inputs.dart';
+import '../../../../core/ui/widgets/navigation/navigation.dart';
+import '../../../../core/ui/widgets/nz_glyph.dart';
 import '../../../../core/ui/widgets/nz_icon.dart';
 import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
+import '../../../archive/archive.dart';
 import '../../application/task_catalog_controller.dart';
 import '../../application/task_detail_controller.dart';
 import '../../application/tasks_providers.dart';
 import '../../domain/task_catalog.dart';
 import '../../domain/task_permissions.dart';
 import '../../domain/task_writes.dart';
+import '../../domain/work_item.dart' show TransitionActor;
+import '../decision/task_decision_flows.dart';
 import '../task_texts.dart';
 import '../task_widgets.dart';
 import 'detail_forms.dart';
+import 'subtask_create_sheet.dart';
 
+part 'detail_decision_actions.dart';
+part 'detail_file_actions.dart';
 part 'detail_list_option.dart';
+part 'detail_request_actions.dart';
 part 'upload_origin_sheet.dart';
 
 /// Ayrıntı ekranının eylemleri: denetleyici komutu + prototipteki sonuç bildirimi ve alt
@@ -78,18 +87,19 @@ class TaskDetailActions {
     _listSheet(
       title: l.uiTasksSheetStatus,
       builder: (sheet) => [
+        ..._statusHead(targets),
         if (targets.isEmpty)
           Padding(
             padding: const EdgeInsets.all(NizamioSpacing.space2),
             child: Text(
-              l.uiTasksNoStatusTransitions,
+              _noTransitionsText,
               style: context.text.bodySm.copyWith(color: c.textMuted),
             ),
           ),
         for (final s in TaskStatus.known)
           if (s == t.status || targets.contains(s))
             _ListOption(
-              label: l.statusLabel(s),
+              label: _statusOptionLabel(t, s),
               leading: NzDot(color: statusTone(s).color(c)),
               hint: s == TaskStatus.done && open > 0 && !t.isDone
                   ? '$open ${l.uiTasksOpenSubsTail}'
@@ -97,7 +107,7 @@ class TaskDetailActions {
               selected: s == t.status,
               onTap: () {
                 Navigator.of(sheet).pop();
-                _setStatus(s);
+                _pickStatus(t, s);
               },
             ),
       ],
@@ -302,6 +312,16 @@ class TaskDetailActions {
               _report(await _ctl.unclaim(), done: l.uiTasksTUnclaimed);
             },
           ),
+        if (p.canExtend(t))
+          _ListOption(
+            label: l.uiTasksExtend,
+            hint: l.uiTasksExtendCaption,
+            leading: const NzIcon(NzIcons.clock, size: NizamioSize.iconSizeSm),
+            onTap: () {
+              Navigator.of(sheet).pop();
+              openExtend();
+            },
+          ),
         if (p.canManageTask) ...[
           _ListOption(
             label: l.uiTasksEditTask,
@@ -309,20 +329,6 @@ class TaskDetailActions {
             onTap: () {
               Navigator.of(sheet).pop();
               openEdit();
-            },
-          ),
-          _ListOption(
-            label: l.uiTasksCopy,
-            leading: const NzIcon(NzIcons.copy, size: NizamioSize.iconSizeSm),
-            onTap: () async {
-              Navigator.of(sheet).pop();
-              final (r, _) = await _ctl.copy(l.uiTasksCopySuffix);
-              _report(
-                r,
-                done:
-                    '“${t.title} ${l.uiTasksCopySuffix}” '
-                    '${l.uiTasksTCreatedTail}',
-              );
             },
           ),
           _ListOption(
@@ -497,138 +503,30 @@ class TaskDetailActions {
     );
   }
 
-  // ---- dosya ------------------------------------------------------------------------------
-
-  /// Dosya satırının işlemleri (yetkiye göre): indir, adı değiştir, sil.
-  void openFile(TaskFile f) {
-    final l = context.l10n;
-    final c = context.colors;
-    final p = _perms;
-    if (!p.canDownloadFile && !p.canRenameFile(f) && !p.canDeleteFile(f)) {
-      return;
-    }
-    _listSheet(
-      title: f.name,
-      builder: (sheet) => [
-        if (p.canDownloadFile)
-          _ListOption(
-            label: l.uiTasksFileDownload,
-            leading: const NzIcon(
-              NzIcons.uploadFile,
-              size: NizamioSize.iconSizeSm,
-            ),
-            onTap: () async {
-              Navigator.of(sheet).pop();
-              final (r, _) = await _ctl.downloadFile(f);
-              _report(r, done: '${l.uiTasksTFileSaved} · ${f.name}');
-            },
-          ),
-        if (p.canRenameFile(f))
-          _ListOption(
-            label: l.uiTasksFileRename,
-            leading: const NzIcon(NzIcons.edit, size: NizamioSize.iconSizeSm),
-            onTap: () {
-              Navigator.of(sheet).pop();
-              _renameFile(f);
-            },
-          ),
-        if (p.canDeleteFile(f))
-          _ListOption(
-            label: l.uiTasksFileDelete,
-            color: c.danger,
-            leading: NzIcon(
-              NzIcons.delete,
-              size: NizamioSize.iconSizeSm,
-              color: c.danger,
-            ),
-            onTap: () {
-              Navigator.of(sheet).pop();
-              _deleteFile(f);
-            },
-          ),
-      ],
-    );
-  }
-
-  Future<void> _renameFile(TaskFile f) async {
-    final l = context.l10n;
-    final name = await _askText(
-      title: l.uiTasksFileRename,
-      description: f.name,
-      label: l.uiTasksFileNameLabel,
-      ok: l.uiTasksSave,
-      initial: f.name,
-    );
-    if (name == null || !context.mounted) return;
-    _report(await _ctl.renameFile(f, name), done: l.uiTasksTFileRenamed);
-  }
-
-  Future<void> _deleteFile(TaskFile f) async {
-    final l = context.l10n;
-    final yes = await _confirm(
-      title: l.uiTasksFileDeleteQ,
-      description: l.uiTasksFileDeleteDesc,
-      ok: l.uiTasksDeleteOk,
-      danger: true,
-    );
-    if (!yes || !context.mounted) return;
-    _report(await _ctl.deleteFile(f), done: l.uiTasksTFileDeleted);
-  }
-
-  // ---- talep, hatırlatma, silme ------------------------------------------------------------
-
-  Future<void> approveRequest() async {
-    final r = _task?.dateRequest;
-    if (r == null) return;
-    final l = context.l10n;
-    _report(
-      await _ctl.approveRequest(),
-      done:
-          '${l.uiTasksTApproved} · ${l.uiTasksTNewDue} '
-          '${TaskDates.full(r.due)}',
-    );
-  }
-
-  Future<void> rejectRequest() async {
-    final r = _task?.dateRequest;
-    if (r == null) return;
-    final l = context.l10n;
-    _report(
-      await _ctl.rejectRequest(),
-      done:
-          '${l.uiTasksTRejected} · '
-          '${r.by == null ? '' : _name(r.by!)} ${l.uiTasksTInformed}',
-    );
-  }
-
-  void remind() {
-    final t = _task;
-    if (t == null) return;
-    _say(
-      '${context.l10n.uiTasksTReminded} · '
-      '${t.assignees.map(_name).join(', ')}',
-    );
-  }
-
   // ---- alt görev, not ---------------------------------------------------------------------
 
   Future<void> toggleSubtask(String id) async =>
       _report(await _ctl.toggleSubtask(id));
 
-  /// Alt görev ekle: başlık alt sayfası → oluştur.
+  /// Alt görev ekle: başlık + kanıt radyosu → oluştur. S12: sonucu bilinmeyen eklemenin adı
+  /// geri gelir (aynı gövde → aynı anahtar).
   Future<void> addSubtask() async {
-    final l = context.l10n;
-    final title = await _askText(
-      title: l.uiTasksSubAdd,
-      description: l.uiTasksSubsHint,
-      label: l.uiTasksSubName,
-      ok: l.uiTasksCreate,
-      // S12: sonucu bilinmeyen/başarısız eklemenin adı geri gelir (aynı ad → aynı anahtar).
-      initial: _ctl.pendingSubtaskTitle ?? '',
+    final pending = _ctl.pendingSubtask;
+    final r = await askNewSubtask(
+      context,
+      initial: pending?.title ?? '',
+      initialEvidence: pending?.evidenceRequired ?? false,
     );
-    if (title == null || !context.mounted) return;
-    _report(await _ctl.createSubtask(title), done: l.uiTasksTSubAdded);
+    if (r == null || !context.mounted) return;
+    final done = context.l10n.uiTasksTSubAdded;
+    _report(
+      await _ctl.createSubtask(r.title, evidenceRequired: r.evidenceRequired),
+      done: done,
+    );
   }
+
+  Future<void> setSubtaskEvidence(String id, bool v) async =>
+      _report(await _ctl.setSubtaskEvidence(id, value: v));
 
   /// Alt görev adı: gönderilemeyen ad state'te kalır ve diyalog onunla açılır (S12); 409
   /// `work.edit_conflict`'te sunucudaki ad ile sizinki arasında seçim (V3).
@@ -681,11 +579,19 @@ class TaskDetailActions {
   Future<void> clearSubtaskDates(String id) async =>
       _report(await _ctl.clearSubtaskDates(id));
 
+  /// Alt görev kalıcı silinir: önce "geri alınamaz" onayı.
   Future<void> removeSubtask(String id) async {
     final key = '“${_task?.title ?? ''}”';
+    final l = context.l10n;
+    final yes = await _confirm(
+      title: l.uiTasksSubDeleteQ,
+      description: l.uiTasksSubDeleteDesc,
+      ok: l.uiTasksDeleteOk,
+      danger: true,
+    );
+    if (!yes || !context.mounted) return;
     final (r, u) = await _ctl.removeSubtask(id);
     if (!context.mounted) return;
-    final l = context.l10n;
     _report(
       r,
       done: u == null

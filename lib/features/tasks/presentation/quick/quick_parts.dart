@@ -49,6 +49,7 @@ class QuickTitleField extends StatefulWidget {
     required this.onChanged,
     this.maxLength,
     this.autofillHints,
+    this.pill = false,
   });
 
   final String label;
@@ -56,6 +57,7 @@ class QuickTitleField extends StatefulWidget {
   final String value;
   final ValueChanged<String> onChanged;
   final int? maxLength;
+  final bool pill;
   final Iterable<String>? autofillHints;
 
   @override
@@ -80,8 +82,10 @@ class _QuickTitleFieldState extends State<QuickTitleField> {
 
   @override
   Widget build(BuildContext context) => NzTextField(
+    pill: widget.pill,
     label: widget.label,
     hint: widget.hint,
+    labelAbove: false,
     controller: _controller,
     onChanged: widget.onChanged,
     maxLength: widget.maxLength,

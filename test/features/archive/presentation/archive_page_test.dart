@@ -1,19 +1,26 @@
 // ArchivePage (sunucu verisi, sahte depo): özet ve klasörler, arama, klasör → ayrıntı, yükleme
-// tostu, kısayol menüsü (tam arşiv yalnız yöneticide), hata görünümü, dar ekran / 2.0 / koyu.
+// görev seçimi, kısayol menüsü (tam arşiv yalnız yöneticide), hata görünümü, dar ekran / 2.0 / koyu.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/domain/page_slice.dart';
 import 'package:nizamio/core/errors/api_error.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/ui/page/nz_shell_events.dart';
 import 'package:nizamio/core/ui/widgets/feedback/feedback.dart';
+import 'package:nizamio/features/archive/application/archive_controller.dart';
+import 'package:nizamio/features/archive/application/archive_folder_controller.dart';
 import 'package:nizamio/features/archive/archive.dart';
 import 'package:nizamio/features/archive/domain/archive.dart';
+import 'package:nizamio/features/archive/domain/records.dart';
 import 'package:nizamio/features/archive/presentation/archive/archive_folder_card.dart';
+import 'package:nizamio/features/archive/presentation/archive/archive_folder_parts.dart';
+import 'package:nizamio/features/archive/presentation/archive/archive_storage.dart';
 
 import '../../../support/harness.dart';
 import '../../../support/recording_app_nav.dart';
+import '../../../support/screen_matrix.dart';
 import '../../pilot_support.dart';
 import '../archive_fixture.dart';
 
@@ -23,12 +30,16 @@ Future<(Harness, RecordingAppNav, RecordingSink)> _open(
   WidgetTester tester, {
   FakeArchiveRepository? repo,
   bool admin = false,
+  bool member = false,
   bool dark = false,
 }) async {
-  final h = await real(
-    tester,
-    () => pilotHarness(archiveBackend(admin: admin), signedIn: true),
-  );
+  final backend = archiveBackend(admin: admin);
+  if (member) {
+    backend.seats = [
+      for (final seat in backend.seats) {...seat, 'role': 'uye'},
+    ];
+  }
+  final h = await real(tester, () => pilotHarness(backend, signedIn: true));
   final sink = RecordingSink();
   useArchiveFakes(h, repo ?? FakeArchiveRepository(), sink: sink);
   h.read(scopeControllerProvider).selectProgram('prog-1');
@@ -48,21 +59,141 @@ Future<void> _tap(WidgetTester tester, Finder f) async {
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
 
+  testWidgets(
+    'koordinatör kök arşivinden tüm dosyalara ve görev dosyalarına geçer',
+    (tester) async {
+      final repo = FakeArchiveRepository();
+      final (h, nav, _) = await _open(tester, repo: repo);
+      expect(find.text(_l.uiArchiveTabTasks), findsOneWidget);
+      expect(find.byType(ArchiveTaskFolderCard), findsNWidgets(2));
+      expect(find.byType(ArchiveFolderIcon), findsNWidgets(2));
+      // Arşiv başlığı ile aynı adı taşıyan sekme.
+      await _tap(tester, find.text(_l.uiArchiveTitle).last);
+      expect(find.text('f1.pdf'), findsOneWidget);
+      expect(find.text('f3.pdf'), findsOneWidget);
+      expect(
+        h.container.read(archiveFolderControllerProvider('d1')).task,
+        isNull,
+      );
+      h.container.read(archiveControllerProvider.notifier).setQuery('Saha');
+      await settle(tester);
+      expect(repo.filters.last.search, 'Saha');
+      await _tap(tester, find.text(_l.uiArchiveTabTasks));
+      await _tap(tester, find.text('Saha keşfi'));
+      expect(nav.calls, isEmpty);
+      expect(h.container.read(archiveControllerProvider).query, isEmpty);
+      final view = h.container.read(archiveFolderControllerProvider('d1'));
+      expect(view.tab, ArchiveFolderTab.files);
+      expect(view.task, 'w1');
+      expect(repo.filters.last.workItemId, 'w1');
+      expect(find.text('f1.pdf'), findsOneWidget);
+      // Arşiv sekmesine doğrudan dokunuş görev süzgecini kaldırır.
+      await _tap(tester, find.text(_l.uiArchiveTitle).last);
+      expect(
+        h.container.read(archiveFolderControllerProvider('d1')).task,
+        isNull,
+      );
+    },
+  );
+
+  testWidgets('üye görev klasörü ortak karttan seçili görev arşivini açar', (
+    tester,
+  ) async {
+    final repo = FakeArchiveRepository()
+      ..folders = const [
+        ArchiveFolder(
+          code: 'mine',
+          name: 'Görevlerim',
+          files: 3,
+          isVirtual: true,
+        ),
+      ];
+    final (h, nav, _) = await _open(tester, repo: repo, member: true);
+    expect(find.byType(ArchiveTaskFolderCard), findsNWidgets(2));
+    expect(find.byType(ArchiveFolderIcon), findsNWidgets(2));
+    await _tap(tester, find.text('Saha keşfi'));
+    expect(nav.calls.last, 'folder:mine');
+    expect(
+      h.container.read(archiveFolderControllerProvider('mine')).task,
+      'w1',
+    );
+  });
+
+  testWidgets(
+    'üye: depolama, etiketler, ilk beş dosya ve tümü; etiket iki listeyi süzer',
+    (tester) async {
+      final repo = FakeArchiveRepository()
+        ..folders = const [
+          ArchiveFolder(
+            code: 'mine',
+            name: 'Görevlerim',
+            files: 7,
+            isVirtual: true,
+          ),
+        ]
+        ..pages = {
+          null: PageSlice(
+            items: [
+              for (var i = 0; i < 7; i++)
+                archiveFile(
+                  'belge$i',
+                  task: i == 0 ? 'w2' : 'w1',
+                  tag: i == 0 ? RecordTag.sonuc : RecordTag.plan,
+                ),
+            ],
+          ),
+        };
+      final (h, _, _) = await _open(tester, repo: repo, member: true);
+      expect(find.text(_l.uiArchiveStorage), findsOneWidget);
+      expect(find.text(_l.uiArchiveTags), findsOneWidget);
+      expect(find.text(_l.uiArchiveStatFolders), findsNothing);
+      expect(find.text(_l.uiArchiveAssignedOnly), findsNothing);
+      expect(find.text('belge4.pdf'), findsOneWidget);
+      expect(find.text('belge5.pdf'), findsNothing);
+      await _tap(tester, find.text(_l.uiArchiveShowAll));
+      expect(find.text('belge6.pdf'), findsOneWidget);
+      h.container.read(archiveControllerProvider.notifier).setTags({
+        RecordTag.sonuc,
+      });
+      await settle(tester);
+      expect(find.text('belge0.pdf'), findsOneWidget);
+      expect(find.text('belge1.pdf'), findsNothing);
+      expect(find.text('Saha keşfi'), findsNothing);
+      expect(find.text('Rapor'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testScreens('üye Dosyalarım taşmadan çizilir', (tester, screen) async {
+    final repo = FakeArchiveRepository()
+      ..folders = const [
+        ArchiveFolder(
+          code: 'mine',
+          name: 'Görevlerim',
+          files: 3,
+          isVirtual: true,
+        ),
+      ];
+    await _open(tester, repo: repo, member: true);
+    expect(find.text(_l.uiArchiveStorage), findsOneWidget);
+    expect(find.text(_l.uiArchiveTags), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  // Klasör ızgarası yönetici görünümündedir; koordinatör düz görev klasörü listesini görür.
   testWidgets('özet ve klasörler sunucudan; klasör açılır', (tester) async {
     final repo = FakeArchiveRepository();
-    final (_, nav, _) = await _open(tester, repo: repo);
+    final (_, nav, _) = await _open(tester, repo: repo, admin: true);
     expect(find.text(_l.uiArchiveTitle), findsOneWidget);
-    expect(find.text('3 dosya · 2 klasör'), findsOneWidget);
-    expect(find.text('${_l.uiArchiveFoldersTitle} · 2'), findsOneWidget);
-    expect(find.text('3 dosya · 4 görev'), findsOneWidget);
-    expect(find.text('${_l.uiArchiveNoFiles} · 4 görev'), findsOneWidget);
-    expect(
-      find.bySemanticsLabel('Altyapı, 3 dosya, 4 görev, 2,5 MB, 5 gün önce'),
-      findsOneWidget,
-    );
+    // Depolama kartı (dosya, klasör, görev) ve koordinatörlük kartları.
+    expect(find.text(_l.uiArchiveStorage), findsOneWidget);
+    expect(find.text(_l.uiArchiveStatFolders), findsOneWidget);
+    expect(find.text(_l.uiArchiveTags), findsOneWidget);
+    expect(find.text('${_l.uiArchiveCoordinatorshipsLc} · 2'), findsOneWidget);
+    expect(find.byType(ArchiveStatFolderCard), findsNWidgets(2));
     expect(find.text('grup'), findsNothing);
     // Koordinatör satırının departmanı başlık olarak gider.
-    expect(repo.calls.single, ('folders', 'd1', null));
+    expect(repo.calls.first, ('folders', 'd1', null));
     await _tap(tester, find.text('Bilişim'));
     expect(nav.calls, ['folder:d2']);
   });
@@ -95,26 +226,29 @@ void main() {
               files: i,
             ),
         ];
-      await _open(tester, repo: repo);
-      final heading = find.text('${_l.uiArchiveFoldersTitle} · 7');
-      final cards = find.byType(ArchiveFolderCard);
+      await _open(tester, repo: repo, admin: true);
+      final heading = find.text('${_l.uiArchiveCoordinatorshipsLc} · 7');
+      final cards = find.byType(ArchiveStatFolderCard);
       final headingRect = tester.getRect(heading);
       final first = tester.getRect(cards.first);
       for (var i = 0; i < 7; i++) {
         final card = cards.at(i);
         final rect = tester.getRect(card);
-        final folder = tester.widget<ArchiveFolderCard>(card).folder;
+        final folder = tester.widget<ArchiveStatFolderCard>(card).folder;
         final title = find.descendant(
           of: card,
           matching: find.text(folder.name),
         );
-        final meta = find
-            .descendant(of: card, matching: find.textContaining('görev'))
-            .first;
+        final meta = find.descendant(
+          of: card,
+          matching: find.text(
+            folder.files > 0 ? '${folder.files} dosya' : _l.uiArchiveNoFiles,
+          ),
+        );
         expect(rect.height, closeTo(first.height, .1));
         expect(
           tester.getTopLeft(meta).dy - tester.getRect(title).bottom,
-          inInclusiveRange(0, 3),
+          inInclusiveRange(0, 4),
         );
       }
       expect(first.left, closeTo(headingRect.left, .1));
@@ -130,11 +264,11 @@ void main() {
   testWidgets('arama süzer; eşleşme yoksa boş metni; geri dönüşte korunur', (
     tester,
   ) async {
-    final (h, _, _) = await _open(tester);
+    final (h, _, _) = await _open(tester, admin: true);
     await _tap(tester, find.byIcon(Icons.search_rounded).first);
     await tester.enterText(find.byType(TextField).first, 'bili');
     await settle(tester);
-    expect(find.text('${_l.uiArchiveFoldersTitle} · 1'), findsOneWidget);
+    expect(find.text('${_l.uiArchiveCoordinatorshipsLc} · 1'), findsOneWidget);
     await pumpScreen(tester, h, const SizedBox.shrink());
     await settle(tester);
     await pumpScreen(tester, h, const ArchivePage());
@@ -145,20 +279,19 @@ void main() {
     expect(find.text(_l.uiArchiveEmptySearch), findsOneWidget);
   });
 
-  testWidgets('yükleme görev bağlamı yok → yakında; kısayollar (koordinatör)', (
+  testWidgets('yüklenecek görev yoksa bilgi; kısayollar (koordinatör)', (
     tester,
   ) async {
     final (h, nav, _) = await _open(tester);
     await _tap(tester, find.byIcon(Icons.arrow_upward_rounded));
-    expect(find.text(_l.uiArchiveUploadSoon), findsOneWidget);
+    // Pilot kataloğunda görev yok: görev seçici açılmaz, bilgi verilir.
+    expect(find.text(_l.uiArchiveUploadNoTask), findsOneWidget);
     h.read(shellReselectEventsProvider.notifier).fire(ArchivePage.shellTab);
     await settle(tester);
-    expect(find.text(_l.uiArchiveGoCoordinatorships), findsOneWidget);
-    // Tam arşiv yalnız şirket yöneticisine.
+    // Koordinatör menüsünde Koordinatörlükler listesi yok; tam arşiv yalnız yöneticiye.
+    expect(find.text(_l.uiArchiveGoCoordinatorships), findsNothing);
     expect(find.text(_l.uiArchiveDownloadAll), findsNothing);
-    await tester.tap(find.text(_l.uiArchiveGoCoordinatorships));
-    await settle(tester);
-    expect(nav.calls, ['coordinatorships']);
+    expect(nav.calls, isEmpty);
   });
 
   testWidgets('yönetici: tam arşiv indirilir ve kaydedilir', (tester) async {

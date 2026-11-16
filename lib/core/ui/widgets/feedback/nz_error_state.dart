@@ -5,8 +5,10 @@ import 'package:gap/gap.dart';
 
 import '../../../errors/api_error.dart';
 import '../../../errors/error_text.dart';
+import '../../../network/connectivity_monitor.dart';
 import '../../../theme/generated/tokens.gen.dart';
 import '../../extensions/context_ext.dart';
+import '../../page/nz_connection_scope.dart';
 import '../nz_icon.dart';
 import '../nz_icons.dart';
 
@@ -15,6 +17,11 @@ import '../nz_icons.dart';
 /// `error.retryAfter` varsa "Yeniden dene" düğmesi süre dolana dek devre dışıdır ve kalan saniye
 /// ayrı `Text` ile gösterilir. Süre dolunca düğme yalnız ETKİNLEŞİR; [onRetry] kendiliğinden
 /// ÇAĞRILMAZ (otomatik yeniden deneme yok). [onRetry] null → düğme (ve geri sayım) yok.
+///
+/// Bağlantı hatası ([isConnectionError]) sayfa içinde ([NzConnectionScope]) bağlantı tasarımıyla
+/// çizilir: şerit görünürken (internet yok / sunucu yok) başlık ve hata metni şeritte olduğundan
+/// yalnız "bağlantı gelince yüklenecek" notu ve düğme; şerit yokken başlık "Sunucuya
+/// ulaşılamıyor". Bağlantı geri gelince [onRetry] bir kez kendiliğinden çağrılır (not 47).
 class NzErrorState extends StatefulWidget {
   /// Sayfa/bölüm ortası (ikon + başlık + metin + düğme).
   const NzErrorState({super.key, required this.error, this.onRetry})
@@ -35,6 +42,21 @@ class NzErrorState extends StatefulWidget {
 class _NzErrorStateState extends State<NzErrorState> {
   Timer? _timer;
   int _remaining = 0;
+  ConnectivityState? _connection;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final now = NzConnectionScope.maybeOf(context);
+    final before = _connection;
+    _connection = now;
+    if (now == null || !connectionRestored(before, now)) return;
+    final retry = widget.onRetry;
+    if (retry == null || !isConnectionError(widget.error)) return;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && identical(widget.onRetry, retry)) retry();
+    });
+  }
 
   @override
   void initState() {
@@ -80,6 +102,18 @@ class _NzErrorStateState extends State<NzErrorState> {
         ? _RetryCountdown(remaining: _remaining, inline: widget._inline)
         : null;
     final message = errorText(l, widget.error);
+    final connection = _connection;
+    if (!widget._inline &&
+        connection != null &&
+        isConnectionError(widget.error)) {
+      return _ConnectionBody(
+        bannerShown: connection.isDown,
+        message: message,
+        countdown: countdown,
+        showRetry: widget.onRetry != null,
+        onPressed: onPressed,
+      );
+    }
 
     return widget._inline
         ? _InlineErrorBody(
@@ -191,6 +225,87 @@ class _InlineErrorBody extends StatelessWidget {
               child: Text(l.uiCommonRetry),
             ),
         ],
+      ),
+    );
+  }
+}
+
+/// Bağlantı hatası (sayfa içinde): şeritle aynı dil — bağlantı ikonu `warning` tonunda.
+/// [bannerShown] iken başlık/metin şeritte olduğundan yalnız bekleme notu ve düğme.
+class _ConnectionBody extends StatelessWidget {
+  const _ConnectionBody({
+    required this.bannerShown,
+    required this.message,
+    required this.countdown,
+    required this.showRetry,
+    required this.onPressed,
+  });
+
+  final bool bannerShown;
+  final String message;
+  final Widget? countdown;
+  final bool showRetry;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final colors = context.colors;
+    final text = context.text;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(NizamioSpacing.space6),
+        child: Semantics(
+          container: true,
+          liveRegion: true,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ExcludeSemantics(
+                child: NzIcon(
+                  NzIcons.offline,
+                  size: NizamioSpacing.space12,
+                  color: bannerShown ? colors.textFaint : colors.warning,
+                ),
+              ),
+              const Gap(NizamioSpacing.space4),
+              if (!bannerShown) ...[
+                Semantics(
+                  header: true,
+                  child: Text(
+                    l.uiFeedbackUnreachable,
+                    textAlign: TextAlign.center,
+                    style: text.titleSm,
+                  ),
+                ),
+                const Gap(NizamioSpacing.space2),
+                Text(
+                  message,
+                  textAlign: TextAlign.center,
+                  style: text.bodyMd.copyWith(color: colors.textMuted),
+                ),
+                const Gap(NizamioSpacing.space2),
+              ],
+              Text(
+                l.uiFeedbackConnectionWait,
+                textAlign: TextAlign.center,
+                style: text.bodySm.copyWith(color: colors.textMuted),
+              ),
+              if (countdown != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: NizamioSpacing.space2),
+                  child: countdown,
+                ),
+              if (showRetry) ...[
+                const Gap(NizamioSpacing.space6),
+                OutlinedButton(
+                  onPressed: onPressed,
+                  child: Text(l.uiCommonRetry),
+                ),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }

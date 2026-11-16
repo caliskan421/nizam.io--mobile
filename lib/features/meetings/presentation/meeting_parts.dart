@@ -401,37 +401,61 @@ class MeetingStats extends StatelessWidget {
 
 /// Bilgi satırı (prototip Bilgi bölümü: solda soluk etiket, sağda değer).
 class MeetingInfoRow extends StatelessWidget {
-  const MeetingInfoRow({super.key, required this.label, required this.value});
+  const MeetingInfoRow({
+    super.key,
+    required this.label,
+    required this.value,
+    this.onTap,
+    this.tapHint,
+  });
 
   final String label;
   final String value;
+
+  /// Verilirse değer bağlantı görünümünde çizilir ve satır dokunulabilir olur.
+  final VoidCallback? onTap;
+  final String? tapHint;
 
   @override
   Widget build(BuildContext context) {
     final c = context.colors;
     final t = context.text;
-    return MergeSemantics(
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 48),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          child: Row(
-            children: [
-              SizedBox(
-                width: 116,
-                child: Text(
-                  label,
-                  style: t.bodySm.copyWith(color: c.textMuted),
-                ),
+    final row = ConstrainedBox(
+      constraints: const BoxConstraints(minHeight: 48),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        child: Row(
+          children: [
+            SizedBox(
+              width: 116,
+              child: Text(label, style: t.bodySm.copyWith(color: c.textMuted)),
+            ),
+            const Gap(12),
+            Expanded(
+              child: Text(
+                value,
+                textAlign: TextAlign.end,
+                style: onTap == null
+                    ? t.bodyMd
+                    : t.bodyMd.copyWith(
+                        color: c.accentText,
+                        decoration: TextDecoration.underline,
+                        decorationColor: c.accentText,
+                      ),
               ),
-              const Gap(12),
-              Expanded(
-                child: Text(value, textAlign: TextAlign.end, style: t.bodyMd),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
+    );
+    return MergeSemantics(
+      child: onTap == null
+          ? row
+          : Semantics(
+              button: true,
+              hint: tapHint,
+              child: InkWell(onTap: onTap, child: row),
+            ),
     );
   }
 }

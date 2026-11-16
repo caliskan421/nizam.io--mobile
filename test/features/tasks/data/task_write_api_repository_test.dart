@@ -36,6 +36,7 @@ const _subtask = {
   'work_item_id': 'w1',
   'title': 'Pompa',
   'done': true,
+  'evidence_required': false,
   'created_by_account_id': 'u1',
   'created_at': '2026-07-02T08:00:00Z',
   'updated_at': '2026-07-02T08:00:00Z',

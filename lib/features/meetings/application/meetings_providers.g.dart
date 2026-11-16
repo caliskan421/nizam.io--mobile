@@ -60,3 +60,59 @@ final class MeetingsRepositoryProvider
 
 String _$meetingsRepositoryHash() =>
     r'4260dd898147c05ee71795a937b79e18b06a815a';
+
+/// PORT: görüntülü görüşme oda bağı üreticisi (`meetings_module.dart`'ta LiveKit bağlanır;
+/// testte sahte). Her katılım yeni bağ alır.
+
+@ProviderFor(conferenceLinkFactory)
+final conferenceLinkFactoryProvider = ConferenceLinkFactoryProvider._();
+
+/// PORT: görüntülü görüşme oda bağı üreticisi (`meetings_module.dart`'ta LiveKit bağlanır;
+/// testte sahte). Her katılım yeni bağ alır.
+
+final class ConferenceLinkFactoryProvider
+    extends
+        $FunctionalProvider<
+          ConferenceLinkFactory,
+          ConferenceLinkFactory,
+          ConferenceLinkFactory
+        >
+    with $Provider<ConferenceLinkFactory> {
+  /// PORT: görüntülü görüşme oda bağı üreticisi (`meetings_module.dart`'ta LiveKit bağlanır;
+  /// testte sahte). Her katılım yeni bağ alır.
+  ConferenceLinkFactoryProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'conferenceLinkFactoryProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$conferenceLinkFactoryHash();
+
+  @$internal
+  @override
+  $ProviderElement<ConferenceLinkFactory> $createElement(
+    $ProviderPointer pointer,
+  ) => $ProviderElement(pointer);
+
+  @override
+  ConferenceLinkFactory create(Ref ref) {
+    return conferenceLinkFactory(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ConferenceLinkFactory value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ConferenceLinkFactory>(value),
+    );
+  }
+}
+
+String _$conferenceLinkFactoryHash() =>
+    r'c68f17afd5876cda20eef21142e4adf99f6e4155';

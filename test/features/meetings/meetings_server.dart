@@ -252,6 +252,13 @@ class MeetingsServer {
         );
       case 'POST /v1/meetings/m1/conference':
         return jsonResponse(201, {'conference': conferenceWire()});
+      case 'POST /v1/meetings/m1/conference/token':
+        return jsonResponse(200, {
+          'token': 'gizli-token',
+          'url': 'wss://lk.example.test',
+          'expires_at': '2100-01-01T00:00:00Z',
+          'role': 'host',
+        });
       case 'POST /v1/meetings/m1/participants':
         return jsonResponse(201, {
           'meeting_id': 'm1',

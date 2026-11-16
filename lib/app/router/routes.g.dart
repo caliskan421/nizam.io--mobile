@@ -19,6 +19,7 @@ List<RouteBase> get $appRoutes => [
   $appShellRoute,
   $timelineRoute,
   $chatRoute,
+  $conferenceRoute,
   $profileRoute,
 ];
 
@@ -1007,6 +1008,36 @@ mixin $ChatRoute on GoRouteData {
   @override
   String get location =>
       GoRouteData.$location('/chat/${Uri.encodeComponent(_self.id)}');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $conferenceRoute => GoRouteData.$route(
+  path: '/conference/:id',
+  hasOverriddenOnExit: false,
+  factory: $ConferenceRoute._fromState,
+);
+
+mixin $ConferenceRoute on GoRouteData {
+  static ConferenceRoute _fromState(GoRouterState state) =>
+      ConferenceRoute(id: state.pathParameters['id']!);
+
+  ConferenceRoute get _self => this as ConferenceRoute;
+
+  @override
+  String get location =>
+      GoRouteData.$location('/conference/${Uri.encodeComponent(_self.id)}');
 
   @override
   void go(BuildContext context) => context.go(location);

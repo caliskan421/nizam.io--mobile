@@ -56,6 +56,9 @@ class RecordingAppNav implements NzAppNav {
   void openMeeting(String id) => calls.add('meeting:$id');
 
   @override
+  void openConference(String meetingId) => calls.add('conference:$meetingId');
+
+  @override
   void openMessages() => calls.add('messages');
 
   @override

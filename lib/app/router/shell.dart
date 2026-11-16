@@ -424,6 +424,9 @@ class _SplitAppNav implements NzAppNav {
   void openMeeting(String id) => _pane(PaneEntry(PaneKind.meeting, id));
 
   @override
+  void openConference(String meetingId) => _base.openConference(meetingId);
+
+  @override
   void openMeetings() => _module(RailModule.meetings);
 
   @override

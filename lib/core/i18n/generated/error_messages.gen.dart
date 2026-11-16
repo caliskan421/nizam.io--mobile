@@ -282,6 +282,9 @@ const localizedErrorCodes = <String>{
   'work.transition_not_allowed',
   'client.camera_permission_denied',
   'client.camera_unavailable',
+  'client.conference_connect_failed',
+  'client.conference_insecure_url',
+  'client.conference_token_expired',
   'client.file_unreadable',
   'client.insecure_server',
   'client.invalid_response',
@@ -863,6 +866,12 @@ String? localizedErrorText(AppLocalizations l, String code) {
       return l.errClientCameraPermissionDenied;
     case 'client.camera_unavailable':
       return l.errClientCameraUnavailable;
+    case 'client.conference_connect_failed':
+      return l.errClientConferenceConnectFailed;
+    case 'client.conference_insecure_url':
+      return l.errClientConferenceInsecureUrl;
+    case 'client.conference_token_expired':
+      return l.errClientConferenceTokenExpired;
     case 'client.file_unreadable':
       return l.errClientFileUnreadable;
     case 'client.insecure_server':

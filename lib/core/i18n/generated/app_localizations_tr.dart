@@ -966,6 +966,18 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu cihazda kullanılabilir bir kamera bulunamadı. Fotoğrafı galeriden ya da dosyalardan seçin.';
 
   @override
+  String get errClientConferenceConnectFailed =>
+      'Görüşmeye bağlanılamadı. Bağlantınızı kontrol edip yeniden katılın.';
+
+  @override
+  String get errClientConferenceInsecureUrl =>
+      'Görüşme sunucusunun adresi güvenli değil; bağlantı kurulmadı.';
+
+  @override
+  String get errClientConferenceTokenExpired =>
+      'Görüşme anahtarının süresi doldu. Yeniden katılın.';
+
+  @override
   String get errClientFileUnreadable =>
       'Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.';
 
@@ -3272,7 +3284,123 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsConfJoin => 'Katıl';
 
   @override
-  String get uiMeetingsConfJoinSoon => 'Görüntülü görüşme ekranı yakında';
+  String get uiMeetingsCallLabel => 'Görüntülü görüşme';
+
+  @override
+  String get uiMeetingsCallConnecting => 'Görüşmeye bağlanılıyor…';
+
+  @override
+  String get uiMeetingsCallReconnecting =>
+      'Bağlantı koptu, yeniden bağlanılıyor…';
+
+  @override
+  String get uiMeetingsConfReturn => 'Görüşmeye dön';
+
+  @override
+  String get uiMeetingsCallStartedTail => 'başladı';
+
+  @override
+  String get uiMeetingsCallRunningTail => 'dakikadır sürüyor';
+
+  @override
+  String get uiMeetingsCallInCall => 'görüşmede';
+
+  @override
+  String get uiMeetingsCallPanel => 'Gündem, notlar ve kişiler';
+
+  @override
+  String get uiMeetingsCallPanelClose => 'Paneli kapat';
+
+  @override
+  String get uiMeetingsCallNotes => 'Notları aç';
+
+  @override
+  String get uiMeetingsCallMinimize => 'Görüşmeyi küçült';
+
+  @override
+  String get uiMeetingsCallExpand => 'Görüşmeyi büyüt';
+
+  @override
+  String get uiMeetingsCallCameraOff => 'Kamera kapalı';
+
+  @override
+  String get uiMeetingsCallYou => 'Sen';
+
+  @override
+  String get uiMeetingsCallMicOn => 'Mikrofonu kapat';
+
+  @override
+  String get uiMeetingsCallMicOff => 'Mikrofonu aç';
+
+  @override
+  String get uiMeetingsCallCamOn => 'Kamerayı kapat';
+
+  @override
+  String get uiMeetingsCallCamOff => 'Kamerayı aç';
+
+  @override
+  String get uiMeetingsCallFlip => 'Kamerayı çevir';
+
+  @override
+  String get uiMeetingsCallLeave => 'Ayrıl';
+
+  @override
+  String get uiMeetingsCallEnd => 'Herkes için bitir';
+
+  @override
+  String get uiMeetingsCallEndQ => 'Görüşme herkes için bitirilsin mi?';
+
+  @override
+  String get uiMeetingsCallEndDesc =>
+      'Bağlı herkes odadan çıkar. Daha sonra yeni bir görüşme başlatabilirsin.';
+
+  @override
+  String get uiMeetingsCallMuted => 'Mikrofon kapalı';
+
+  @override
+  String get uiMeetingsCallDeniedTitle => 'Mikrofon ya da kamera izni kapalı';
+
+  @override
+  String get uiMeetingsCallDeniedDesc =>
+      'Görüşmede seni duyup görebilmeleri için Ayarlar > Nizamio bölümünden mikrofon ve kamera iznini aç, sonra yeniden katıl. Bu arada görüşmeyi dinleyebilirsin.';
+
+  @override
+  String get uiMeetingsCallNoCamera =>
+      'Bu cihazda kullanılabilir kamera yok; görüşmeye yalnız sesle katıldın.';
+
+  @override
+  String get uiMeetingsCallNoMic =>
+      'Bu cihazda kullanılabilir mikrofon yok; görüşmeyi yalnız dinleyebilirsin.';
+
+  @override
+  String get uiMeetingsCallOk => 'Anladım';
+
+  @override
+  String get uiMeetingsCallLeft => 'Görüşmeden ayrıldın.';
+
+  @override
+  String get uiMeetingsCallEndedForAll => 'Görüşmeyi herkes için bitirdin.';
+
+  @override
+  String get uiMeetingsCallClosed => 'Görüşme sona erdi.';
+
+  @override
+  String get uiMeetingsCallRemoved =>
+      'Bu toplantıya erişimin kalmadığı için görüşmeden çıkarıldın.';
+
+  @override
+  String get uiMeetingsCallReplaced =>
+      'Bu hesapla başka bir cihazdan katıldın; bu cihazın bağlantısı kapandı.';
+
+  @override
+  String get uiMeetingsCallLost =>
+      'Görüşme bağlantısı koptu ve yeniden kurulamadı.';
+
+  @override
+  String get uiMeetingsCallRejoin => 'Yeniden katıl';
+
+  @override
+  String get uiMeetingsCallBack => 'Toplantıya dön';
 
   @override
   String get uiMeetingsTConfStarted => 'Konferans başlatıldı';

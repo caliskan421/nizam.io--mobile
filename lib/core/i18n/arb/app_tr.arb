@@ -1109,6 +1109,18 @@
   "@errClientCameraUnavailable": {
     "description": "client.camera_unavailable"
   },
+  "errClientConferenceConnectFailed": "Görüşmeye bağlanılamadı. Bağlantınızı kontrol edip yeniden katılın.",
+  "@errClientConferenceConnectFailed": {
+    "description": "client.conference_connect_failed"
+  },
+  "errClientConferenceInsecureUrl": "Görüşme sunucusunun adresi güvenli değil; bağlantı kurulmadı.",
+  "@errClientConferenceInsecureUrl": {
+    "description": "client.conference_insecure_url"
+  },
+  "errClientConferenceTokenExpired": "Görüşme anahtarının süresi doldu. Yeniden katılın.",
+  "@errClientConferenceTokenExpired": {
+    "description": "client.conference_token_expired"
+  },
   "errClientFileUnreadable": "Dosya okunamadı; silinmiş ya da erişilemiyor olabilir. Dosyayı yeniden seçin.",
   "@errClientFileUnreadable": {
     "description": "client.file_unreadable"
@@ -4101,9 +4113,153 @@
   "@uiMeetingsConfJoin": {
     "description": "ui.meetings.conf_join"
   },
-  "uiMeetingsConfJoinSoon": "Görüntülü görüşme ekranı yakında",
-  "@uiMeetingsConfJoinSoon": {
-    "description": "ui.meetings.conf_join_soon"
+  "uiMeetingsCallLabel": "Görüntülü görüşme",
+  "@uiMeetingsCallLabel": {
+    "description": "ui.meetings.call_label"
+  },
+  "uiMeetingsCallConnecting": "Görüşmeye bağlanılıyor…",
+  "@uiMeetingsCallConnecting": {
+    "description": "ui.meetings.call_connecting"
+  },
+  "uiMeetingsCallReconnecting": "Bağlantı koptu, yeniden bağlanılıyor…",
+  "@uiMeetingsCallReconnecting": {
+    "description": "ui.meetings.call_reconnecting"
+  },
+  "uiMeetingsConfReturn": "Görüşmeye dön",
+  "@uiMeetingsConfReturn": {
+    "description": "ui.meetings.conf_return"
+  },
+  "uiMeetingsCallStartedTail": "başladı",
+  "@uiMeetingsCallStartedTail": {
+    "description": "ui.meetings.call_started_tail"
+  },
+  "uiMeetingsCallRunningTail": "dakikadır sürüyor",
+  "@uiMeetingsCallRunningTail": {
+    "description": "ui.meetings.call_running_tail"
+  },
+  "uiMeetingsCallInCall": "görüşmede",
+  "@uiMeetingsCallInCall": {
+    "description": "ui.meetings.call_in_call"
+  },
+  "uiMeetingsCallPanel": "Gündem, notlar ve kişiler",
+  "@uiMeetingsCallPanel": {
+    "description": "ui.meetings.call_panel"
+  },
+  "uiMeetingsCallPanelClose": "Paneli kapat",
+  "@uiMeetingsCallPanelClose": {
+    "description": "ui.meetings.call_panel_close"
+  },
+  "uiMeetingsCallNotes": "Notları aç",
+  "@uiMeetingsCallNotes": {
+    "description": "ui.meetings.call_notes"
+  },
+  "uiMeetingsCallMinimize": "Görüşmeyi küçült",
+  "@uiMeetingsCallMinimize": {
+    "description": "ui.meetings.call_minimize"
+  },
+  "uiMeetingsCallExpand": "Görüşmeyi büyüt",
+  "@uiMeetingsCallExpand": {
+    "description": "ui.meetings.call_expand"
+  },
+  "uiMeetingsCallCameraOff": "Kamera kapalı",
+  "@uiMeetingsCallCameraOff": {
+    "description": "ui.meetings.call_camera_off"
+  },
+  "uiMeetingsCallYou": "Sen",
+  "@uiMeetingsCallYou": {
+    "description": "ui.meetings.call_you"
+  },
+  "uiMeetingsCallMicOn": "Mikrofonu kapat",
+  "@uiMeetingsCallMicOn": {
+    "description": "ui.meetings.call_mic_on"
+  },
+  "uiMeetingsCallMicOff": "Mikrofonu aç",
+  "@uiMeetingsCallMicOff": {
+    "description": "ui.meetings.call_mic_off"
+  },
+  "uiMeetingsCallCamOn": "Kamerayı kapat",
+  "@uiMeetingsCallCamOn": {
+    "description": "ui.meetings.call_cam_on"
+  },
+  "uiMeetingsCallCamOff": "Kamerayı aç",
+  "@uiMeetingsCallCamOff": {
+    "description": "ui.meetings.call_cam_off"
+  },
+  "uiMeetingsCallFlip": "Kamerayı çevir",
+  "@uiMeetingsCallFlip": {
+    "description": "ui.meetings.call_flip"
+  },
+  "uiMeetingsCallLeave": "Ayrıl",
+  "@uiMeetingsCallLeave": {
+    "description": "ui.meetings.call_leave"
+  },
+  "uiMeetingsCallEnd": "Herkes için bitir",
+  "@uiMeetingsCallEnd": {
+    "description": "ui.meetings.call_end"
+  },
+  "uiMeetingsCallEndQ": "Görüşme herkes için bitirilsin mi?",
+  "@uiMeetingsCallEndQ": {
+    "description": "ui.meetings.call_end_q"
+  },
+  "uiMeetingsCallEndDesc": "Bağlı herkes odadan çıkar. Daha sonra yeni bir görüşme başlatabilirsin.",
+  "@uiMeetingsCallEndDesc": {
+    "description": "ui.meetings.call_end_desc"
+  },
+  "uiMeetingsCallMuted": "Mikrofon kapalı",
+  "@uiMeetingsCallMuted": {
+    "description": "ui.meetings.call_muted"
+  },
+  "uiMeetingsCallDeniedTitle": "Mikrofon ya da kamera izni kapalı",
+  "@uiMeetingsCallDeniedTitle": {
+    "description": "ui.meetings.call_denied_title"
+  },
+  "uiMeetingsCallDeniedDesc": "Görüşmede seni duyup görebilmeleri için Ayarlar > Nizamio bölümünden mikrofon ve kamera iznini aç, sonra yeniden katıl. Bu arada görüşmeyi dinleyebilirsin.",
+  "@uiMeetingsCallDeniedDesc": {
+    "description": "ui.meetings.call_denied_desc"
+  },
+  "uiMeetingsCallNoCamera": "Bu cihazda kullanılabilir kamera yok; görüşmeye yalnız sesle katıldın.",
+  "@uiMeetingsCallNoCamera": {
+    "description": "ui.meetings.call_no_camera"
+  },
+  "uiMeetingsCallNoMic": "Bu cihazda kullanılabilir mikrofon yok; görüşmeyi yalnız dinleyebilirsin.",
+  "@uiMeetingsCallNoMic": {
+    "description": "ui.meetings.call_no_mic"
+  },
+  "uiMeetingsCallOk": "Anladım",
+  "@uiMeetingsCallOk": {
+    "description": "ui.meetings.call_ok"
+  },
+  "uiMeetingsCallLeft": "Görüşmeden ayrıldın.",
+  "@uiMeetingsCallLeft": {
+    "description": "ui.meetings.call_left"
+  },
+  "uiMeetingsCallEndedForAll": "Görüşmeyi herkes için bitirdin.",
+  "@uiMeetingsCallEndedForAll": {
+    "description": "ui.meetings.call_ended_for_all"
+  },
+  "uiMeetingsCallClosed": "Görüşme sona erdi.",
+  "@uiMeetingsCallClosed": {
+    "description": "ui.meetings.call_closed"
+  },
+  "uiMeetingsCallRemoved": "Bu toplantıya erişimin kalmadığı için görüşmeden çıkarıldın.",
+  "@uiMeetingsCallRemoved": {
+    "description": "ui.meetings.call_removed"
+  },
+  "uiMeetingsCallReplaced": "Bu hesapla başka bir cihazdan katıldın; bu cihazın bağlantısı kapandı.",
+  "@uiMeetingsCallReplaced": {
+    "description": "ui.meetings.call_replaced"
+  },
+  "uiMeetingsCallLost": "Görüşme bağlantısı koptu ve yeniden kurulamadı.",
+  "@uiMeetingsCallLost": {
+    "description": "ui.meetings.call_lost"
+  },
+  "uiMeetingsCallRejoin": "Yeniden katıl",
+  "@uiMeetingsCallRejoin": {
+    "description": "ui.meetings.call_rejoin"
+  },
+  "uiMeetingsCallBack": "Toplantıya dön",
+  "@uiMeetingsCallBack": {
+    "description": "ui.meetings.call_back"
   },
   "uiMeetingsTConfStarted": "Konferans başlatıldı",
   "@uiMeetingsTConfStarted": {

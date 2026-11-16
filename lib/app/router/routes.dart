@@ -506,6 +506,19 @@ class ChatRoute extends NzRouteData with $ChatRoute {
   Widget build(BuildContext context, GoRouterState state) => ChatPage(id: id);
 }
 
+/// Görüntülü görüşme (kabuk dışı tam ekran; alt menü yok). Kimlik `meeting_id`; oda bağı
+/// ConferenceController'dadır, ekran kapanınca görüşme mini pencerede sürer.
+@TypedGoRoute<ConferenceRoute>(path: '/conference/:id')
+class ConferenceRoute extends NzRouteData with $ConferenceRoute {
+  const ConferenceRoute({required this.id});
+
+  final String id;
+
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      ConferencePage(key: ValueKey(id), id: id);
+}
+
 @TypedGoRoute<ProfileRoute>(path: '/profile')
 class ProfileRoute extends NzRouteData with $ProfileRoute {
   const ProfileRoute();

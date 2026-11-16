@@ -5,6 +5,9 @@
 abstract final class ClientErrorCode {
   static const cameraPermissionDenied = 'client.camera_permission_denied';
   static const cameraUnavailable = 'client.camera_unavailable';
+  static const conferenceConnectFailed = 'client.conference_connect_failed';
+  static const conferenceInsecureUrl = 'client.conference_insecure_url';
+  static const conferenceTokenExpired = 'client.conference_token_expired';
   static const fileUnreadable = 'client.file_unreadable';
   static const insecureServer = 'client.insecure_server';
   static const invalidResponse = 'client.invalid_response';
@@ -31,6 +34,9 @@ abstract final class ClientErrorCode {
   static const all = <String>{
     cameraPermissionDenied,
     cameraUnavailable,
+    conferenceConnectFailed,
+    conferenceInsecureUrl,
+    conferenceTokenExpired,
     fileUnreadable,
     insecureServer,
     invalidResponse,

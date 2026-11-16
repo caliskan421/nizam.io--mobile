@@ -104,6 +104,14 @@ class GoRouterAppNav implements NzAppNav {
   @override
   void openMeeting(String id) => _record(PaneEntry(PaneKind.meeting, id));
 
+  /// Görüşme ekranı zaten en üstteyse yeniden itilmez.
+  @override
+  void openConference(String meetingId) {
+    final location = ConferenceRoute(id: meetingId).location;
+    if (_router.routeInformationProvider.value.uri.path == location) return;
+    _router.push(location);
+  }
+
   @override
   void openMessages() => _router.go(const MessagesRoute().location);
 

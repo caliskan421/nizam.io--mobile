@@ -47,6 +47,9 @@ abstract interface class NzAppNav {
 
   /// Toplantı ayrıntısı ([id] = `meeting_id`).
   void openMeeting(String id);
+
+  /// Toplantının görüntülü görüşme ekranı (tam ekran, kabuk dışı; [meetingId] = `meeting_id`).
+  void openConference(String meetingId);
   void openMessages();
   void openChat(String id);
   void openProfile();

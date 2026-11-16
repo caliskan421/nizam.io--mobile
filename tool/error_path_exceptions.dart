@@ -289,6 +289,15 @@ const errorPathExceptions = <String, ErrorPathException>{
         '`save` içinde FileSystemException olarak raporlanıp yeniden fırlatılır; temizlik '
         'hatası ikincil ve eyleme dönüşmez.',
       ),
+  'features/meetings/data/livekit_conference_link.dart::LiveKitConferenceLink.connect#catch':
+      ErrorPathException(
+        1,
+        'LiveKit bağlantı hatasının ham metni (WebSocket/doğrulama adresi) katılım token\'ını '
+        'access_token sorgusu olarak taşıyabilir; token rapora, log\'a ve hata metnine '
+        'yazılmaz (COLLABORATION-K49). Hata sabit client.conference_connect_failed koduna '
+        'çevrilip fırlatılır; çağıran (ConferenceController.join) onu toReportedApiError ile '
+        'işler.',
+      ),
   'features/tasks/data/file_upload_picker.dart::FileUploadPicker.pick#catch':
       ErrorPathException(
         1,

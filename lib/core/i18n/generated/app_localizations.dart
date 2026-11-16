@@ -1756,6 +1756,24 @@ abstract class AppLocalizations {
   /// **'Bu cihazda kullanılabilir bir kamera bulunamadı. Fotoğrafı galeriden ya da dosyalardan seçin.'**
   String get errClientCameraUnavailable;
 
+  /// client.conference_connect_failed
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşmeye bağlanılamadı. Bağlantınızı kontrol edip yeniden katılın.'**
+  String get errClientConferenceConnectFailed;
+
+  /// client.conference_insecure_url
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşme sunucusunun adresi güvenli değil; bağlantı kurulmadı.'**
+  String get errClientConferenceInsecureUrl;
+
+  /// client.conference_token_expired
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşme anahtarının süresi doldu. Yeniden katılın.'**
+  String get errClientConferenceTokenExpired;
+
   /// client.file_unreadable
   ///
   /// In tr, this message translates to:
@@ -6244,11 +6262,227 @@ abstract class AppLocalizations {
   /// **'Katıl'**
   String get uiMeetingsConfJoin;
 
-  /// ui.meetings.conf_join_soon
+  /// ui.meetings.call_label
   ///
   /// In tr, this message translates to:
-  /// **'Görüntülü görüşme ekranı yakında'**
-  String get uiMeetingsConfJoinSoon;
+  /// **'Görüntülü görüşme'**
+  String get uiMeetingsCallLabel;
+
+  /// ui.meetings.call_connecting
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşmeye bağlanılıyor…'**
+  String get uiMeetingsCallConnecting;
+
+  /// ui.meetings.call_reconnecting
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlantı koptu, yeniden bağlanılıyor…'**
+  String get uiMeetingsCallReconnecting;
+
+  /// ui.meetings.conf_return
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşmeye dön'**
+  String get uiMeetingsConfReturn;
+
+  /// ui.meetings.call_started_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'başladı'**
+  String get uiMeetingsCallStartedTail;
+
+  /// ui.meetings.call_running_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'dakikadır sürüyor'**
+  String get uiMeetingsCallRunningTail;
+
+  /// ui.meetings.call_in_call
+  ///
+  /// In tr, this message translates to:
+  /// **'görüşmede'**
+  String get uiMeetingsCallInCall;
+
+  /// ui.meetings.call_panel
+  ///
+  /// In tr, this message translates to:
+  /// **'Gündem, notlar ve kişiler'**
+  String get uiMeetingsCallPanel;
+
+  /// ui.meetings.call_panel_close
+  ///
+  /// In tr, this message translates to:
+  /// **'Paneli kapat'**
+  String get uiMeetingsCallPanelClose;
+
+  /// ui.meetings.call_notes
+  ///
+  /// In tr, this message translates to:
+  /// **'Notları aç'**
+  String get uiMeetingsCallNotes;
+
+  /// ui.meetings.call_minimize
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşmeyi küçült'**
+  String get uiMeetingsCallMinimize;
+
+  /// ui.meetings.call_expand
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşmeyi büyüt'**
+  String get uiMeetingsCallExpand;
+
+  /// ui.meetings.call_camera_off
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamera kapalı'**
+  String get uiMeetingsCallCameraOff;
+
+  /// ui.meetings.call_you
+  ///
+  /// In tr, this message translates to:
+  /// **'Sen'**
+  String get uiMeetingsCallYou;
+
+  /// ui.meetings.call_mic_on
+  ///
+  /// In tr, this message translates to:
+  /// **'Mikrofonu kapat'**
+  String get uiMeetingsCallMicOn;
+
+  /// ui.meetings.call_mic_off
+  ///
+  /// In tr, this message translates to:
+  /// **'Mikrofonu aç'**
+  String get uiMeetingsCallMicOff;
+
+  /// ui.meetings.call_cam_on
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamerayı kapat'**
+  String get uiMeetingsCallCamOn;
+
+  /// ui.meetings.call_cam_off
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamerayı aç'**
+  String get uiMeetingsCallCamOff;
+
+  /// ui.meetings.call_flip
+  ///
+  /// In tr, this message translates to:
+  /// **'Kamerayı çevir'**
+  String get uiMeetingsCallFlip;
+
+  /// ui.meetings.call_leave
+  ///
+  /// In tr, this message translates to:
+  /// **'Ayrıl'**
+  String get uiMeetingsCallLeave;
+
+  /// ui.meetings.call_end
+  ///
+  /// In tr, this message translates to:
+  /// **'Herkes için bitir'**
+  String get uiMeetingsCallEnd;
+
+  /// ui.meetings.call_end_q
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşme herkes için bitirilsin mi?'**
+  String get uiMeetingsCallEndQ;
+
+  /// ui.meetings.call_end_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Bağlı herkes odadan çıkar. Daha sonra yeni bir görüşme başlatabilirsin.'**
+  String get uiMeetingsCallEndDesc;
+
+  /// ui.meetings.call_muted
+  ///
+  /// In tr, this message translates to:
+  /// **'Mikrofon kapalı'**
+  String get uiMeetingsCallMuted;
+
+  /// ui.meetings.call_denied_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Mikrofon ya da kamera izni kapalı'**
+  String get uiMeetingsCallDeniedTitle;
+
+  /// ui.meetings.call_denied_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşmede seni duyup görebilmeleri için Ayarlar > Nizamio bölümünden mikrofon ve kamera iznini aç, sonra yeniden katıl. Bu arada görüşmeyi dinleyebilirsin.'**
+  String get uiMeetingsCallDeniedDesc;
+
+  /// ui.meetings.call_no_camera
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu cihazda kullanılabilir kamera yok; görüşmeye yalnız sesle katıldın.'**
+  String get uiMeetingsCallNoCamera;
+
+  /// ui.meetings.call_no_mic
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu cihazda kullanılabilir mikrofon yok; görüşmeyi yalnız dinleyebilirsin.'**
+  String get uiMeetingsCallNoMic;
+
+  /// ui.meetings.call_ok
+  ///
+  /// In tr, this message translates to:
+  /// **'Anladım'**
+  String get uiMeetingsCallOk;
+
+  /// ui.meetings.call_left
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşmeden ayrıldın.'**
+  String get uiMeetingsCallLeft;
+
+  /// ui.meetings.call_ended_for_all
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşmeyi herkes için bitirdin.'**
+  String get uiMeetingsCallEndedForAll;
+
+  /// ui.meetings.call_closed
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşme sona erdi.'**
+  String get uiMeetingsCallClosed;
+
+  /// ui.meetings.call_removed
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu toplantıya erişimin kalmadığı için görüşmeden çıkarıldın.'**
+  String get uiMeetingsCallRemoved;
+
+  /// ui.meetings.call_replaced
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu hesapla başka bir cihazdan katıldın; bu cihazın bağlantısı kapandı.'**
+  String get uiMeetingsCallReplaced;
+
+  /// ui.meetings.call_lost
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşme bağlantısı koptu ve yeniden kurulamadı.'**
+  String get uiMeetingsCallLost;
+
+  /// ui.meetings.call_rejoin
+  ///
+  /// In tr, this message translates to:
+  /// **'Yeniden katıl'**
+  String get uiMeetingsCallRejoin;
+
+  /// ui.meetings.call_back
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantıya dön'**
+  String get uiMeetingsCallBack;
 
   /// ui.meetings.t_conf_started
   ///

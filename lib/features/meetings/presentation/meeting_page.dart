@@ -8,6 +8,7 @@ import '../../../core/theme/generated/tokens.gen.dart';
 import '../../../core/ui/extensions/context_ext.dart';
 import '../../../core/ui/layout/nz_layout.dart';
 import '../../../core/ui/layout/nz_pane.dart';
+import '../../../core/ui/page/nz_app_nav.dart';
 import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/buttons/buttons.dart';
@@ -168,9 +169,12 @@ class MeetingActions {
 
   // ---- konferans ---------------------------------------------------------------------------
 
+  /// Başlatır ve başarıda görüşme ekranına geçer (başlatan doğrudan katılır).
   Future<void> startConference() async {
-    final done = context.l10n.uiMeetingsTConfStarted;
-    report(await _ctl.startConference(), done: done);
+    final e = await _ctl.startConference();
+    if (!context.mounted) return;
+    if (e != null) return report(e);
+    context.appNav.openConference(id);
   }
 
   Future<void> endConference() async {
@@ -178,8 +182,9 @@ class MeetingActions {
     report(await _ctl.endConference(), done: done);
   }
 
-  /// Görüntülü görüşme ekranı henüz yok (ürün kararı): katılım token'ı istenmez.
-  void joinConference() => say(context.l10n.uiMeetingsConfJoinSoon);
+  /// Görüşme ekranı (katılım token'ı orada, bağlanmadan hemen önce alınır); süren görüşmeye
+  /// dönüşte yeniden bağlanılmaz.
+  void joinConference() => context.appNav.openConference(id);
 
   // ---- menü ---------------------------------------------------------------------------------
 

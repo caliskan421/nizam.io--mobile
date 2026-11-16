@@ -5,16 +5,21 @@ import 'package:get_it/get_it.dart';
 import '../tasks/tasks.dart';
 import 'application/meetings_planner.dart';
 import 'application/meetings_providers.dart';
+import 'data/livekit_conference_link.dart';
 import 'data/meetings_api_repository.dart';
+import 'domain/conference.dart';
 import 'domain/meetings_repository.dart';
 
 /// meetings modülünün kayıt fonksiyonu (ADR-0001). YALNIZ bileşim kökünden çağrılır (G2).
 ///
 /// [apiDio]: doğrulanmış bağın güncel API istemcisi (Riverpod `apiDioProvider`); bağ yoksa null.
 void registerMeetingsModule(GetIt locator, {required Dio? Function() apiDio}) {
-  locator.registerLazySingleton<MeetingsRepository>(
-    () => ApiMeetingsRepository(apiDio),
-  );
+  locator
+    ..registerLazySingleton<MeetingsRepository>(
+      () => ApiMeetingsRepository(apiDio),
+    )
+    // Görüşme oda bağı: her katılımda yeni nesne; yaşam döngüsü ConferenceController'da.
+    ..registerFactory<ConferenceLink>(LiveKitConferenceLink.new);
 }
 
 /// meetings'in Riverpod portlarını bağlar; tasks'ın toplantı yazma portu ([MeetingPlanner])
@@ -22,6 +27,10 @@ void registerMeetingsModule(GetIt locator, {required Dio? Function() apiDio}) {
 List<Override> meetingsOverrides(GetIt locator) => [
   meetingsRepositoryProvider.overrideWith(
     (ref) => locator<MeetingsRepository>(),
+  ),
+  conferenceLinkFactoryProvider.overrideWith(
+    (ref) =>
+        () => locator<ConferenceLink>(),
   ),
   meetingPlannerProvider.overrideWith(MeetingsPlanner.new),
 ];

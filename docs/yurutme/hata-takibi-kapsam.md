@@ -10,8 +10,8 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 |---|---|
 | denetim akışı | 1 |
 | iletilir | 15 |
-| istisna | 59 |
-| rapor | 197 |
+| istisna | 60 |
+| rapor | 205 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -55,6 +55,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/coordinatorships/application/coordinatorship_detail_controller.dart::coordinatorshipDetail#asyncError` | 2 | YENİDEN: kaynak sağlayıcı hatası aynı nesneyle taşınır. |
 | `features/identity/application/logout_controller.dart::LogoutController.signOut#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; AsyncError durumu providerDidFail ile raporlanır (test: provider_error_observer_test). |
 | `features/identity/application/password_change_controller.dart::PasswordChangeController.submit#guard` | 1 | GÖZLEMCİ: guard sonucu `state`e atanır; beklenmeyen hata providerDidFail ile raporlanır, yanlış parola/doğrulama (ApiError) süzülür. |
+| `features/meetings/data/livekit_conference_link.dart::LiveKitConferenceLink.connect#catch` | 1 | LiveKit bağlantı hatasının ham metni (WebSocket/doğrulama adresi) katılım token'ını access_token sorgusu olarak taşıyabilir; token rapora, log'a ve hata metnine yazılmaz (COLLABORATION-K49). Hata sabit client.conference_connect_failed koduna çevrilip fırlatılır; çağıran (ConferenceController.join) onu toReportedApiError ile işler. |
 | `features/messages/application/chat_actions_controller.dart::ChatActionsController._queue#onError` | 1 | Kendi API`mizin ApiError geri çağrısı (hata yutma değil): `_fly` hatayı raporlayıp çağıranlara iletir; geri çağrı yalnız anket-kapalı gibi beklenen kodlara tepki verir. |
 | `features/messages/application/chat_actions_controller.dart::ChatActionsController._vote#onError` | 1 | Kendi API`mizin ApiError geri çağrısı: yalnız messaging.poll_closed beklenen koduna tepki verir; hata başka yerde yutulmaz. |
 | `features/messages/application/messages_providers.dart::chatUnreadBadges#asyncError` | 1 | YENİDEN: kaynak sağlayıcı hatası aynı nesneyle taşınır. |
@@ -186,6 +187,8 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/identity/application/login_controller.dart` | `LoginController.submit` | guard | rapor | 1 |
 | `features/identity/application/logout_controller.dart` | `LogoutController.signOut` | guard | istisna | 1 |
 | `features/identity/application/password_change_controller.dart` | `PasswordChangeController.submit` | guard | istisna | 1 |
+| `features/meetings/application/conference_controller.dart` | `ConferenceController.endForAll` | catch | rapor | 1 |
+| `features/meetings/application/conference_controller.dart` | `ConferenceController.join` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.addAgenda` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.deleteAgenda` | catch | rapor | 1 |
 | `features/meetings/application/meeting_room_agenda.dart` | `MeetingRoomAgenda.renameAgenda` | catch | rapor | 1 |
@@ -203,6 +206,12 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.refresh` | catch | rapor | 1 |
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.restore` | catch | rapor | 1 |
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.startInstant` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._keepAwake` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._teardown` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.connect` | catch | istisna | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.flipCamera` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setCamera` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setMicrophone` | catch | rapor | 1 |
 | `features/meetings/presentation/meeting_people.dart` | `_MeetingPeopleState._showAdd` | catch | rapor | 1 |
 | `features/meetings/presentation/meetings_page.dart` | `_MeetingsPageState._instant` | catch | rapor | 1 |
 | `features/messages/application/chat_actions_controller.dart` | `ChatActionsController._closePoll` | catch | iletilir | 1 |
@@ -266,6 +275,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tables/application/table_attachment_flow.dart` | `uploadTableSource` | handleError | rapor | 1 |
 | `features/tables/application/table_detail_controller.dart` | `TableDetailController._sendPending` | catch | rapor | 1 |
 | `features/tables/application/table_detail_controller.dart` | `TableDetailController.active` | catchError | rapor | 1 |
+| `features/tables/application/table_detail_controller.dart` | `TableDetailController.loadRemaining` | catch | rapor | 1 |
 | `features/tables/application/table_detail_controller.dart` | `TableDetailController.refresh` | catch | rapor | 1 |
 | `features/tables/application/table_detail_live.dart` | `_TableDetailLive._connect` | onError | rapor | 1 |
 | `features/tables/application/table_detail_live.dart` | `_TableDetailLive._publishPresence` | catch | rapor | 1 |

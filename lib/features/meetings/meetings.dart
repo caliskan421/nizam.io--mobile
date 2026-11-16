@@ -10,6 +10,8 @@ export 'application/meetings_providers.dart' show meetingsRepositoryProvider;
 export 'domain/meeting.dart'
     show Meeting, MeetingDepartment, MeetingSummary, SummaryConferenceStatus;
 export 'domain/meeting_board.dart' show MeetingsBoard, MeetingsTab;
+export 'presentation/conference_dock.dart' show ConferenceDock;
+export 'presentation/conference_page.dart' show ConferencePage;
 export 'presentation/meeting_card.dart' show MeetingCard;
 export 'presentation/meeting_page.dart' show MeetingPage;
 export 'presentation/meetings_page.dart' show MeetingsPage;

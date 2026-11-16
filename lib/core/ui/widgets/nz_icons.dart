@@ -100,6 +100,12 @@ abstract final class NzIcons {
   static const IconData upload = Icons.upload_rounded;
   static const IconData uploadFile = Icons.upload_file_rounded;
   static const IconData video = Icons.videocam_outlined;
+  static const IconData videoOff = Icons.videocam_off_outlined;
+  static const IconData mic = Icons.mic_none_rounded;
+  static const IconData micOff = Icons.mic_off_rounded;
+  static const IconData flipCamera = Icons.flip_camera_ios_outlined;
+  static const IconData callEnd = Icons.call_end_rounded;
+  static const IconData openFull = Icons.open_in_full_rounded;
   static const IconData viewList = Icons.view_list_rounded;
   static const IconData viewWeek = Icons.view_week_outlined;
   static const IconData visible = Icons.visibility;

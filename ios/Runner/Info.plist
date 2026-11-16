@@ -31,7 +31,9 @@
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Mesaja, arşive ya da göreve eklemek için fotoğraf çekebilmen gerekiyor.</string>
+	<string>Fotoğraf çekip mesaja, arşive ya da göreve eklemek ve toplantının görüntülü görüşmesinde görünmek için kamera gerekiyor.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Toplantının görüntülü görüşmesinde konuşabilmen için mikrofon gerekiyor.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Seçtiğin NIZAM.IO sunucusuna yerel ağ üzerinden bağlanmak için erişim gerekiyor.</string>
 	<key>LSRequiresIPhoneOS</key>

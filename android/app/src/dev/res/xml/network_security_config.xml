@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- dev flavor: yalnız yerel geliştirme adreslerine http (K-11 "dev — localhost http serbest"). -->
+<!-- dev flavor: düz http yalnız geliştirme için. Android bu yapılandırmada IP aralığı (192.168/16, 10/8,
+     172.16/12) yazdırmaz; fiziksel cihazdan geliştirici Mac'ine bağlanmak için dev'de düz http açıktır.
+     Asıl kapı Dart katmanıdır: ServerAddress dev'de http'yi yalnız yerel/özel ağ adreslerine verir
+     (lib/core/server/server_address.dart). prod flavor'da düz http hiçbir adrese yok. -->
 <network-security-config>
-    <base-config cleartextTrafficPermitted="false" />
-    <domain-config cleartextTrafficPermitted="true">
-        <domain includeSubdomains="false">localhost</domain>
-        <domain includeSubdomains="false">127.0.0.1</domain>
-        <domain includeSubdomains="false">10.0.2.2</domain>
-    </domain-config>
+    <base-config cleartextTrafficPermitted="true" />
 </network-security-config>

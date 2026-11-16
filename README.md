@@ -69,12 +69,12 @@ adres `http://10.0.2.2:18140`.
 
 | Flavor | Giriş noktası | Android / iOS kimliği | Ağ |
 |---|---|---|---|
-| `dev` | `lib/main_dev.dart` | `io.nizamio.mobile.dev` | yalnız `localhost`, `127.0.0.1`, `10.0.2.2` için düz http; diğer her yer https |
+| `dev` | `lib/main_dev.dart` | `io.nizamio.mobile.dev` | düz http yalnız yerel geliştirme adreslerine (`localhost`, `127.0.0.1`, `10.0.2.2`, özel ağ 10/8, 172.16/12, 192.168/16, `.local`); diğer her yer https |
 | `prod` | `lib/main_prod.dart` | `io.nizamio.mobile` | yalnız https; sistem CA'ları (pinning v1 dışı) |
 
 Flavor derleme anında `--flavor` ve karşılık gelen giriş noktasıyla seçilir; çalışma anında değişmez. Düz http yasağının
 asıl kapısı Dart katmanıdır (`lib/core/server/`); Android ağ güvenlik yapılandırması
-(`android/app/src/<flavor>/res/xml/network_security_config.xml`) ikinci savunmadır.
+(`android/app/src/<flavor>/res/xml/network_security_config.xml`; dev'de IP aralığı yazılamadığı için düz http açık) ve iOS `NSAllowsLocalNetworking` yalnız işletim sistemi katmanını Dart kuralına uydurur. prod'da Dart düz http'yi reddeder.
 iOS'ta `dev` / `prod` Xcode şemaları ve Debug/Profile/Release yapılandırmaları vardır; flavor yine
 giriş noktasıyla seçilir.
 

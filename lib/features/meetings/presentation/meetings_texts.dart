@@ -91,12 +91,11 @@ extension MeetingsTexts on AppLocalizations {
     MeetingRole.member || MeetingRole.unknown => uiMeetingsRoleMember,
   };
 
-  String noteFilterLabel(NoteFilter f, int count) =>
-      '${switch (f) {
-        NoteFilter.all => uiMeetingsNfAll,
-        NoteFilter.converted => uiMeetingsNfConverted,
-        NoteFilter.mine => uiMeetingsNfMine,
-      }} $count';
+  String noteFilterLabel(NoteFilter f) => switch (f) {
+    NoteFilter.all => uiMeetingsNfAll,
+    NoteFilter.converted => uiMeetingsNfConverted,
+    NoteFilter.mine => uiMeetingsNfMine,
+  };
 
   /// Okuyucu: "3 maddeden 2 tamamlandı".
   String agendaProgress(int done, int total) =>

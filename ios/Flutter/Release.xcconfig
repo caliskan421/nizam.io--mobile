@@ -1,1 +1,7 @@
 #include "Generated.xcconfig"
+
+// Ekran paylaşımı (ScreenShare uzantısı): uygulama kimliği; App Group yalnız isteğe bağlı yerel
+// ScreenShare.xcconfig ile açılır (ScreenShare.xcconfig.example).
+NIZAM_APP_ID = io.nizamio.mobile
+NIZAM_APP_GROUP =
+#include? "ScreenShare.xcconfig"

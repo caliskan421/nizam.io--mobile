@@ -1,1 +1,2 @@
 #include "Debug.xcconfig"
+NIZAM_APP_ID = io.nizamio.mobile.dev

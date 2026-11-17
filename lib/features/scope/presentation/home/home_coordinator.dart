@@ -15,16 +15,16 @@ import 'module_menu_texts.dart';
 
 /// Ana sayfanın koordinatör bölümleri; yönetici ana sayfasının dili (genel durum halkası, özet
 /// kutuları) etkin koordinatörlüğün görevleriyle ([coordinatorBoardProvider]). Dar düzen tek
-/// sütun: genel durum (koordinatörlük adı), hızlı işlemler, 2×2 özet kutusu, bekleyen işler
+/// sütun: genel durum (koordinatörlük adı), 2×2 özet kutusu, hızlı işlemler, bekleyen işler
 /// (onay / atanmamış / tarih talebi kutuları), ekip yükü, yaklaşan toplantılar. Geniş düzen:
-/// genel durum + 2×2 hızlı işlemler; dört özet kutusu tek satır; bekleyen işler + ekip yükü
+/// genel durum; dört özet kutusu tek satır; hızlı işlemler; bekleyen işler + ekip yükü
 /// (aynı yükseklik); yaklaşan toplantılar.
 class HomeCoordinatorFeed extends ConsumerWidget {
   const HomeCoordinatorFeed({super.key, required this.wide, this.quick});
 
   final bool wide;
 
-  /// Hızlı işlemler (boşsa null; bölüm çizilmez). Geniş düzende 2×2 kart, darda tek satır.
+  /// Hızlı işlemler (boşsa null; bölüm çizilmez); özet kutularının altında tam genişlik.
   final Widget? quick;
 
   /// Bölüm başına gösterilen satır.
@@ -43,7 +43,6 @@ class HomeCoordinatorFeed extends ConsumerWidget {
       statuses: [for (final t in board.tasks) t.status],
       truncated: board.truncated,
       title: board.departmentName,
-      legendGrid: wide && quick != null,
     );
     final kpis = HomeGrid(
       columns: wide ? 4 : 2,
@@ -57,8 +56,8 @@ class HomeCoordinatorFeed extends ConsumerWidget {
         children: [
           for (final (i, w) in [
             overview,
-            ?quick,
             kpis,
+            ?quick,
             HomePendingWork(board: board, compact: true),
             HomeTeamLoad(board: board),
             meetings,
@@ -67,26 +66,23 @@ class HomeCoordinatorFeed extends ConsumerWidget {
       );
     }
     // Yan yana iki öğe aynı yükseklikte (veri az/boş olsa da); kartlar `fill` ile uzar.
-    Widget pair(Widget a, Widget b, {int flexA = 1, int flexB = 1}) =>
-        IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(flex: flexA, child: a),
-              const Gap(homeWideGap),
-              Expanded(flex: flexB, child: b),
-            ],
-          ),
-        );
+    Widget pair(Widget a, Widget b) => IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(child: a),
+          const Gap(homeWideGap),
+          Expanded(child: b),
+        ],
+      ),
+    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (quick case final q?)
-          pair(overview, q, flexA: 5, flexB: 3)
-        else
-          overview,
+        overview,
         const Gap(NizamioSpacing.gapXl),
         kpis,
+        if (quick case final q?) ...[const Gap(NizamioSpacing.gapXl), q],
         const Gap(NizamioSpacing.gapXl),
         pair(
           HomePendingWork(board: board, fill: true),

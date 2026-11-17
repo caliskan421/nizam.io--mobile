@@ -2,8 +2,6 @@
 // kişi paylaşırken paylaşım sahnesi ızgaranın yerini alır; kendi paylaşımında "bitir" düğmesi
 // bağa paylaşımı kapatma isteği gönderir ve yerleşim normale döner. Bütün ekran boyutlarında
 // taşma yok. Görsel/piksel denetimi yapılmaz.
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -23,11 +21,10 @@ class _Link implements ConferenceLink {
 
   final bool remoteSharing;
   final calls = <String>[];
-  final _signals = StreamController<ConferenceSignal>.broadcast();
   bool localSharing = false;
 
   @override
-  Stream<ConferenceSignal> get signals => _signals.stream;
+  Stream<ConferenceSignal> get signals => const Stream.empty();
 
   @override
   List<ConferencePeer> get peers => [

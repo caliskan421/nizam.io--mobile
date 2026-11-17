@@ -143,8 +143,8 @@ class _MemberUpcoming extends ConsumerWidget {
           return HomeSectionFrame(
             title: l.uiHomeMemberUpcomingTitle,
             count: 0,
-            onAll: nav.openCalendar,
-            allLabel: l.uiHomeModuleCalendar,
+            onAll: nav.openMeetings,
+            allLabel: l.uiHomeSeeAll,
             empty: l.uiHomeMemberUpcomingEmpty,
             children: const [],
           );
@@ -156,13 +156,11 @@ class _MemberUpcoming extends ConsumerWidget {
             NzSectionHeader(
               l.uiHomeMemberUpcomingTitle,
               count: meetings.length + dues.length,
-              onAll: nav.openCalendar,
-              allLabel: l.uiHomeModuleCalendar,
+              onAll: nav.openMeetings,
+              allLabel: l.uiHomeSeeAll,
             ),
             if (meetings.isNotEmpty) ...[
               const Gap(NizamioSpacing.gapMd),
-              NzKicker(l.uiHomeMemberUpcomingMeetings),
-              const Gap(NizamioSpacing.space2),
               for (final (i, m) in meetings.take(n).indexed) ...[
                 if (i > 0) const Gap(NizamioSpacing.gapMd),
                 MeetingCard(

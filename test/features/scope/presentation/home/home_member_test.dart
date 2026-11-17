@@ -116,6 +116,11 @@ void main() {
       await tester.tap(tile);
       expect(nav.calls.last, 'tasks:$view');
     }
+    final allMeetings = find.text(l.uiHomeSeeAll);
+    await tester.ensureVisible(allMeetings);
+    await tester.pumpAndSettle();
+    await tester.tap(allMeetings);
+    expect(nav.calls.last, 'meetings');
     expect(tester.takeException(), isNull);
   });
 }

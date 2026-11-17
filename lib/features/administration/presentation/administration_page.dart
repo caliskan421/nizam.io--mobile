@@ -48,16 +48,16 @@ class _AdministrationPageState extends ConsumerState<AdministrationPage> {
   static const _searchDelayDuration = Duration(milliseconds: 300);
   static const _betweenControls = 14.0;
   Timer? _searchDelay;
-  late final _search = TextEditingController(
-    text: ref.read(adminUserQueryProvider).search,
-  );
+  TextEditingController? _searchController;
+  TextEditingController get _search => _searchController ??=
+      TextEditingController(text: ref.read(adminUserQueryProvider).search);
   final _searchFocus = FocusNode();
   bool _searchOpen = false;
 
   @override
   void dispose() {
     _searchDelay?.cancel();
-    _search.dispose();
+    _searchController?.dispose();
     _searchFocus.dispose();
     super.dispose();
   }

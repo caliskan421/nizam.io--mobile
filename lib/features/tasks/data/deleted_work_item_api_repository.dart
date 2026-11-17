@@ -31,6 +31,7 @@ class ApiDeletedWorkItemRepository implements DeletedWorkItemRepository {
             status: taskStatusFromWire(d.status),
             deletedAt: d.deletedAt,
             fileCount: d.fileCount,
+            deletedByDepartment: d.deletedByDepartment,
           ),
       ],
       nextCursor: r.nextCursor,

@@ -26,6 +26,7 @@ void main() {
           'status': 'iade_edildi',
           'deleted_at': '2026-11-01T08:00:00Z',
           'file_count': 4,
+          'deleted_by_department': true,
         },
         {
           'work_item_id': 'w2',
@@ -34,6 +35,7 @@ void main() {
           'status': 'bilinmez',
           'deleted_at': '2026-11-02T08:00:00Z',
           'file_count': 0,
+          'deleted_by_department': false,
         },
       ],
       'next_cursor': 'c2',
@@ -51,6 +53,7 @@ void main() {
         status: TaskStatus.returned,
         deletedAt: DateTime.utc(2026, 11, 1, 8),
         fileCount: 4,
+        deletedByDepartment: true,
       ),
     );
     expect(s.items.last.status, TaskStatus.unknown);

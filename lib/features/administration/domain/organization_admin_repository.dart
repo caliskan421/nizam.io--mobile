@@ -80,11 +80,12 @@ abstract interface class OrganizationAdminRepository {
     PageRequest page = const PageRequest(),
   });
 
-  /// `PATCH /v1/admin/restore/departments/{id}`.
-  Future<LifecycleStatus> restoreDepartment(String departmentId);
+  /// `PATCH /v1/admin/restore/departments/{id}`: departmanla silinen görevler de geri gelir.
+  Future<DepartmentLifecycle> restoreDepartment(String departmentId);
 
-  /// `DELETE /v1/admin/permanent/departments/{id}`.
-  Future<LifecycleStatus> permanentDeleteDepartment(String departmentId);
+  /// `DELETE /v1/admin/permanent/departments/{id}`: görevler, dosyalar, program bağları ve
+  /// ekip satırları kalıcı silinir; tablo engelinde 409 `organization.department_in_use`.
+  Future<DepartmentLifecycle> permanentDeleteDepartment(String departmentId);
 
   /// `GET /v1/admin/deleted/accounts` (imleçli).
   Future<PageSlice<DeletedAccount>> listDeletedAccounts({

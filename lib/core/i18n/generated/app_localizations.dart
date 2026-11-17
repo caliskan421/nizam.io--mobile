@@ -4636,6 +4636,204 @@ abstract class AppLocalizations {
   /// **'Takvim'**
   String get uiCoordTabCalendar;
 
+  /// ui.coord_delete.menu
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüğü sil'**
+  String get uiCoordDeleteMenu;
+
+  /// ui.coord_delete.title
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlüğü sil'**
+  String get uiCoordDeleteTitle;
+
+  /// ui.coord_delete.permanent_title
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalıcı sil'**
+  String get uiCoordDeletePermanentTitle;
+
+  /// ui.coord_delete.soft_warning
+  ///
+  /// In tr, this message translates to:
+  /// **'Bütün programlardaki görevleri Silinenler\'e taşınır; koordinatörlük geri yüklenince geri gelir. Diğer programlar da etkilenir. Toplantılar kalır.'**
+  String get uiCoordDeleteSoftWarning;
+
+  /// ui.coord_delete.permanent_warning
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu işlem geri alınamaz. Bütün görevler (silinmişler dahil), dosyalar, program bağları ve ekip satırları kalıcı silinir. Toplantılar koordinatörlük adıyla kalır.'**
+  String get uiCoordDeletePermanentWarning;
+
+  /// ui.coord_delete.blocked
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalıcı silinemez: koordinatörlük tablo kayıtlarında kullanılıyor. Önce bu kayıtlar tablolardan kaldırılmalı; koordinatörlük silinmiş olarak kalabilir.'**
+  String get uiCoordDeleteBlocked;
+
+  /// ui.coord_delete.blocker_tables
+  ///
+  /// In tr, this message translates to:
+  /// **'tablo'**
+  String get uiCoordDeleteBlockerTables;
+
+  /// ui.coord_delete.blocker_projects
+  ///
+  /// In tr, this message translates to:
+  /// **'proje'**
+  String get uiCoordDeleteBlockerProjects;
+
+  /// ui.coord_delete.blocker_proposals
+  ///
+  /// In tr, this message translates to:
+  /// **'bekleyen tablo önerisi'**
+  String get uiCoordDeleteBlockerProposals;
+
+  /// ui.coord_delete.row_this_program
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu program'**
+  String get uiCoordDeleteRowThisProgram;
+
+  /// ui.coord_delete.row_files
+  ///
+  /// In tr, this message translates to:
+  /// **'Dosya'**
+  String get uiCoordDeleteRowFiles;
+
+  /// ui.coord_delete.row_members
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekip'**
+  String get uiCoordDeleteRowMembers;
+
+  /// ui.coord_delete.row_meetings
+  ///
+  /// In tr, this message translates to:
+  /// **'Toplantı'**
+  String get uiCoordDeleteRowMeetings;
+
+  /// ui.coord_delete.row_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Silinenler\'de'**
+  String get uiCoordDeleteRowDeleted;
+
+  /// ui.coord_delete.open
+  ///
+  /// In tr, this message translates to:
+  /// **'açık'**
+  String get uiCoordDeleteOpen;
+
+  /// ui.coord_delete.completed
+  ///
+  /// In tr, this message translates to:
+  /// **'tamamlanmış'**
+  String get uiCoordDeleteCompleted;
+
+  /// ui.coord_delete.task
+  ///
+  /// In tr, this message translates to:
+  /// **'görev'**
+  String get uiCoordDeleteTask;
+
+  /// ui.coord_delete.person
+  ///
+  /// In tr, this message translates to:
+  /// **'kişi'**
+  String get uiCoordDeletePerson;
+
+  /// ui.coord_delete.unlinked
+  ///
+  /// In tr, this message translates to:
+  /// **'bağ yok'**
+  String get uiCoordDeleteUnlinked;
+
+  /// ui.coord_delete.other_program
+  ///
+  /// In tr, this message translates to:
+  /// **'Başka program'**
+  String get uiCoordDeleteOtherProgram;
+
+  /// ui.coord_delete.confirm_label
+  ///
+  /// In tr, this message translates to:
+  /// **'Onay için yazın'**
+  String get uiCoordDeleteConfirmLabel;
+
+  /// ui.coord_delete.confirm_helper
+  ///
+  /// In tr, this message translates to:
+  /// **'Silme düğmesi yazılan metin eşleşince açılır.'**
+  String get uiCoordDeleteConfirmHelper;
+
+  /// ui.coord_delete.cancel
+  ///
+  /// In tr, this message translates to:
+  /// **'Vazgeç'**
+  String get uiCoordDeleteCancel;
+
+  /// ui.coord_delete.delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Sil'**
+  String get uiCoordDeleteDelete;
+
+  /// ui.coord_delete.permanent_delete
+  ///
+  /// In tr, this message translates to:
+  /// **'Kalıcı sil'**
+  String get uiCoordDeletePermanentDelete;
+
+  /// ui.coord_delete.toast_deleted
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlük silindi'**
+  String get uiCoordDeleteToastDeleted;
+
+  /// ui.coord_delete.toast_moved_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görev Silinenler\'e taşındı'**
+  String get uiCoordDeleteToastMovedTail;
+
+  /// ui.coord_delete.toast_restored
+  ///
+  /// In tr, this message translates to:
+  /// **'geri yüklendi'**
+  String get uiCoordDeleteToastRestored;
+
+  /// ui.coord_delete.toast_restored_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'görev geri geldi'**
+  String get uiCoordDeleteToastRestoredTail;
+
+  /// ui.coord_delete.toast_purged
+  ///
+  /// In tr, this message translates to:
+  /// **'kalıcı silindi'**
+  String get uiCoordDeleteToastPurged;
+
+  /// ui.coord_delete.toast_files_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'dosya'**
+  String get uiCoordDeleteToastFilesTail;
+
+  /// ui.coord_delete.toast_links_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'program bağı'**
+  String get uiCoordDeleteToastLinksTail;
+
+  /// ui.coord_delete.by_department
+  ///
+  /// In tr, this message translates to:
+  /// **'Koordinatörlükle silindi'**
+  String get uiCoordDeleteByDepartment;
+
   /// ui.feedback.loading
   ///
   /// In tr, this message translates to:

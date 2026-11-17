@@ -320,6 +320,7 @@ final class DeletedTask {
     required this.status,
     required this.deletedAt,
     required this.fileCount,
+    this.deletedByDepartment = false,
   });
 
   final String id;
@@ -333,6 +334,10 @@ final class DeletedTask {
   /// Korunan ek dosya sayısı (`file_count`).
   final int fileCount;
 
+  /// Koordinatörlüğüyle birlikte silindi (ADR-0043): koordinatörlük geri yüklenince geri gelir;
+  /// o silinmişken tek başına geri yüklenemez (409 `work.department_unavailable`).
+  final bool deletedByDepartment;
+
   @override
   bool operator ==(Object other) =>
       other is DeletedTask &&
@@ -341,11 +346,19 @@ final class DeletedTask {
       other.departmentId == departmentId &&
       other.status == status &&
       other.deletedAt == deletedAt &&
-      other.fileCount == fileCount;
+      other.fileCount == fileCount &&
+      other.deletedByDepartment == deletedByDepartment;
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, departmentId, status, deletedAt, fileCount);
+  int get hashCode => Object.hash(
+    id,
+    title,
+    departmentId,
+    status,
+    deletedAt,
+    fileCount,
+    deletedByDepartment,
+  );
 }
 
 bool _sameList(List<String> a, List<String> b) {

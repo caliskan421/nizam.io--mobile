@@ -455,26 +455,38 @@ void main() {
       expect(slice.nextCursor, 'n');
     });
 
-    test(
-      'restore → restored; permanent → purged; bilinmeyen → unknown',
-      () async {
-        final (r1, a1) = _repo('{"department_id":"d1","status":"restored"}');
-        expect(await r1.restoreDepartment('d1'), LifecycleStatus.restored);
-        expect(a1.seen!.method, 'PATCH');
-        expect(a1.seen!.uri.path, '/v1/admin/restore/departments/d1');
+    test('restore → restored; permanent → purged; bilinmeyen → unknown', () async {
+      final (r1, a1) = _repo(
+        '{"department_id":"d1","status":"restored","work_items_restored":4}',
+      );
+      final restored = await r1.restoreDepartment('d1');
+      expect(restored.status, LifecycleStatus.restored);
+      expect(restored.workItemsRestored, 4);
+      expect(a1.seen!.method, 'PATCH');
+      expect(a1.seen!.uri.path, '/v1/admin/restore/departments/d1');
 
-        final (r2, a2) = _repo('{"department_id":"d1","status":"purged"}');
-        expect(
-          await r2.permanentDeleteDepartment('d1'),
-          LifecycleStatus.purged,
-        );
-        expect(a2.seen!.method, 'DELETE');
-        expect(a2.seen!.uri.path, '/v1/admin/permanent/departments/d1');
+      final (r2, a2) = _repo(
+        '{"department_id":"d1","status":"purged","work_items_deleted":7,'
+        '"files_deleted":2,"program_links_removed":3,"memberships_deleted":5}',
+      );
+      final purged = await r2.permanentDeleteDepartment('d1');
+      expect(purged, (
+        status: LifecycleStatus.purged,
+        workItemsRestored: 0,
+        workItemsDeleted: 7,
+        filesDeleted: 2,
+        programLinksRemoved: 3,
+        membershipsDeleted: 5,
+      ));
+      expect(a2.seen!.method, 'DELETE');
+      expect(a2.seen!.uri.path, '/v1/admin/permanent/departments/d1');
 
-        final (r3, _) = _repo('{"department_id":"d1","status":"archived"}');
-        expect(await r3.restoreDepartment('d1'), LifecycleStatus.unknown);
-      },
-    );
+      final (r3, _) = _repo('{"department_id":"d1","status":"archived"}');
+      expect(
+        (await r3.restoreDepartment('d1')).status,
+        LifecycleStatus.unknown,
+      );
+    });
 
     test('hata → ApiError', () async {
       final (repo, _) = _repo(

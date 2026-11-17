@@ -114,6 +114,17 @@ ayrı uygulama kaydı açılır; [kurulum ve kontroller](docs/yurutme/firebase-k
 İmzalama ve mağaza yayını henüz tamamlanmadı. `make build-prod-apk` yalnız `--obfuscate` derlemesini sınamak içindir ve
 Flutter şablonunun debug anahtarıyla imzalanır; dağıtılmaz.
 
+**Görüşmede ekran paylaşımı.** İzleme (başkasının paylaştığı ekran) her platformda açıktır.
+Paylaşma yalnız yayın hakkı olan rolde (yöneten/konuşmacı) ve şu kurulumla:
+Android'de `ScreenCaptureService` (`foregroundServiceType=mediaProjection`) her derlemede vardır.
+iOS'ta ReplayKit yayın uzantısı `ios/ScreenShare` (kimlik `<uygulama kimliği>.ScreenShare`) her
+derlemeye gömülür ama App Group **varsayılan olarak kapalıdır**: Runner ve uzantı App Group'suz
+imzalanır (ücretsiz Apple Kimliği / Personal Team ile cihaza kurulabilir) ve paylaşma düğmesi
+görünmez. Açmak için (ücretli takım): Apple Developer'da `group.io.nizamio.mobile.dev` ve
+`group.io.nizamio.mobile` grupları tanımlanıp uygulama ve uzantı kimliklerine bağlanır, sonra
+`ios/Flutter/ScreenShare.xcconfig.example` aynı dizine `ScreenShare.xcconfig` adıyla kopyalanır
+(git'e girmez; App Group ve entitlements'ı Runner + uzantıya ekler).
+
 ## Dizin düzeni ve sınır kuralı
 
 ```text

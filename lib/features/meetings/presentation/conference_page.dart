@@ -161,6 +161,7 @@ class _ConferencePageState extends ConsumerState<ConferencePage> {
           mic: _ctl.toggleMic,
           camera: _ctl.toggleCamera,
           flip: _ctl.flipCamera,
+          share: _ctl.toggleScreenShare,
           panel: _togglePanel,
           notes: () => setState(
             () => _panel = _panel == MeetingSection.notes

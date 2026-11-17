@@ -126,12 +126,19 @@ class ConferenceGrid extends StatelessWidget {
 }
 
 /// Katılımcı karosu: video ya da degrade zemin + baş harfli avatar; altta "Ad Rol"; konuşan
-/// vurgulu (birincil renk çerçeve); kamera kapalıysa sağ üstte simge.
+/// vurgulu (birincil renk çerçeve); kamera kapalıysa sağ üstte simge. [compact] ekran paylaşımı
+/// şeridi içindir: küçük avatar, dar kenar boşluğu, rol yok.
 class ConferenceTile extends StatelessWidget {
-  const ConferenceTile({super.key, required this.peer, required this.names});
+  const ConferenceTile({
+    super.key,
+    required this.peer,
+    required this.names,
+    this.compact = false,
+  });
 
   final ConferencePeer peer;
   final ConferenceNames names;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -139,8 +146,9 @@ class ConferenceTile extends StatelessWidget {
     final t = context.text;
     final l = context.l10n;
     final name = names.fullName(peer);
-    final role = names.role(peer);
+    final role = compact ? '' : names.role(peer);
     final video = peer.video;
+    final inset = compact ? NizamioSpacing.space2 : NizamioSpacing.space3;
     final radius = BorderRadius.circular(NizamioRadius.card);
     return Semantics(
       label: [names.label(peer), role].where((x) => x.isNotEmpty).join(' · '),
@@ -174,14 +182,14 @@ class ConferenceTile extends StatelessWidget {
                     child: NzAvatar.initials(
                       name: name,
                       tone: NzAvatar.toneOf(name),
-                      extent: NzAvatarSize.profile,
+                      extent: compact ? NzAvatarSize.md : NzAvatarSize.profile,
                     ),
                   ),
                 ),
               if (!peer.cameraOn)
                 Positioned(
-                  top: NizamioSpacing.space3,
-                  right: NizamioSpacing.space3,
+                  top: inset,
+                  right: inset,
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       color: c.background,
@@ -199,9 +207,9 @@ class ConferenceTile extends StatelessWidget {
                   ),
                 ),
               Positioned(
-                left: NizamioSpacing.space3,
-                right: NizamioSpacing.space3,
-                bottom: NizamioSpacing.space3,
+                left: inset,
+                right: inset,
+                bottom: inset,
                 child: Row(
                   children: [
                     if (!peer.micOn) ...[

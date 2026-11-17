@@ -47,6 +47,12 @@ class _Link implements ConferenceLink {
       on ? MediaIssue.unavailable : null;
 
   @override
+  Future<bool> screenShareAvailable() async => true;
+
+  @override
+  Future<MediaIssue?> setScreenShare(bool on) async => null;
+
+  @override
   Future<void> flipCamera() async {}
 
   @override

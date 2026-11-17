@@ -3407,6 +3407,34 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsCallBack => 'Toplantıya dön';
 
   @override
+  String get uiMeetingsCallShare => 'Ekranını paylaş';
+
+  @override
+  String get uiMeetingsCallShareStop => 'Paylaşımı bitir';
+
+  @override
+  String get uiMeetingsCallSharingSelf => 'Ekranını paylaşıyorsun';
+
+  @override
+  String get uiMeetingsCallSharingSelfDesc =>
+      'Görüşmedekiler şu an ekranını görüyor. Bildirimler ve açtığın uygulamalar da görünür.';
+
+  @override
+  String get uiMeetingsCallSharingTail => 'ekranını paylaşıyor';
+
+  @override
+  String get uiMeetingsCallShareDenied =>
+      'Ekran paylaşımına izin verilmedi; paylaşım başlamadı.';
+
+  @override
+  String get uiMeetingsCallShareUnavailable =>
+      'Bu cihazda ekran paylaşımı başlatılamadı.';
+
+  @override
+  String get uiMeetingsCallShareTaken =>
+      'Ekranı şu an başka biri paylaşıyor. O bitirince paylaşabilirsin.';
+
+  @override
   String get uiMeetingsTConfStarted => 'Konferans başlatıldı';
 
   @override

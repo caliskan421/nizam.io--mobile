@@ -80,7 +80,7 @@ final class ConferenceControllerProvider
 }
 
 String _$conferenceControllerHash() =>
-    r'13a2aa097aad1a79aac3ede33973e372fb2b3ac0';
+    r'0c1ec13feaf6c6e918b5bd68ec2276bb3c0f7d7a';
 
 /// Bir toplantının görüntülü görüşmesi: katılım token'ı (`joinConference`) → adres doğrulama
 /// ([conferenceUrl]) → oda bağı ([ConferenceLink]) → mikrofon ve kamera. Token yalnız bağa

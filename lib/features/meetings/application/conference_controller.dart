@@ -27,6 +27,8 @@ final class ConferenceView {
     this.cameraOn = false,
     this.micIssue,
     this.cameraIssue,
+    this.shareIssue,
+    this.shareAvailable = false,
     this.role = ConferenceRole.unknown,
     this.error,
     this.end,
@@ -41,6 +43,12 @@ final class ConferenceView {
   final MediaIssue? micIssue;
   final MediaIssue? cameraIssue;
 
+  /// Son ekran paylaşımı isteğinin sorunu (null → sorun yok).
+  final ScreenShareIssue? shareIssue;
+
+  /// Cihaz/derleme ekran paylaşımını destekliyor ([ConferenceLink.screenShareAvailable]).
+  final bool shareAvailable;
+
   /// Token'daki oda rolü; `host` konferansı herkes için bitirebilir (K45/K46).
   final ConferenceRole role;
 
@@ -51,6 +59,19 @@ final class ConferenceView {
   final ConferenceEnd? end;
 
   bool get canEnd => role == ConferenceRole.host;
+
+  /// Yayın hakkı (mikrofon/kamera ile aynı kapı): `host` ve `speaker`; token'ı izleyici olan
+  /// (rol tanınmayan) kişi ekran paylaşamaz. Sunucu token'ı da aynı kaynakları verir. Derleme
+  /// paylaşımı desteklemiyorsa (iOS uzantısız) düğme yoktur.
+  bool get canShare =>
+      shareAvailable &&
+      (role == ConferenceRole.host || role == ConferenceRole.speaker);
+
+  /// Kendi ekranını paylaşıyor.
+  bool get sharing => peers.any((p) => p.isLocal && p.screenSharing);
+
+  /// Sahnedeki paylaşılan ekranın sahibi ([presenterOf]); null → normal ızgara.
+  ConferencePeer? get presenter => presenterOf(peers);
 
   /// Oda bağı canlı (bağlı ya da yeniden bağlanıyor).
   bool get inRoom =>
@@ -64,6 +85,8 @@ final class ConferenceView {
     bool? cameraOn,
     MediaIssue? Function()? micIssue,
     MediaIssue? Function()? cameraIssue,
+    ScreenShareIssue? Function()? shareIssue,
+    bool? shareAvailable,
     ConferenceRole? role,
   }) => ConferenceView(
     phase: phase ?? this.phase,
@@ -72,6 +95,8 @@ final class ConferenceView {
     cameraOn: cameraOn ?? this.cameraOn,
     micIssue: micIssue == null ? this.micIssue : micIssue(),
     cameraIssue: cameraIssue == null ? this.cameraIssue : cameraIssue(),
+    shareIssue: shareIssue == null ? this.shareIssue : shareIssue(),
+    shareAvailable: shareAvailable ?? this.shareAvailable,
     role: role ?? this.role,
     error: error,
     end: end,
@@ -153,6 +178,9 @@ class ConferenceController extends _$ConferenceController {
         cameraIssue: () => cam,
         peers: link.peers,
       );
+      final share = await link.screenShareAvailable();
+      if (!_live(attempt)) return;
+      state = state.copyWith(shareAvailable: share);
     } on Object catch (e, st) {
       final error = toReportedApiError(e, st, source: ReportSource.meetings);
       if (!_live(attempt)) return;
@@ -215,6 +243,31 @@ class ConferenceController extends _$ConferenceController {
     );
   }
 
+  /// Ekranı paylaş ya da paylaşımı bitir (yalnız [ConferenceView.canShare]). Odada başka biri
+  /// paylaşıyorsa istek gitmez ([ScreenShareIssue.taken]); izin reddi ya da desteklenmeyen
+  /// cihaz sorun olarak durumda kalır. Paylaşım durumu kişilerden okunur (iOS'ta yayın sistem
+  /// penceresinde onaylanınca başlar; sistem denetiminden durdurulabilir).
+  Future<void> toggleScreenShare() async {
+    final link = _link;
+    if (link == null || !state.inRoom || !state.canShare) return;
+    final want = !state.sharing;
+    final presenter = state.presenter;
+    if (want && presenter != null && !presenter.isLocal) {
+      state = state.copyWith(shareIssue: () => ScreenShareIssue.taken);
+      return;
+    }
+    final issue = await link.setScreenShare(want);
+    if (!ref.mounted || !identical(link, _link)) return;
+    state = state.copyWith(
+      shareIssue: () => switch (issue) {
+        MediaIssue.denied => ScreenShareIssue.denied,
+        MediaIssue.unavailable => ScreenShareIssue.unavailable,
+        null => null,
+      },
+      peers: link.peers,
+    );
+  }
+
   Future<void> flipCamera() async {
     final link = _link;
     if (link == null || !state.inRoom || !state.cameraOn) return;
@@ -223,7 +276,11 @@ class ConferenceController extends _$ConferenceController {
 
   /// Sorun bildirimini kapatır (izin açıklaması okundu).
   void dismissIssues() {
-    state = state.copyWith(micIssue: () => null, cameraIssue: () => null);
+    state = state.copyWith(
+      micIssue: () => null,
+      cameraIssue: () => null,
+      shareIssue: () => null,
+    );
   }
 
   /// Odadan ayrılır (konferans diğerleri için sürer).

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ekran paylaşımı ön plan servisi bildirimi (ScreenCaptureService). -->
+<resources>
+    <string name="screen_share_channel">Ekran paylaşımı</string>
+    <string name="screen_share_title">Ekranın paylaşılıyor</string>
+    <string name="screen_share_text">Görüntülü görüşmedekiler ekranını görüyor.</string>
+</resources>

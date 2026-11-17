@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 15 |
 | istisna | 61 |
-| rapor | 207 |
+| rapor | 210 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -208,11 +208,14 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.restore` | catch | rapor | 1 |
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.startInstant` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._keepAwake` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._releaseCapture` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._teardown` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.connect` | catch | istisna | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.flipCamera` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setCamera` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setMicrophone` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setScreenShare` | catch | rapor | 1 |
+| `features/meetings/data/screen_capture_channel.dart` | `ScreenCaptureChannel.available` | catch | rapor | 1 |
 | `features/meetings/presentation/meeting_people.dart` | `_MeetingPeopleState._showAdd` | catch | rapor | 1 |
 | `features/meetings/presentation/meetings_page.dart` | `_MeetingsPageState._instant` | catch | rapor | 1 |
 | `features/messages/application/chat_actions_controller.dart` | `ChatActionsController._closePoll` | catch | iletilir | 1 |

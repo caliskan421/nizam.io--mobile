@@ -6,12 +6,47 @@ import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
 import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/core/scope/scope_controller.dart';
 import 'package:nizamio/features/administration/application/team_controller.dart';
+import 'package:nizamio/features/administration/domain/organization_admin.dart';
 import 'package:nizamio/features/administration/domain/team_view.dart';
+import 'package:nizamio/features/administration/presentation/admin_user_profile_page.dart';
 import 'package:nizamio/features/administration/presentation/administration_page.dart';
 import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/screen_matrix.dart';
 import '../../pilot_support.dart';
+
+class _TeamCatalog extends TaskCatalogController {
+  _TeamCatalog(this.role);
+  final SeatRole role;
+
+  @override
+  Future<TaskCatalog> build() async => TaskCatalog(
+    today: DateTime(2026, 11, 18),
+    me: 'acc-1',
+    access: TaskAccess(
+      accountId: 'acc-1',
+      companyAdmin: false,
+      seats: [
+        TeamSeat(
+          programId: 'prog-1',
+          departmentId: 'd1',
+          departmentName: 'Altyapı',
+          role: role,
+        ),
+      ],
+    ),
+    people: const [],
+    coordinatorships: const [
+      CoordinatorshipRef(
+        code: 'd1',
+        name: 'Altyapı',
+        leads: ['lead'],
+        members: ['acc-1'],
+      ),
+    ],
+    tasks: const [],
+  );
+}
 
 void main() {
   setUpAll(() => GoogleFonts.config.allowRuntimeFetching = false);
@@ -39,11 +74,23 @@ void main() {
           final h = await real(t, () => pilotHarness(backend, signedIn: true));
           h.read(scopeControllerProvider).selectProgram('prog-1');
           final opened = <String>[];
+          final selected = ValueNotifier<String?>(null);
+          addTearDown(selected.dispose);
           await pumpScreen(
             t,
             h,
             ProviderScope(
               overrides: [
+                taskCatalogControllerProvider.overrideWith(
+                  () => _TeamCatalog(role),
+                ),
+                teamUserProfileProvider('lead').overrideWith(
+                  (ref) async => KnownUser(
+                    accountId: 'lead',
+                    fullName: 'Ece Kaya',
+                    memberships: const [],
+                  ),
+                ),
                 teamSourceProvider.overrideWithValue(source),
                 effectiveAccessProvider.overrideWith(
                   (ref) => EffectiveAccess.of(
@@ -84,7 +131,20 @@ void main() {
                   ),
                 ),
               ],
-              child: AdministrationPage(onUserSelected: opened.add),
+              child: ValueListenableBuilder<String?>(
+                valueListenable: selected,
+                builder: (context, id, _) => id == null
+                    ? AdministrationPage(
+                        onUserSelected: (id) {
+                          opened.add(id);
+                          selected.value = id;
+                        },
+                      )
+                    : AdminUserProfilePage(
+                        accountId: id,
+                        onBack: () => selected.value = null,
+                      ),
+              ),
             ),
           );
           await settle(t);
@@ -99,6 +159,9 @@ void main() {
             await t.tap(find.text('Ece Kaya'));
             await settle(t);
             expect(opened, ['lead']);
+            expect(find.byType(AdminUserProfilePage), findsOneWidget);
+            expect(find.text('Ece Kaya'), findsWidgets);
+            expect(find.text(l.uiUsersNotFound), findsNothing);
             if (role == SeatRole.member) {
               expect(find.byTooltip(l.uiUsersTeamAdd), findsNothing);
             }

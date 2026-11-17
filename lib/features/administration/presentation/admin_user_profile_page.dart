@@ -344,45 +344,47 @@ class _AdminUserProfilePageState extends ConsumerState<AdminUserProfilePage> {
           // Koordinatör görünümü: üyeyi ekipten çıkar (yalnız `uye`, kendisi değil).
           TeamRemoveAction(accountId: widget.accountId),
           const Gap(_sectionGap - NizamioSpacing.space1),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final tabs = NzPillTabs(
-                compact: true,
-                semanticLabel: l.uiUsersProfile,
-                tabs: [
-                  for (final t in tabSet)
-                    switch (t) {
-                      UserProfileTab.tasks => NzPillTab(
-                        label: l.uiUsersTasks,
-                        countText: taskCount,
-                      ),
-                      UserProfileTab.files => NzPillTab(
-                        label: l.uiUsersFiles,
-                        countText: filesCount,
-                      ),
-                      UserProfileTab.history => NzPillTab(
-                        label: l.uiUsersHistory,
-                        countText: '—',
-                      ),
-                      UserProfileTab.account => NzPillTab(
-                        label: l.uiUsersAccount,
-                      ),
-                    },
-                ],
-                selected: _tab < tabSet.length ? _tab : 0,
-                onSelected: _selectTab,
-              );
-              final scale = MediaQuery.textScalerOf(context).scale(1);
-              if (scale <= _largeTextThreshold) return tabs;
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: SizedBox(
-                  width: constraints.maxWidth * scale,
-                  child: tabs,
-                ),
-              );
-            },
-          ),
+          // Üyede tek içerik (Görevler) var; seçim gerekmediği için sekme çizilmez.
+          if (tabSet.length > 1)
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final tabs = NzPillTabs(
+                  compact: true,
+                  semanticLabel: l.uiUsersProfile,
+                  tabs: [
+                    for (final t in tabSet)
+                      switch (t) {
+                        UserProfileTab.tasks => NzPillTab(
+                          label: l.uiUsersTasks,
+                          countText: taskCount,
+                        ),
+                        UserProfileTab.files => NzPillTab(
+                          label: l.uiUsersFiles,
+                          countText: filesCount,
+                        ),
+                        UserProfileTab.history => NzPillTab(
+                          label: l.uiUsersHistory,
+                          countText: '—',
+                        ),
+                        UserProfileTab.account => NzPillTab(
+                          label: l.uiUsersAccount,
+                        ),
+                      },
+                  ],
+                  selected: _tab < tabSet.length ? _tab : 0,
+                  onSelected: _selectTab,
+                );
+                final scale = MediaQuery.textScalerOf(context).scale(1);
+                if (scale <= _largeTextThreshold) return tabs;
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: constraints.maxWidth * scale,
+                    child: tabs,
+                  ),
+                );
+              },
+            ),
         ],
       ],
     );

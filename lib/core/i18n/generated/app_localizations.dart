@@ -5845,7 +5845,7 @@ abstract class AppLocalizations {
   /// ui.home.member_upcoming_title
   ///
   /// In tr, this message translates to:
-  /// **'Yaklaşanlar'**
+  /// **'Yaklaşan toplantılar'**
   String get uiHomeMemberUpcomingTitle;
 
   /// ui.home.member_upcoming_meetings

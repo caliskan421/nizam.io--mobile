@@ -3060,7 +3060,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeMemberTasksEmpty => 'Açık görevin yok.';
 
   @override
-  String get uiHomeMemberUpcomingTitle => 'Yaklaşanlar';
+  String get uiHomeMemberUpcomingTitle => 'Yaklaşan toplantılar';
 
   @override
   String get uiHomeMemberUpcomingMeetings => 'Toplantılar';

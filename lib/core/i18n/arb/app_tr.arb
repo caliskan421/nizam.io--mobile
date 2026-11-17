@@ -3833,7 +3833,7 @@
   "@uiHomeMemberTasksEmpty": {
     "description": "ui.home.member_tasks_empty"
   },
-  "uiHomeMemberUpcomingTitle": "Yaklaşanlar",
+  "uiHomeMemberUpcomingTitle": "Yaklaşan toplantılar",
   "@uiHomeMemberUpcomingTitle": {
     "description": "ui.home.member_upcoming_title"
   },

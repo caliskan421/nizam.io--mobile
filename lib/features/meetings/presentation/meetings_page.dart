@@ -25,7 +25,6 @@ import '../application/meetings_controller.dart';
 import '../domain/meeting.dart';
 import '../domain/meeting_board.dart';
 import 'meeting_card.dart';
-import 'meetings_scope_bar.dart';
 import 'meetings_texts.dart';
 
 /// Toplantılar (prototip `meetings`): kök üst çubuk, başlık + ara / yeni toplantı, açılır arama,
@@ -195,7 +194,7 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
             data: (_) => const SizedBox.shrink(),
           )
         else
-          ..._content(context, b, view, catalog, access),
+          ..._content(context, b, view, catalog),
       ],
     );
   }
@@ -205,7 +204,6 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
     MeetingsBoard board,
     MeetingsView view,
     TaskCatalog? catalog,
-    EffectiveAccess access,
   ) {
     final l = context.l10n;
     final c = context.colors;
@@ -219,11 +217,7 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
       if (board.deleted != null) MeetingsTab.deleted,
     ];
     final tab = tabs.contains(view.tab) ? view.tab : MeetingsTab.upcoming;
-    // Birim süzgeci yalnız Koordinatör/Üye görünümünde (etkin koordinatörlük).
-    final unit = access.seesAllDepartments ? null : access.departmentId;
-    final unitOnly = unit != null && view.unitOnly;
-    List<Meeting> ofTab(MeetingsTab x) =>
-        meetingsOfUnit(board.of(x, today), unitOnly ? unit : null);
+    List<Meeting> ofTab(MeetingsTab x) => board.of(x, today);
     final list = searchMeetings(
       ofTab(tab),
       view.query,
@@ -233,20 +227,6 @@ class _MeetingsPageState extends ConsumerState<MeetingsPage> {
     final filtered = view.query.trim().isNotEmpty;
     final caption = t.caption.copyWith(color: c.textMuted);
     return [
-      if (unit != null) ...[
-        MeetingsScopeBar(
-          unit:
-              catalog?.coordinatorship(unit)?.label ??
-              access.departmentName ??
-              unit,
-          upcoming: ofTab(MeetingsTab.upcoming).length,
-          past: ofTab(MeetingsTab.past).length,
-          coordinator: access.isCoordinatorView,
-          unitOnly: unitOnly,
-          onUnitOnly: _view.setUnitOnly,
-        ),
-        const Gap(NizamioSpacing.space4),
-      ],
       NzPillTabs(
         semanticLabel: l.uiMeetingsTitle,
         selected: tabs.indexOf(tab),

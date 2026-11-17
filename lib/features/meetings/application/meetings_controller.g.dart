@@ -42,7 +42,7 @@ final class MeetingsViewControllerProvider
 }
 
 String _$meetingsViewControllerHash() =>
-    r'0662c71c7f0d96f15743679301712d7001b6ece7';
+    r'a084be8780ee79fc920fe98397a7e49d7a8edb14';
 
 abstract class _$MeetingsViewController extends $Notifier<MeetingsView> {
   MeetingsView build();

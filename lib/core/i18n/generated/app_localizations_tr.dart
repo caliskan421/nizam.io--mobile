@@ -3881,6 +3881,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiMeetingsInstantTitle => 'Anlık toplantı';
 
   @override
+  String get uiMeetingsNoteTaskSwitchRole =>
+      'Notu göreve dönüştürmek için Yönetici veya Koordinatör görünümüne geç.';
+
+  @override
   String get uiMessagesTitle => 'Mesajlar';
 
   @override

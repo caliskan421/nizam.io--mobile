@@ -318,6 +318,10 @@ class MeetingActions {
   Future<void> convertNote(MeetingNote n) async {
     final m = _room?.meeting;
     if (m == null) return;
+    if (!ref.read(canCreateTaskProvider)) {
+      say(context.l10n.uiMeetingsNoteTaskSwitchRole);
+      return;
+    }
     await showNewTaskSheet(
       context,
       note: n.id,

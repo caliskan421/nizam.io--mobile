@@ -7402,6 +7402,12 @@ abstract class AppLocalizations {
   /// **'Anlık toplantı'**
   String get uiMeetingsInstantTitle;
 
+  /// ui.meetings.note_task_switch_role
+  ///
+  /// In tr, this message translates to:
+  /// **'Notu göreve dönüştürmek için Yönetici veya Koordinatör görünümüne geç.'**
+  String get uiMeetingsNoteTaskSwitchRole;
+
   /// ui.messages.title
   ///
   /// In tr, this message translates to:

@@ -5,8 +5,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/domain/effective_role.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/meetings/meetings.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
@@ -146,6 +149,43 @@ void main() {
           _l.uiMeetingsTabAgenda,
         ]) {
           await _tap(tester, find.textContaining(s));
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
+  for (final memberView in [true, false]) {
+    testWidgets(
+      'yönetici hesabı, üye görünümü=$memberView: nottan görev geri bildirimi',
+      (tester) async {
+        _screen(tester, 390, 1);
+        final server = MeetingsServer(seat: 'uye')
+          ..notes = [noteWire('n1', content: 'Göreve dönüşecek not')];
+        final (h, c) = await real(tester, () => openMeetings(server));
+        final view = c.read(effectiveAccessProvider);
+        expect(
+          c
+              .read(scopeControllerProvider)
+              .selectRole(
+                memberView ? EffectiveRole.member : EffectiveRole.admin,
+                view.grants,
+              ),
+          isTrue,
+        );
+        await pumpScreen(tester, h, const MeetingPage(id: 'm1'));
+        await settle(tester);
+        await _tap(tester, find.textContaining(_l.uiMeetingsTabNotes));
+        expect(c.read(canCreateTaskProvider), !memberView);
+        h.backend.requests.clear();
+        await _tap(tester, find.text(_l.uiMeetingsToTask));
+        if (memberView) {
+          expect(find.text(_l.uiMeetingsNoteTaskSwitchRole), findsOneWidget);
+          expect(find.text(_l.uiTasksNoteTaskTitle), findsNothing);
+          expect(calls(h), isEmpty);
+        } else {
+          expect(find.text(_l.uiTasksNoteTaskTitle), findsOneWidget);
+          expect(find.text(_l.uiMeetingsNoteTaskSwitchRole), findsNothing);
         }
         expect(tester.takeException(), isNull);
       },

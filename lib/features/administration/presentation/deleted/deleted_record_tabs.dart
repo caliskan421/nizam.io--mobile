@@ -11,11 +11,13 @@ import '../../../../core/ui/extensions/context_ext.dart';
 import '../../../../core/ui/state/nz_async_view.dart';
 import '../../../../core/ui/widgets/feedback/feedback.dart';
 import '../../../../core/ui/widgets/overlays/overlays.dart';
+import '../../../coordinatorships/coordinatorships.dart';
 import '../../../meetings/meetings.dart';
 import '../../../tasks/tasks.dart';
 import '../../application/admin_controller.dart';
 import '../../application/admin_deleted_provider.dart';
 import '../../domain/deleted_records.dart';
+import '../../domain/organization_admin.dart';
 import '../../domain/organization_admin_repository.dart';
 import 'deleted_record_row.dart';
 
@@ -66,6 +68,8 @@ class DeletedTasksTab extends ConsumerWidget {
             DeletedRecordRow(
               title: task.title,
               subtitle: [
+                if (task.deletedByDepartment)
+                  context.l10n.uiCoordDeleteByDepartment,
                 ?deptName(task.departmentId),
                 'Silinme ${_when(task.deletedAt)}',
                 if (task.fileCount > 0) '${task.fileCount} dosya',
@@ -76,6 +80,7 @@ class DeletedTasksTab extends ConsumerWidget {
                 name: task.title,
                 purge: false,
                 departmentName: deptName(task.departmentId),
+                byDepartment: task.deletedByDepartment,
                 onGoTo: onGoTo,
                 onRefresh: () => ref.invalidate(deletedTasksProvider),
                 run: () => guard(() => ctrl.restore(task)),
@@ -216,35 +221,80 @@ class _DeletedCoordinatorshipsTabState
                 ?d.code,
                 if (d.deletedAt != null) 'Silinme ${_when(d.deletedAt)}',
               ].join(' · '),
-              onRestore: () => runDeletedAction(
+              onRestore: () {
+                DepartmentLifecycle? done;
+                return runDeletedAction(
+                  context,
+                  kind: DeletedKind.coordinatorship,
+                  name: d.name,
+                  purge: false,
+                  onGoTo: widget.onGoTo,
+                  onRefresh: refresh,
+                  success: () => coordRestoredToast(
+                    context.l10n,
+                    d.name,
+                    done?.workItemsRestored ?? 0,
+                  ),
+                  run: () => _admin(ref, (o) async {
+                    done = await o.restoreDepartment(d.departmentId);
+                    refresh();
+                  }),
+                );
+              },
+              onPurge: () => _purgeDepartment(
                 context,
-                kind: DeletedKind.coordinatorship,
+                ref,
+                departmentId: d.departmentId,
                 name: d.name,
-                purge: false,
-                onGoTo: widget.onGoTo,
-                onRefresh: refresh,
-                run: () => _admin(ref, (o) async {
-                  await o.restoreDepartment(d.departmentId);
-                  refresh();
-                }),
-              ),
-              onPurge: () => runDeletedAction(
-                context,
-                kind: DeletedKind.coordinatorship,
-                name: d.name,
-                purge: true,
-                onGoTo: widget.onGoTo,
-                onRefresh: refresh,
-                run: () => _admin(ref, (o) async {
-                  await o.permanentDeleteDepartment(d.departmentId);
-                  refresh();
-                }),
+                code: d.code,
+                refresh: refresh,
               ),
             ),
         ],
       ),
     );
   }
+}
+
+/// Koordinatörlüğü kalıcı silme: etki önizlemeli onay sayfası (tablo engelinde düğme kapalı;
+/// 409 `organization.department_in_use` engel sayılarıyla sayfada), başarıda özet bildirim.
+Future<void> _purgeDepartment(
+  BuildContext context,
+  WidgetRef ref, {
+  required String departmentId,
+  required String name,
+  required String? code,
+  required VoidCallback refresh,
+}) async {
+  final l = context.l10n;
+  final done = await showDepartmentDeleteSheet<DepartmentLifecycle>(
+    context,
+    departmentId: departmentId,
+    name: name,
+    code: code,
+    permanent: true,
+    run: () async {
+      DepartmentLifecycle? result;
+      final error = await _admin(ref, (o) async {
+        result = await o.permanentDeleteDepartment(departmentId);
+      });
+      return (result: result, error: error);
+    },
+  );
+  if (done == null) return;
+  refresh();
+  if (!context.mounted) return;
+  NzToast.show(
+    context,
+    coordPurgedToast(
+      l,
+      name,
+      tasks: done.workItemsDeleted,
+      files: done.filesDeleted,
+      links: done.programLinksRemoved,
+    ),
+    tone: NzToastTone.success,
+  );
 }
 
 /// Kullanıcılar: `GET /v1/admin/deleted/accounts`.
@@ -329,6 +379,8 @@ Future<void> runDeletedAction(
   required ValueChanged<DeletedKind> onGoTo,
   required VoidCallback onRefresh,
   String? departmentName,
+  bool byDepartment = false,
+  String Function()? success,
 }) async {
   if (purge) {
     final ok = await NzDialog.confirm(
@@ -349,7 +401,8 @@ Future<void> runDeletedAction(
   if (error == null) {
     NzToast.show(
       context,
-      purge ? '"$name" kalıcı silindi' : '"$name" geri yüklendi',
+      success?.call() ??
+          (purge ? '"$name" kalıcı silindi' : '"$name" geri yüklendi'),
       tone: NzToastTone.success,
     );
     return;
@@ -358,6 +411,7 @@ Future<void> runDeletedAction(
     kind,
     error.code,
     departmentName: departmentName,
+    byDepartment: byDepartment,
   );
   if (block == null) {
     NzToast.error(context, error);

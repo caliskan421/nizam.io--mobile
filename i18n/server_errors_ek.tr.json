@@ -3,6 +3,7 @@
   "codes": {
     "organization.department_usage": "Koordinatörlüğe bağlı kayıtlar var; önce bunları kaldırın.",
     "organization.existing_department": "Bu adda bir departman zaten var.",
+    "organization.department_usage": "Departman başka kayıtlarda kullanılıyor.",
     "organization.idempotency_key_reused": "Bu işlem anahtarı başka bir istek için kullanılmış. Sayfayı yenileyip yeniden deneyin.",
     "organization.invalid_request_key": "İşlem anahtarı geçersiz.",
     "program.invalid_request_key": "İşlem anahtarı geçersiz.",

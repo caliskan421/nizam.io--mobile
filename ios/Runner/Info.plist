@@ -39,6 +39,10 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
+	<key>RTCAppGroupIdentifier</key>
+	<string>$(NIZAM_APP_GROUP)</string>
+	<key>RTCScreenSharingExtension</key>
+	<string>$(NIZAM_APP_ID).ScreenShare</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Seçtiğin NIZAM.IO sunucusuna yerel ağ üzerinden bağlanmak için erişim gerekiyor.</string>
 	<key>LSRequiresIPhoneOS</key>

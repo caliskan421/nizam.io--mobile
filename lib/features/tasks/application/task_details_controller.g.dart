@@ -10,7 +10,8 @@ part of 'task_details_controller.dart';
 // ignore_for_file: type=lint, type=warning
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+/// yoksa kimlikle çözümlenir ([TaskCatalogController.resolveMissing]); kaynak ayrıntı
+/// taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
 /// katalogdaki [TaskCatalog.access]'ten.
 ///
 /// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
@@ -22,7 +23,8 @@ final taskDetailsProvider = TaskDetailsFamily._();
 
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+/// yoksa kimlikle çözümlenir ([TaskCatalogController.resolveMissing]); kaynak ayrıntı
+/// taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
 /// katalogdaki [TaskCatalog.access]'ten.
 ///
 /// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
@@ -34,7 +36,8 @@ final class TaskDetailsProvider
     with $FutureModifier<void>, $FutureProvider<void> {
   /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
   /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-  /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+  /// yoksa kimlikle çözümlenir ([TaskCatalogController.resolveMissing]); kaynak ayrıntı
+  /// taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
   /// katalogdaki [TaskCatalog.access]'ten.
   ///
   /// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
@@ -83,11 +86,12 @@ final class TaskDetailsProvider
   }
 }
 
-String _$taskDetailsHash() => r'9c65f98e15a184a85ed82bf570b84e9d2b7d870d';
+String _$taskDetailsHash() => r'803de37eac6f22f5e159f835dafb5e3f1db466e8';
 
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+/// yoksa kimlikle çözümlenir ([TaskCatalogController.resolveMissing]); kaynak ayrıntı
+/// taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
 /// katalogdaki [TaskCatalog.access]'ten.
 ///
 /// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
@@ -107,7 +111,8 @@ final class TaskDetailsFamily extends $Family
 
   /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
   /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-  /// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+  /// yoksa kimlikle çözümlenir ([TaskCatalogController.resolveMissing]); kaynak ayrıntı
+  /// taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
   /// katalogdaki [TaskCatalog.access]'ten.
   ///
   /// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;

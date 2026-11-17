@@ -10,8 +10,8 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 |---|---|
 | denetim akışı | 1 |
 | iletilir | 15 |
-| istisna | 60 |
-| rapor | 205 |
+| istisna | 61 |
+| rapor | 212 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -72,6 +72,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/data/task_catalog_api_repository.dart::ApiTaskCatalogRepository._teams#catchError` | 1 | Ekip üyeleri isteğe bağlı zenginleştirmedir: apiCall beklenmeyen hatayı ZATEN işlem kimliğiyle raporlamıştır; bu kol yalnız eksik ekibi boş liste yapar. |
 | `features/tasks/data/upload_digest.dart::uploadDigest#catch` | 1 | Kullanıcının seçtiği geçici dosya özet çıkarılırken okunamadı (silindi/taşındı): client.file_unreadable beklenen durumdur; dosya yolu/adı rapora girmez. |
 | `features/tasks/presentation/task_detail_page.dart::TaskDetailPage.build#catch` | 1 | GÖZLEMCİ: taskDetailsProvider hatası sayfadaki banner ile gösterilir ve providerDidFail ile raporlanır; çekme-yenile closure`ı yalnız tekrar fırlatmayı keser. |
+| `features/timeline/application/gantt_provider.dart::_TimelineSnapshot.pending#asyncError` | 1 | YENİDEN: kaynak (görev kataloğu/zaman çizelgesi) sağlayıcısının hatası ve yığını aynı nesneyle taşınır; yeni hata üretilmez, rapor kaynak sağlayıcıdadır. |
 
 ## Tüm yollar (dosya → işlev → tür → sahip)
 
@@ -177,6 +178,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/assistant/data/assistant_api_repository.dart` | `ApiAssistantRepository.chat` | rawDio | istisna | 1 |
 | `features/calendar/presentation/coordinatorship_calendar.dart` | `_Calendar.build` | asyncError | istisna | 1 |
 | `features/coordinatorships/application/coord_member_controller.dart` | `CoordMemberController.submit` | catch | rapor | 1 |
+| `features/coordinatorships/application/coordinatorship_delete_controller.dart` | `deleteCoordinatorship` | catch | rapor | 2 |
 | `features/coordinatorships/application/coordinatorship_detail_controller.dart` | `coordinatorshipDetail` | asyncError | istisna | 2 |
 | `features/coordinatorships/application/coordinatorship_form_controller.dart` | `CoordinatorshipFormController.create` | catch | rapor | 3 |
 | `features/coordinatorships/application/coordinatorship_form_controller.dart` | `CoordinatorshipFormController.edit` | catch | rapor | 2 |
@@ -207,11 +209,14 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.restore` | catch | rapor | 1 |
 | `features/meetings/application/meetings_controller.dart` | `MeetingsBoardController.startInstant` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._keepAwake` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._releaseCapture` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink._teardown` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.connect` | catch | istisna | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.flipCamera` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setCamera` | catch | rapor | 1 |
 | `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setMicrophone` | catch | rapor | 1 |
+| `features/meetings/data/livekit_conference_link.dart` | `LiveKitConferenceLink.setScreenShare` | catch | rapor | 1 |
+| `features/meetings/data/screen_capture_channel.dart` | `ScreenCaptureChannel.available` | catch | rapor | 1 |
 | `features/meetings/presentation/meeting_people.dart` | `_MeetingPeopleState._showAdd` | catch | rapor | 1 |
 | `features/meetings/presentation/meetings_page.dart` | `_MeetingsPageState._instant` | catch | rapor | 1 |
 | `features/messages/application/chat_actions_controller.dart` | `ChatActionsController._closePoll` | catch | iletilir | 1 |
@@ -295,6 +300,8 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/application/invite_form_controller.dart` | `InviteFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/meeting_form_controller.dart` | `MeetingFormController.submit` | catch | rapor | 1 |
 | `features/tasks/application/quick_forms_controller.dart` | `NewTaskFormController.submit` | catch | rapor | 3 |
+| `features/tasks/application/task_catalog_controller.dart` | `TaskCatalogController._probe` | catch | rapor | 1 |
+| `features/tasks/application/task_catalog_controller.dart` | `TaskCatalogController._resolve` | catch | rapor | 1 |
 | `features/tasks/application/task_catalog_controller.dart` | `TaskCatalogController.reload` | catch | rapor | 1 |
 | `features/tasks/application/task_detail_controller.dart` | `TaskDetailController._reread` | catch | rapor | 1 |
 | `features/tasks/application/task_detail_controller.dart` | `TaskDetailController._writeKeyed` | catch | rapor | 1 |
@@ -315,6 +322,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/tasks/presentation/decision/task_decision_flows.dart` | `TaskDecisionFlows._readFiles` | catch | rapor | 1 |
 | `features/tasks/presentation/detail/task_dependencies.dart` | `TaskDependencies.build` | catch | rapor | 1 |
 | `features/tasks/presentation/task_detail_page.dart` | `TaskDetailPage.build` | catch | istisna | 1 |
+| `features/timeline/application/gantt_provider.dart` | `_TimelineSnapshot.pending` | asyncError | istisna | 1 |
 | `features/timeline/application/timeline_controller.dart` | `TimelineController._extend` | catch | rapor | 1 |
 | `features/timeline/application/timeline_controller.dart` | `TimelineController._reload` | catch | rapor | 1 |
 | `features/timeline/application/timeline_controller.dart` | `TimelineController.requestDates` | catch | rapor | 3 |

@@ -173,6 +173,12 @@ const errorPathExceptions = <String, ErrorPathException>{
         1,
         'YENİDEN: kaynak sağlayıcı hatası aynı nesneyle taşınır.',
       ),
+  'features/timeline/application/gantt_provider.dart::_TimelineSnapshot.pending#asyncError':
+      ErrorPathException(
+        1,
+        'YENİDEN: kaynak (görev kataloğu/zaman çizelgesi) sağlayıcısının hatası ve yığını '
+        'aynı nesneyle taşınır; yeni hata üretilmez, rapor kaynak sağlayıcıdadır.',
+      ),
   'features/administration/application/admin_controller.dart::AdminUsersController.loadMore#asyncError':
       ErrorPathException(
         1,

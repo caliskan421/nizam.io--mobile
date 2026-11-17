@@ -1,0 +1,11 @@
+// iOS ekran paylaşımını AÇAR (isteğe bağlı; ücretli Apple Developer takımı gerekir).
+// Etkinleştirme: bu dosyayı aynı dizine `ScreenShare.xcconfig` adıyla kopyala (git'e girmez).
+// Dosya yokken Runner ve ScreenShare uzantısı App Group'suz imzalanır (ücretsiz Apple Kimliği /
+// Personal Team ile cihaza kurulabilir) ve uygulamada ekran paylaşma düğmesi görünmez.
+//
+// Önce Apple Developer hesabında: App Group `group.io.nizamio.mobile.dev` (dev) ve
+// `group.io.nizamio.mobile` (prod) tanımlanır; uygulama kimlikleri io.nizamio.mobile(.dev) ve
+// uzantı kimlikleri io.nizamio.mobile(.dev).ScreenShare için App Groups yeteneği açılıp gruba
+// bağlanır.
+NIZAM_APP_GROUP = group.$(NIZAM_APP_ID)
+CODE_SIGN_ENTITLEMENTS = $(NIZAM_SCREEN_SHARE_ENTITLEMENTS)

@@ -9,7 +9,8 @@ part 'task_details_controller.g.dart';
 
 /// Görev ayrıntısını ([code]) kaynağından okur ve katalogdaki göreve ekler. Ayrıntı ekranı
 /// izler; kapsam değişince ya da dokunuşla (`ref.invalidate`) yeniden okunur. Görev katalogda
-/// yoksa ya da kaynak ayrıntı taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
+/// yoksa kimlikle çözümlenir ([TaskCatalogController.resolveMissing]); kaynak ayrıntı
+/// taşımıyorsa (örnek) bir şey yapmaz. Rol (tarih talebi yüzü)
 /// katalogdaki [TaskCatalog.access]'ten.
 ///
 /// Katalog yeniden kurulunca (invalidate, kapsam değişimi) ayrıntı katalogla birlikte gider;
@@ -36,7 +37,14 @@ Future<void> taskDetails(Ref ref, String code) async {
     });
   final catalog = await ref.read(taskCatalogControllerProvider.future);
   final task = catalog.task(code);
-  if (task == null) return;
+  if (task == null) {
+    // Bayat ya da kesik katalog: görev kimlikle çözümlenir. Bulunursa kataloğa eklenir ve
+    // yukarıdaki dinleyici (yok → var) ayrıntıyı yeniden okutur; kesin "bulunamadı" sessizdir
+    // (ekran boş durumu gösterir); geçici hata ve aday sınırı bu sağlayıcının hatasıdır (ekran
+    // hata/sınır metnini gösterir, yenileme aramayı tekrarlar).
+    await ref.read(taskCatalogControllerProvider.notifier).resolveMissing(code);
+    return;
+  }
   final details = await ref
       .read(taskDetailsRepositoryProvider)
       .load(task, access: catalog.access);

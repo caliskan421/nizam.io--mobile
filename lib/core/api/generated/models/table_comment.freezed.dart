@@ -17,8 +17,7 @@ T _$identity<T>(T value) => value;
 mixin _$TableComment {
 
  String get id;@JsonKey(name: 'row_id') String get rowId;/// Yalnız satıra bağlı yorumda `null`.
-@JsonKey(name: 'column_id') String? get columnId;/// Yazar okuyana görünmüyorsa `null` (kimlik/e-posta yok).
- Author? get author;/// Yorum okuyanındır (yazar görünmese de doludur).
+@JsonKey(name: 'column_id') String? get columnId; TableCommentAuthor? get author;/// Yorum okuyanındır (yazar görünmese de doludur).
  bool get mine; String get body;/// Yorumu oluşturan komutun tablo işlem sırası; değişmez, imleç anahtarıdır.
  int get seq;@JsonKey(name: 'created_at') DateTime get createdAt;@JsonKey(name: 'edited_at') DateTime? get editedAt;
 /// Create a copy of TableComment
@@ -58,11 +57,11 @@ abstract mixin class $TableCommentCopyWith<$Res>  {
   factory $TableCommentCopyWith(TableComment value, $Res Function(TableComment) _then) = _$TableCommentCopyWithImpl;
 @useResult
 $Res call({
- String id,@JsonKey(name: 'row_id') String rowId,@JsonKey(name: 'column_id') String? columnId, Author? author, bool mine, String body, int seq,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'edited_at') DateTime? editedAt
+ String id,@JsonKey(name: 'row_id') String rowId,@JsonKey(name: 'column_id') String? columnId, TableCommentAuthor? author, bool mine, String body, int seq,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'edited_at') DateTime? editedAt
 });
 
 
-
+$TableCommentAuthorCopyWith<$Res>? get author;
 
 }
 /// @nodoc
@@ -81,7 +80,7 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,rowId: null == rowId ? _self.rowId : rowId // ignore: cast_nullable_to_non_nullable
 as String,columnId: freezed == columnId ? _self.columnId : columnId // ignore: cast_nullable_to_non_nullable
 as String?,author: freezed == author ? _self.author : author // ignore: cast_nullable_to_non_nullable
-as Author?,mine: null == mine ? _self.mine : mine // ignore: cast_nullable_to_non_nullable
+as TableCommentAuthor?,mine: null == mine ? _self.mine : mine // ignore: cast_nullable_to_non_nullable
 as bool,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
 as String,seq: null == seq ? _self.seq : seq // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -89,7 +88,19 @@ as DateTime,editedAt: freezed == editedAt ? _self.editedAt : editedAt // ignore:
 as DateTime?,
   ));
 }
+/// Create a copy of TableComment
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TableCommentAuthorCopyWith<$Res>? get author {
+    if (_self.author == null) {
+    return null;
+  }
 
+  return $TableCommentAuthorCopyWith<$Res>(_self.author!, (value) {
+    return _then(_self.copyWith(author: value));
+  });
+}
 }
 
 
@@ -171,7 +182,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String? columnId,  Author? author,  bool mine,  String body,  int seq, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'edited_at')  DateTime? editedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String? columnId,  TableCommentAuthor? author,  bool mine,  String body,  int seq, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'edited_at')  DateTime? editedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TableComment() when $default != null:
 return $default(_that.id,_that.rowId,_that.columnId,_that.author,_that.mine,_that.body,_that.seq,_that.createdAt,_that.editedAt);case _:
@@ -192,7 +203,7 @@ return $default(_that.id,_that.rowId,_that.columnId,_that.author,_that.mine,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String? columnId,  Author? author,  bool mine,  String body,  int seq, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'edited_at')  DateTime? editedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String? columnId,  TableCommentAuthor? author,  bool mine,  String body,  int seq, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'edited_at')  DateTime? editedAt)  $default,) {final _that = this;
 switch (_that) {
 case _TableComment():
 return $default(_that.id,_that.rowId,_that.columnId,_that.author,_that.mine,_that.body,_that.seq,_that.createdAt,_that.editedAt);case _:
@@ -212,7 +223,7 @@ return $default(_that.id,_that.rowId,_that.columnId,_that.author,_that.mine,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String? columnId,  Author? author,  bool mine,  String body,  int seq, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'edited_at')  DateTime? editedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String? columnId,  TableCommentAuthor? author,  bool mine,  String body,  int seq, @JsonKey(name: 'created_at')  DateTime createdAt, @JsonKey(name: 'edited_at')  DateTime? editedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _TableComment() when $default != null:
 return $default(_that.id,_that.rowId,_that.columnId,_that.author,_that.mine,_that.body,_that.seq,_that.createdAt,_that.editedAt);case _:
@@ -234,8 +245,7 @@ class _TableComment implements TableComment {
 @override@JsonKey(name: 'row_id') final  String rowId;
 /// Yalnız satıra bağlı yorumda `null`.
 @override@JsonKey(name: 'column_id') final  String? columnId;
-/// Yazar okuyana görünmüyorsa `null` (kimlik/e-posta yok).
-@override final  Author? author;
+@override final  TableCommentAuthor? author;
 /// Yorum okuyanındır (yazar görünmese de doludur).
 @override final  bool mine;
 @override final  String body;
@@ -279,11 +289,11 @@ abstract mixin class _$TableCommentCopyWith<$Res> implements $TableCommentCopyWi
   factory _$TableCommentCopyWith(_TableComment value, $Res Function(_TableComment) _then) = __$TableCommentCopyWithImpl;
 @override @useResult
 $Res call({
- String id,@JsonKey(name: 'row_id') String rowId,@JsonKey(name: 'column_id') String? columnId, Author? author, bool mine, String body, int seq,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'edited_at') DateTime? editedAt
+ String id,@JsonKey(name: 'row_id') String rowId,@JsonKey(name: 'column_id') String? columnId, TableCommentAuthor? author, bool mine, String body, int seq,@JsonKey(name: 'created_at') DateTime createdAt,@JsonKey(name: 'edited_at') DateTime? editedAt
 });
 
 
-
+@override $TableCommentAuthorCopyWith<$Res>? get author;
 
 }
 /// @nodoc
@@ -302,7 +312,7 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,rowId: null == rowId ? _self.rowId : rowId // ignore: cast_nullable_to_non_nullable
 as String,columnId: freezed == columnId ? _self.columnId : columnId // ignore: cast_nullable_to_non_nullable
 as String?,author: freezed == author ? _self.author : author // ignore: cast_nullable_to_non_nullable
-as Author?,mine: null == mine ? _self.mine : mine // ignore: cast_nullable_to_non_nullable
+as TableCommentAuthor?,mine: null == mine ? _self.mine : mine // ignore: cast_nullable_to_non_nullable
 as bool,body: null == body ? _self.body : body // ignore: cast_nullable_to_non_nullable
 as String,seq: null == seq ? _self.seq : seq // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -311,7 +321,19 @@ as DateTime?,
   ));
 }
 
+/// Create a copy of TableComment
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TableCommentAuthorCopyWith<$Res>? get author {
+    if (_self.author == null) {
+    return null;
+  }
 
+  return $TableCommentAuthorCopyWith<$Res>(_self.author!, (value) {
+    return _then(_self.copyWith(author: value));
+  });
+}
 }
 
 // dart format on

@@ -4,10 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/cache_owner.dart';
+import '../../../core/errors/api_error.dart';
+import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/providers.dart';
 import '../../../core/stale_clock.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
+import '../domain/task_access.dart';
 import '../domain/task_catalog.dart';
 import '../domain/task_details.dart';
 import 'effective_access.dart';
@@ -42,6 +45,9 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
     if (_owner != owner) {
       _owner = owner;
       _touched.clear();
+      _clearLookups();
+      _lookupInFlight.clear();
+      _upserted.clear();
       _generation++;
       _namesAt = 0;
       _clock = StaleClock();
@@ -73,6 +79,16 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
   int _generation = 0;
   final _touched = HashMap<String, int>();
 
+  /// Kimlik araması sonuçları ([resolveMissing]): kesin sonuç, 429 bekleme bitişi, uçuştaki
+  /// arama.
+  final _lookupDone = HashMap<String, ({bool limited})>();
+  final _lookupHeld = HashMap<String, (DateTime, ApiError)>();
+  final _lookupInFlight = HashMap<String, Future<void>>();
+
+  /// Süzgeçli okumayla kataloğa eklenmiş görevler: yeniden okumada katalogdan düşmeleri
+  /// beklenir, geri gelişleri süzgeçli yoldandır ([resolveMissing] onları aramaz).
+  final _upserted = <String>{};
+
   void _touch(String code) => _touched[code] = ++_generation;
 
   // Ad nesli: [applyDetails] yeni adlar getirdiğinde işaretlenir; [upsert] okuma başladıktan
@@ -97,6 +113,7 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
   }) {
     final c = _catalog;
     if (c == null || items.isEmpty) return;
+    _upserted.addAll(items.map((i) => i.code));
     final fresh = {
       for (final i in items)
         if ((_touched[i.code] ?? 0) <= since) i.code: i,
@@ -138,11 +155,133 @@ class TaskCatalogController extends AsyncNotifier<TaskCatalog> {
     }
   }
 
+  /// [code] yüklü katalogda yok (ör. katalog yüklendikten sonra oluşturulup başka ekrandan —
+  /// tablo referansı — açılan görev): görevi kimlikle çözümler.
+  /// - Tam katalogda katalog yeniden okunur (liste programın görünür görevlerinin tamamıdır).
+  /// - Kesik katalogda (sayfa tavanı) liste kimlikle süzülemez (`listProgramWorkItems` yalnız
+  ///   departman/atanan süzgeci taşır) ve tekil okuma (`getWorkItem`, S3) görevin departman
+  ///   başlığını ister: görev çağıranın bu programdaki görünür departmanlarında (önce kendi ekip
+  ///   satırları, sonra katalog departmanları; en çok [maxDepartmentProbes]) sırayla denenir.
+  ///
+  /// Sonuçlar: bulunursa kataloğa eklenir. KESİN "bulunamadı" (bütün adaylarda 404 ya da
+  /// 403 `work.not_assigned`) kimlik başına kaydedilir ve tekrar aranmaz (katalog yenilemesi ve sahip
+  /// değişimi kaydı siler). Aday sınırı dolarsa `client.task_lookup_limit` FIRLAR (kesin).
+  /// Geçici hata (ağ, 5xx, 429) FIRLAR ve kaydedilmez: ayrıntı yenilemesi aramayı tekrarlar;
+  /// 429'da `Retry-After` dolmadan istek atılmaz (aynı hata yeniden fırlar). Süzgeçli okumayla
+  /// gelmiş görev bu yoldan geçmez. Kapsam/oturum değişirse arama sessizce biter.
+  Future<void> resolveMissing(String code) {
+    if (_upserted.contains(code)) return Future.value();
+    final done = _lookupDone[code];
+    if (done != null) {
+      return done.limited ? Future.error(_limitError()) : Future.value();
+    }
+    final held = _lookupHeld[code];
+    if (held != null && held.$1.isAfter(DateTime.now())) {
+      return Future.error(held.$2);
+    }
+    if (_lookupInFlight[code] case final running?) return running;
+    // Uçuştaki kayıt sahip değişiminde silinir ([build]); eski aramanın tamamlanması yalnız
+    // KENDİ kaydını siler (gelecek eşitliği), yeni sahibin aramasını değil. Gövde bloklu:
+    // `remove` geleceğin kendisini döndürür; whenComplete onu beklerse kilitlenir.
+    late final Future<void> lookup;
+    lookup = _resolve(code).whenComplete(() {
+      if (identical(_lookupInFlight[code], lookup)) {
+        _lookupInFlight.remove(code);
+      }
+    });
+    return _lookupInFlight[code] = lookup;
+  }
+
+  /// Kesik katalogda görev başına denenecek en çok departman (her biri bir `getWorkItem`).
+  static const maxDepartmentProbes = 20;
+
+  ApiError _limitError() => ApiError(ClientErrorCode.taskLookupLimit);
+
+  Future<void> _resolve(String code) async {
+    final c = _catalog;
+    if (c == null) return;
+    final owner = _owner;
+    try {
+      if (!c.truncated) {
+        await refresh();
+        if (!ref.mounted || _owner != owner) return;
+        if (_catalog?.task(code) == null) _lookupDone[code] = (limited: false);
+        return;
+      }
+      await _probe(code, c, owner);
+    } on ApiError catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.tasks);
+      if (!ref.mounted || _owner != owner) return;
+      if (e.status == 429) {
+        _lookupHeld[code] = (
+          DateTime.now().add(e.retryAfter ?? const Duration(seconds: 2)),
+          e,
+        );
+      }
+      rethrow;
+    }
+  }
+
+  Future<void> _probe(String code, TaskCatalog c, CacheOwner? owner) async {
+    final program = ref.read(scopeStateProvider).programId;
+    if (program == null || program.isEmpty) return;
+    final since = _generation;
+    final all = <String>{
+      for (final s in c.access?.seatsIn(program) ?? const <TeamSeat>[])
+        s.departmentId,
+      for (final d in c.departments) d.id,
+    };
+    final details = ref.read(taskDetailsRepositoryProvider);
+    for (final department in all.take(maxDepartmentProbes)) {
+      final probe = TaskItem(
+        code: code,
+        title: '',
+        coordinatorship: department,
+        departmentId: department,
+        programId: program,
+        status: TaskStatus.todo,
+        priority: TaskPriority.medium,
+        start: c.today,
+        due: c.today,
+        assignees: const [],
+      );
+      final TaskItem item;
+      try {
+        item = await details.loadItem(probe);
+      } on ApiError catch (e, st) {
+        // Aynı hata nesnesi [_resolve]'da yeniden raporlanmaz (ErrorReporting.alreadyHandled).
+        reportUnexpected(e, st, source: ReportSource.tasks);
+        if (!ref.mounted || _owner != owner) return;
+        if (e.status == 404) continue;
+        if (e.code == 'work.not_assigned') {
+          // Görev bu departmanda var ama okuyana atanmamış: kesin sonuç. Diğer 403'ler
+          // (yetki, üyelik, parola değişimi) genel hatadır: aşağıda fırlar.
+          _lookupDone[code] = (limited: false);
+          return;
+        }
+        rethrow; // geçici ya da yetki: çağıran raporlar ve fırlatır
+      }
+      if (!ref.mounted || _owner != owner) return;
+      upsert([item], since: since);
+      return;
+    }
+    if (!ref.mounted || _owner != owner) return;
+    final limited = all.length > maxDepartmentProbes;
+    _lookupDone[code] = (limited: limited);
+    if (limited) throw _limitError();
+  }
+
   /// Kullanıcı yenilemesi (aşağı çekerek): kaynaktan yeniden okur ve bitmesini bekler; okuma
   /// hatası FIRLATILIR (çağıran bildirir), önceki katalog durumda kalır.
   Future<void> refresh() async {
+    _clearLookups();
     ref.invalidateSelf();
     await future;
+  }
+
+  void _clearLookups() {
+    _lookupDone.clear();
+    _lookupHeld.clear();
   }
 
   /// Yeniden ziyaret (sekmeye dönüş): son başarılı okuma [maxAge]'den eskiyse arka planda

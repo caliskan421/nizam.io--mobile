@@ -15,12 +15,14 @@ import 'conference_panel.dart';
 import 'conference_tiles.dart';
 import 'meeting_parts.dart';
 import 'meetings_texts.dart';
+import 'screen_share_stage.dart';
 
 /// Görüşme ekranı komutları (alt çubuk, üst satır, uyarı kapatma).
 typedef ConferenceCommands = ({
   VoidCallback mic,
   VoidCallback camera,
   VoidCallback flip,
+  VoidCallback share,
   VoidCallback panel,
   VoidCallback notes,
   VoidCallback minimize,
@@ -28,8 +30,8 @@ typedef ConferenceCommands = ({
   VoidCallback dismiss,
 });
 
-/// Bağlı oda görünümü: üst satır, uyarılar, ızgara, alt çubuk; panel tablette sağ sütun,
-/// telefonda alttan açılan sayfa.
+/// Bağlı oda görünümü: üst satır, uyarılar, ızgara (ekran paylaşılırken paylaşım sahnesi),
+/// alt çubuk; panel tablette sağ sütun, telefonda alttan açılan sayfa.
 class ConferenceStage extends StatelessWidget {
   const ConferenceStage({
     super.key,
@@ -65,6 +67,13 @@ class ConferenceStage extends StatelessWidget {
         : view.cameraIssue == MediaIssue.unavailable
         ? l.uiMeetingsCallNoCamera
         : null;
+    final shareIssue = switch (view.shareIssue) {
+      ScreenShareIssue.denied => l.uiMeetingsCallShareDenied,
+      ScreenShareIssue.unavailable => l.uiMeetingsCallShareUnavailable,
+      ScreenShareIssue.taken => l.uiMeetingsCallShareTaken,
+      null => null,
+    };
+    final presenter = view.presenter;
     final open = panel;
     final sheet = open == null
         ? null
@@ -108,9 +117,24 @@ class ConferenceStage extends StatelessWidget {
               onAction: commands.dismiss,
             ),
           ],
+          if (shareIssue != null) ...[
+            const Gap(NizamioSpacing.space2),
+            NzBanner.info(
+              message: shareIssue,
+              actionLabel: l.uiMeetingsCallOk,
+              onAction: commands.dismiss,
+            ),
+          ],
           const Gap(NizamioSpacing.space3),
           Expanded(
-            child: ConferenceGrid(peers: view.peers, names: names),
+            child: presenter == null
+                ? ConferenceGrid(peers: view.peers, names: names)
+                : ScreenShareStage(
+                    presenter: presenter,
+                    peers: view.peers,
+                    names: names,
+                    onStop: commands.share,
+                  ),
           ),
           const Gap(NizamioSpacing.space4),
           _Controls(view: view, panelOpen: open != null, commands: commands),
@@ -347,7 +371,8 @@ class _DeniedPanel extends StatelessWidget {
   }
 }
 
-/// Alt çubuk: mikrofon, kamera, çevir, panel (açıkken seçili), ayrıl (kırmızı).
+/// Alt çubuk: mikrofon, kamera, çevir, ekran paylaşımı (yayın hakkı varsa; paylaşırken seçili),
+/// panel (açıkken seçili), ayrıl (kırmızı).
 class _Controls extends StatelessWidget {
   const _Controls({
     required this.view,
@@ -382,6 +407,17 @@ class _Controls extends StatelessWidget {
           label: l.uiMeetingsCallFlip,
           onPressed: view.cameraOn ? commands.flip : null,
         ),
+        if (view.canShare)
+          ConferenceButton(
+            icon: view.sharing ? NzIcons.screenShareStop : NzIcons.screenShare,
+            label: view.sharing
+                ? l.uiMeetingsCallShareStop
+                : l.uiMeetingsCallShare,
+            tone: view.sharing
+                ? ConferenceButtonTone.selected
+                : ConferenceButtonTone.normal,
+            onPressed: commands.share,
+          ),
         ConferenceButton(
           icon: NzIcons.viewList,
           label: l.uiMeetingsCallPanel,

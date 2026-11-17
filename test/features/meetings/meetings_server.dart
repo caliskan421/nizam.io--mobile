@@ -226,7 +226,11 @@ class MeetingsServer {
             'items': notes,
             'next_cursor': moreNotes.isEmpty ? '' : 'n2',
             'total': notes.length + moreNotes.length,
-            'counts': {'all': 0, 'converted': 0, 'mine': 0},
+            'counts': {
+              'all': notes.length + moreNotes.length,
+              'converted': 0,
+              'mine': 0,
+            },
           },
         });
       case 'GET /v1/meetings/m1/notes':
@@ -234,7 +238,11 @@ class MeetingsServer {
           'items': moreNotes,
           'next_cursor': '',
           'total': notes.length + moreNotes.length,
-          'counts': {'all': 0, 'converted': 0, 'mine': 0},
+          'counts': {
+            'all': notes.length + moreNotes.length,
+            'converted': 0,
+            'mine': 0,
+          },
         });
       case 'POST /v1/meetings/m1/agenda':
         return jsonResponse(

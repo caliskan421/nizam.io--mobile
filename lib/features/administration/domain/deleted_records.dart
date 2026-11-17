@@ -8,14 +8,26 @@ enum DeletedKind { task, meeting, coordinatorship, user }
 typedef DeletedActionBlock = ({String reason, String fix, DeletedKind? goTo});
 
 /// Reddin kullanıcıya açıklaması. [code] sunucu hata kodu; [departmentName] görevin silinmiş
-/// koordinatörlüğünün adı (biliniyorsa). Açıklaması olmayan kodda null (ortak hata metni).
+/// koordinatörlüğünün adı (biliniyorsa); [byDepartment] görev koordinatörlüğüyle birlikte
+/// silindiyse (ADR-0043: koordinatörlük geri yüklenince kendiliğinden geri gelir). Açıklaması
+/// olmayan kodda null (ortak hata metni).
 DeletedActionBlock? deletedActionBlock(
   DeletedKind kind,
   String code, {
   String? departmentName,
+  bool byDepartment = false,
 }) {
   final dept = departmentName == null ? 'görevin' : '"$departmentName"';
   return switch (code) {
+    'work.department_unavailable' when byDepartment => (
+      reason:
+          'Görev koordinatörlüğüyle birlikte silindi; koordinatörlük silinmişken '
+          'tek başına geri yüklenemez.',
+      fix:
+          '$dept koordinatörlüğünü Koordinatörlükler sekmesinden geri yükleyin; '
+          'birlikte silinen görevler kendiliğinden geri gelir.',
+      goTo: DeletedKind.coordinatorship,
+    ),
     'work.department_unavailable' => (
       reason: 'Görevin koordinatörlüğü silinmiş; görev ona geri yüklenemez.',
       fix:
@@ -39,13 +51,12 @@ DeletedActionBlock? deletedActionBlock(
     ),
     'organization.department_in_use' => (
       reason:
-          'Koordinatörlüğe bağlı görevler (silinmişler dahil) ya da '
-          'program bağı var.',
+          'Koordinatörlük tablo, proje ya da bekleyen tablo önerisi '
+          'kapsamında kullanılıyor.',
       fix:
-          'Önce bu koordinatörlüğün silinmiş görevlerini Görevler '
-          'sekmesinden kalıcı silin; program bağı varsa koordinatörlük '
-          'silinmiş olarak kalır.',
-      goTo: DeletedKind.task,
+          'Önce bu kayıtlar tablolardan kaldırılmalı; koordinatörlük silinmiş '
+          'olarak kalabilir.',
+      goTo: null,
     ),
     'identity.account_referenced' => (
       reason: 'Hesap görev ataması, mesaj, dosya ya da tablo kaydında geçiyor.',

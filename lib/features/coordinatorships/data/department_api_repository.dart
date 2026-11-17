@@ -27,6 +27,7 @@ import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../scope/scope.dart' show DepartmentRole;
 import '../domain/coordinatorship_overview.dart';
 import '../domain/department.dart';
+import '../domain/department_delete.dart';
 import '../domain/department_repository.dart';
 
 /// [DepartmentRepository]'nin organization ve program uçlarıyla gerçekleştirmesi. Üretilmiş
@@ -200,9 +201,48 @@ class ApiDepartmentRepository implements DepartmentRepository {
   );
 
   @override
-  Future<bool> deleteDepartment(String departmentId) async {
+  Future<DepartmentDeleteResult> deleteDepartment(String departmentId) async {
     final r = await apiCall(() => _client.deleteDepartment(id: departmentId));
-    return r.deleted;
+    return (deleted: r.deleted, workItemsDeleted: r.workItemsDeleted);
+  }
+
+  @override
+  Future<DepartmentDeleteImpact> deleteImpact(String departmentId) async {
+    final r = await apiCall(
+      () => _client.departmentDeleteImpact(id: departmentId),
+    );
+    final b = r.permanentBlockers;
+    return DepartmentDeleteImpact(
+      departmentId: r.departmentId,
+      name: r.name,
+      deleted: r.deleted,
+      programs: [
+        for (final p in r.programs)
+          DepartmentImpactProgram(
+            programId: p.programId,
+            programName: p.programName,
+            departmentName: p.departmentName,
+            linked: p.linked,
+            activeItems: p.activeItems,
+            completedItems: p.completedItems,
+            deletedItems: p.deletedItems,
+            deletedWithDepartment: p.deletedWithDepartment,
+          ),
+      ],
+      activeItems: r.activeItems,
+      completedItems: r.completedItems,
+      deletedItems: r.deletedItems,
+      deletedWithDepartment: r.deletedWithDepartment,
+      fileCount: r.fileCount,
+      memberCount: r.memberCount,
+      meetingCount: r.meetingCount,
+      blockers: DepartmentPermanentBlockers(
+        tables: b.tables,
+        projects: b.projects,
+        pendingProposals: b.pendingProposals,
+      ),
+      permanentBlocked: r.permanentBlocked,
+    );
   }
 
   @override

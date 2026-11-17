@@ -22,6 +22,10 @@ enum ConferencePhase {
 /// Mikrofon/kamera açılamadı: izin verilmedi ya da cihazda yok (simülatörde kamera yoktur).
 enum MediaIssue { denied, unavailable }
 
+/// Ekran paylaşımı başlatılamadı: izin verilmedi, cihazda/kurulumda yok ya da odada başka biri
+/// zaten paylaşıyor (aynı anda tek paylaşan).
+enum ScreenShareIssue { denied, unavailable, taken }
+
 /// Odadan çıkış nedeni.
 enum ConferenceEnd {
   /// Kullanıcı ayrıldı.
@@ -43,8 +47,8 @@ enum ConferenceEnd {
   lost,
 }
 
-/// Odadaki bir kişi (anlık görüntü). [video] sağlayıcının görüntü izidir; yalnız sunum
-/// katmanındaki çizici tanır (domain için opak).
+/// Odadaki bir kişi (anlık görüntü). [video] kamera, [screen] paylaşılan ekran izidir;
+/// ikisini de yalnız sunum katmanındaki çizici tanır (domain için opak).
 @immutable
 final class ConferencePeer {
   const ConferencePeer({
@@ -55,6 +59,8 @@ final class ConferencePeer {
     this.cameraOn = false,
     this.speaking = false,
     this.video,
+    this.screenSharing = false,
+    this.screen,
   });
 
   /// Katılımcı kimliği = NIZAM hesap kimliği.
@@ -67,7 +73,17 @@ final class ConferencePeer {
   final bool cameraOn;
   final bool speaking;
   final Object? video;
+
+  /// Ekranını paylaşıyor (iz henüz abone olunmamış olsa da).
+  final bool screenSharing;
+  final Object? screen;
 }
+
+/// Sahnede gösterilecek paylaşılan ekranın sahibi: önce paylaşan uzak kişi (liste sırası; yarışta
+/// iki kişi paylaşırsa ilki), yoksa paylaşan yerel kişi, yoksa null (normal ızgara).
+ConferencePeer? presenterOf(List<ConferencePeer> peers) =>
+    peers.where((p) => p.screenSharing && !p.isLocal).firstOrNull ??
+    peers.where((p) => p.screenSharing && p.isLocal).firstOrNull;
 
 /// Oda bağından gelen olay.
 sealed class ConferenceSignal {
@@ -110,6 +126,15 @@ abstract interface class ConferenceLink {
 
   /// null → istenen duruma geçildi.
   Future<MediaIssue?> setCamera(bool on);
+
+  /// Bu derlemede ekran paylaşımı kurulu mu (iOS: yayın uzantısı + App Group imzada var;
+  /// ücretsiz Apple hesabıyla imzalanan varsayılan derlemede yoktur). Hata fırlatmaz.
+  Future<bool> screenShareAvailable();
+
+  /// Ekranı paylaş/bırak. Açma isteği platformun izin ya da seçim penceresini açar; iOS'ta yayın
+  /// kullanıcı sistem penceresinde onayladıktan sonra başlar (durum [peers]'tan okunur).
+  /// null → istek kabul edildi.
+  Future<MediaIssue?> setScreenShare(bool on);
 
   /// Ön/arka kamera (kamera açıkken).
   Future<void> flipCamera();

@@ -20,5 +20,7 @@ export 'domain/department.dart'
         MembershipChange;
 export 'domain/department_repository.dart' show DepartmentRepository;
 export 'presentation/coord_add_member_sheet.dart' show showCoordAddMemberSheet;
+export 'presentation/coord_delete_sheet.dart'
+    show coordPurgedToast, coordRestoredToast, showDepartmentDeleteSheet;
 export 'presentation/coordinatorship_page.dart' show CoordinatorshipPage;
 export 'presentation/coordinatorships_page.dart' show CoordinatorshipsPage;

@@ -13,7 +13,7 @@ _TableComment _$TableCommentFromJson(Map<String, dynamic> json) =>
       columnId: json['column_id'] as String?,
       author: json['author'] == null
           ? null
-          : Author.fromJson(json['author'] as String),
+          : TableCommentAuthor.fromJson(json['author'] as Map<String, dynamic>),
       mine: json['mine'] as bool,
       body: json['body'] as String,
       seq: (json['seq'] as num).toInt(),
@@ -28,12 +28,10 @@ Map<String, dynamic> _$TableCommentToJson(_TableComment instance) =>
       'id': instance.id,
       'row_id': instance.rowId,
       'column_id': ?instance.columnId,
-      'author': ?_$AuthorEnumMap[instance.author],
+      'author': ?instance.author?.toJson(),
       'mine': instance.mine,
       'body': instance.body,
       'seq': instance.seq,
       'created_at': instance.createdAt.toIso8601String(),
       'edited_at': ?instance.editedAt?.toIso8601String(),
     };
-
-const _$AuthorEnumMap = {Author.me: 'me', Author.$unknown: r'$unknown'};

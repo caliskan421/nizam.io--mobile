@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/api/generated/clients/organization_client.dart';
 import '../../../core/api/generated/models/account_result.dart';
 import '../../../core/api/generated/models/create_user_request.dart';
+import '../../../core/api/generated/models/department_lifecycle_result.dart';
 import '../../../core/api/generated/models/known_user.dart' as api;
 import '../../../core/api/generated/models/open_account_request.dart';
 import '../../../core/api/generated/models/update_account_request.dart';
@@ -257,18 +258,26 @@ class ApiOrganizationAdminRepository implements OrganizationAdminRepository {
   }
 
   @override
-  Future<LifecycleStatus> restoreDepartment(String departmentId) async {
-    final r = await apiCall(() => _client.restoreDepartment(id: departmentId));
-    return _status(r.status.json);
-  }
+  Future<DepartmentLifecycle> restoreDepartment(String departmentId) async =>
+      _lifecycle(
+        await apiCall(() => _client.restoreDepartment(id: departmentId)),
+      );
 
   @override
-  Future<LifecycleStatus> permanentDeleteDepartment(String departmentId) async {
-    final r = await apiCall(
-      () => _client.permanentDeleteDepartment(id: departmentId),
-    );
-    return _status(r.status.json);
-  }
+  Future<DepartmentLifecycle> permanentDeleteDepartment(
+    String departmentId,
+  ) async => _lifecycle(
+    await apiCall(() => _client.permanentDeleteDepartment(id: departmentId)),
+  );
+
+  static DepartmentLifecycle _lifecycle(DepartmentLifecycleResult r) => (
+    status: _status(r.status.json),
+    workItemsRestored: r.workItemsRestored ?? 0,
+    workItemsDeleted: r.workItemsDeleted ?? 0,
+    filesDeleted: r.filesDeleted ?? 0,
+    programLinksRemoved: r.programLinksRemoved ?? 0,
+    membershipsDeleted: r.membershipsDeleted ?? 0,
+  );
 
   @override
   Future<PageSlice<DeletedAccount>> listDeletedAccounts({

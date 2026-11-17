@@ -421,7 +421,7 @@
   "@errOrganizationDepartmentNotLinked": {
     "description": "organization.department_not_linked"
   },
-  "errOrganizationDepartmentUsage": "Koordinatörlüğe bağlı kayıtlar var; önce bunları kaldırın.",
+  "errOrganizationDepartmentUsage": "Departman başka kayıtlarda kullanılıyor.",
   "@errOrganizationDepartmentUsage": {
     "description": "organization.department_usage"
   },
@@ -1188,6 +1188,10 @@
   "errClientSessionRefreshed": "Oturum yenilendi; dosya gönderilmedi. Yüklemeyi yeniden deneyin.",
   "@errClientSessionRefreshed": {
     "description": "client.session_refreshed"
+  },
+  "errClientTaskLookupLimit": "Görev aranan departman sınırına ulaşıldı. Görev listesinden departman seçerek açın.",
+  "@errClientTaskLookupLimit": {
+    "description": "client.task_lookup_limit"
   },
   "errClientTimeout": "Sunucu zamanında yanıt vermedi. Biraz sonra yeniden deneyin.",
   "@errClientTimeout": {
@@ -3085,6 +3089,138 @@
   "@uiCoordTabCalendar": {
     "description": "ui.coord.tab_calendar"
   },
+  "uiCoordDeleteMenu": "Koordinatörlüğü sil",
+  "@uiCoordDeleteMenu": {
+    "description": "ui.coord_delete.menu"
+  },
+  "uiCoordDeleteTitle": "Koordinatörlüğü sil",
+  "@uiCoordDeleteTitle": {
+    "description": "ui.coord_delete.title"
+  },
+  "uiCoordDeletePermanentTitle": "Kalıcı sil",
+  "@uiCoordDeletePermanentTitle": {
+    "description": "ui.coord_delete.permanent_title"
+  },
+  "uiCoordDeleteSoftWarning": "Bütün programlardaki görevleri Silinenler'e taşınır; koordinatörlük geri yüklenince geri gelir. Diğer programlar da etkilenir. Toplantılar kalır.",
+  "@uiCoordDeleteSoftWarning": {
+    "description": "ui.coord_delete.soft_warning"
+  },
+  "uiCoordDeletePermanentWarning": "Bu işlem geri alınamaz. Bütün görevler (silinmişler dahil), dosyalar, program bağları ve ekip satırları kalıcı silinir. Toplantılar koordinatörlük adıyla kalır.",
+  "@uiCoordDeletePermanentWarning": {
+    "description": "ui.coord_delete.permanent_warning"
+  },
+  "uiCoordDeleteBlocked": "Kalıcı silinemez: koordinatörlük tablo kayıtlarında kullanılıyor. Önce bu kayıtlar tablolardan kaldırılmalı; koordinatörlük silinmiş olarak kalabilir.",
+  "@uiCoordDeleteBlocked": {
+    "description": "ui.coord_delete.blocked"
+  },
+  "uiCoordDeleteBlockerTables": "tablo",
+  "@uiCoordDeleteBlockerTables": {
+    "description": "ui.coord_delete.blocker_tables"
+  },
+  "uiCoordDeleteBlockerProjects": "proje",
+  "@uiCoordDeleteBlockerProjects": {
+    "description": "ui.coord_delete.blocker_projects"
+  },
+  "uiCoordDeleteBlockerProposals": "bekleyen tablo önerisi",
+  "@uiCoordDeleteBlockerProposals": {
+    "description": "ui.coord_delete.blocker_proposals"
+  },
+  "uiCoordDeleteRowThisProgram": "Bu program",
+  "@uiCoordDeleteRowThisProgram": {
+    "description": "ui.coord_delete.row_this_program"
+  },
+  "uiCoordDeleteRowFiles": "Dosya",
+  "@uiCoordDeleteRowFiles": {
+    "description": "ui.coord_delete.row_files"
+  },
+  "uiCoordDeleteRowMembers": "Ekip",
+  "@uiCoordDeleteRowMembers": {
+    "description": "ui.coord_delete.row_members"
+  },
+  "uiCoordDeleteRowMeetings": "Toplantı",
+  "@uiCoordDeleteRowMeetings": {
+    "description": "ui.coord_delete.row_meetings"
+  },
+  "uiCoordDeleteRowDeleted": "Silinenler'de",
+  "@uiCoordDeleteRowDeleted": {
+    "description": "ui.coord_delete.row_deleted"
+  },
+  "uiCoordDeleteOpen": "açık",
+  "@uiCoordDeleteOpen": {
+    "description": "ui.coord_delete.open"
+  },
+  "uiCoordDeleteCompleted": "tamamlanmış",
+  "@uiCoordDeleteCompleted": {
+    "description": "ui.coord_delete.completed"
+  },
+  "uiCoordDeleteTask": "görev",
+  "@uiCoordDeleteTask": {
+    "description": "ui.coord_delete.task"
+  },
+  "uiCoordDeletePerson": "kişi",
+  "@uiCoordDeletePerson": {
+    "description": "ui.coord_delete.person"
+  },
+  "uiCoordDeleteUnlinked": "bağ yok",
+  "@uiCoordDeleteUnlinked": {
+    "description": "ui.coord_delete.unlinked"
+  },
+  "uiCoordDeleteOtherProgram": "Başka program",
+  "@uiCoordDeleteOtherProgram": {
+    "description": "ui.coord_delete.other_program"
+  },
+  "uiCoordDeleteConfirmLabel": "Onay için yazın",
+  "@uiCoordDeleteConfirmLabel": {
+    "description": "ui.coord_delete.confirm_label"
+  },
+  "uiCoordDeleteConfirmHelper": "Silme düğmesi yazılan metin eşleşince açılır.",
+  "@uiCoordDeleteConfirmHelper": {
+    "description": "ui.coord_delete.confirm_helper"
+  },
+  "uiCoordDeleteCancel": "Vazgeç",
+  "@uiCoordDeleteCancel": {
+    "description": "ui.coord_delete.cancel"
+  },
+  "uiCoordDeleteDelete": "Sil",
+  "@uiCoordDeleteDelete": {
+    "description": "ui.coord_delete.delete"
+  },
+  "uiCoordDeletePermanentDelete": "Kalıcı sil",
+  "@uiCoordDeletePermanentDelete": {
+    "description": "ui.coord_delete.permanent_delete"
+  },
+  "uiCoordDeleteToastDeleted": "Koordinatörlük silindi",
+  "@uiCoordDeleteToastDeleted": {
+    "description": "ui.coord_delete.toast_deleted"
+  },
+  "uiCoordDeleteToastMovedTail": "görev Silinenler'e taşındı",
+  "@uiCoordDeleteToastMovedTail": {
+    "description": "ui.coord_delete.toast_moved_tail"
+  },
+  "uiCoordDeleteToastRestored": "geri yüklendi",
+  "@uiCoordDeleteToastRestored": {
+    "description": "ui.coord_delete.toast_restored"
+  },
+  "uiCoordDeleteToastRestoredTail": "görev geri geldi",
+  "@uiCoordDeleteToastRestoredTail": {
+    "description": "ui.coord_delete.toast_restored_tail"
+  },
+  "uiCoordDeleteToastPurged": "kalıcı silindi",
+  "@uiCoordDeleteToastPurged": {
+    "description": "ui.coord_delete.toast_purged"
+  },
+  "uiCoordDeleteToastFilesTail": "dosya",
+  "@uiCoordDeleteToastFilesTail": {
+    "description": "ui.coord_delete.toast_files_tail"
+  },
+  "uiCoordDeleteToastLinksTail": "program bağı",
+  "@uiCoordDeleteToastLinksTail": {
+    "description": "ui.coord_delete.toast_links_tail"
+  },
+  "uiCoordDeleteByDepartment": "Koordinatörlükle silindi",
+  "@uiCoordDeleteByDepartment": {
+    "description": "ui.coord_delete.by_department"
+  },
   "uiFeedbackLoading": "Yükleniyor",
   "@uiFeedbackLoading": {
     "description": "ui.feedback.loading"
@@ -4260,6 +4396,38 @@
   "uiMeetingsCallBack": "Toplantıya dön",
   "@uiMeetingsCallBack": {
     "description": "ui.meetings.call_back"
+  },
+  "uiMeetingsCallShare": "Ekranını paylaş",
+  "@uiMeetingsCallShare": {
+    "description": "ui.meetings.call_share"
+  },
+  "uiMeetingsCallShareStop": "Paylaşımı bitir",
+  "@uiMeetingsCallShareStop": {
+    "description": "ui.meetings.call_share_stop"
+  },
+  "uiMeetingsCallSharingSelf": "Ekranını paylaşıyorsun",
+  "@uiMeetingsCallSharingSelf": {
+    "description": "ui.meetings.call_sharing_self"
+  },
+  "uiMeetingsCallSharingSelfDesc": "Görüşmedekiler şu an ekranını görüyor. Bildirimler ve açtığın uygulamalar da görünür.",
+  "@uiMeetingsCallSharingSelfDesc": {
+    "description": "ui.meetings.call_sharing_self_desc"
+  },
+  "uiMeetingsCallSharingTail": "ekranını paylaşıyor",
+  "@uiMeetingsCallSharingTail": {
+    "description": "ui.meetings.call_sharing_tail"
+  },
+  "uiMeetingsCallShareDenied": "Ekran paylaşımına izin verilmedi; paylaşım başlamadı.",
+  "@uiMeetingsCallShareDenied": {
+    "description": "ui.meetings.call_share_denied"
+  },
+  "uiMeetingsCallShareUnavailable": "Bu cihazda ekran paylaşımı başlatılamadı.",
+  "@uiMeetingsCallShareUnavailable": {
+    "description": "ui.meetings.call_share_unavailable"
+  },
+  "uiMeetingsCallShareTaken": "Ekranı şu an başka biri paylaşıyor. O bitirince paylaşabilirsin.",
+  "@uiMeetingsCallShareTaken": {
+    "description": "ui.meetings.call_share_taken"
   },
   "uiMeetingsTConfStarted": "Konferans başlatıldı",
   "@uiMeetingsTConfStarted": {

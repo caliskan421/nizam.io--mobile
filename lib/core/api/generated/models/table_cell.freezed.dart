@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$TableCell {
 
-@JsonKey(name: 'row_id') String get rowId;@JsonKey(name: 'column_id') String get columnId; TableCellValue? get value;/// Hücre sürümü. Okumada hiç yazılmamış hücre yanıtta yoktur; yazımda 0 ilk yazımdır, sonraki yazım mevcut pozitif sürümü ister (TABLES-K03); eksik ya da `null` sürüm 0 sayılmaz, 422 `tables.input_invalid`. Okumada erişimi kaybolmuş tablo referansı `null` döner (TABLES-K07).
+@JsonKey(name: 'row_id') String get rowId;@JsonKey(name: 'column_id') String get columnId;/// Sütun tipine göre tipli JSON değeri; `null` boş hücredir (TABLES-K06). Referans tipleri tekli sütunda kimlik string'i, çoklu sütunda 1–50 benzersiz, boş olmayan kimlik dizisidir (TABLES-K14): istekte boş dizi, `null`/boş/yinelenen öğe 422 `tables.input_invalid`; okuma yanıtında okuyana görünmeyen öğe AYNI konumda `null` olur (hücre `redacted: true`) — yanıt dizisi bu yüzden istek olarak geri gönderilemez. text/phone/email/date string (date `YYYY-MM-DD`, email tek adres, phone en çok 40 bayt, metin en çok 10000 bayt), number JSON ondalık (en çok 1000 karakter, mutlak üs en çok 1000), checkbox boolean. Hücre başına JSON en çok 16 KiB. Bozuk UTF-8 ya da eşlenmemiş UTF-16 vekil kaçışı (`"\uD800"`) taşıyan gövde 422 `tables.input_invalid` alır (adlar dahil).
+@JsonKey(includeIfNull: true) dynamic get value;/// Hücre sürümü. Okumada hiç yazılmamış hücre yanıtta yoktur; yazımda 0 ilk yazımdır, sonraki yazım mevcut pozitif sürümü ister (TABLES-K03); eksik ya da `null` sürüm 0 sayılmaz, 422 `tables.input_invalid`. Okumada erişimi kaybolmuş tablo referansı `null` döner (TABLES-K07).
  int get version;/// Yalnız okuma yanıtında ve yalnız `true` olarak bulunur: hücredeki referansın tamamı (tekli) ya da bazı öğeleri (çoklu, aynı konumda `null`) okuyana görünmediği için gizlendi; saklanan değer ve sürüm değişmedi (TABLES-K14). İstekte `true` 422 `tables.input_invalid`: kısmi redakte okuma körlemesine geri yazılamaz; gizli öğeyi bırakmak ancak açık tam değiştirmeyle olur.
  bool? get redacted;
 /// Create a copy of TableCell
@@ -32,14 +33,14 @@ $TableCellCopyWith<TableCell> get copyWith => _$TableCellCopyWithImpl<TableCell>
 @override
 bool operator ==(Object other) {
   final _this = this as TableCell;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TableCell&&(identical(other.rowId, _this.rowId) || other.rowId == _this.rowId)&&(identical(other.columnId, _this.columnId) || other.columnId == _this.columnId)&&(identical(other.value, _this.value) || other.value == _this.value)&&(identical(other.version, _this.version) || other.version == _this.version)&&(identical(other.redacted, _this.redacted) || other.redacted == _this.redacted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TableCell&&(identical(other.rowId, _this.rowId) || other.rowId == _this.rowId)&&(identical(other.columnId, _this.columnId) || other.columnId == _this.columnId)&&const DeepCollectionEquality().equals(other.value, _this.value)&&(identical(other.version, _this.version) || other.version == _this.version)&&(identical(other.redacted, _this.redacted) || other.redacted == _this.redacted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as TableCell;
-  return Object.hash(runtimeType,_this.rowId,_this.columnId,_this.value,_this.version,_this.redacted);
+  return Object.hash(runtimeType,_this.rowId,_this.columnId,const DeepCollectionEquality().hash(_this.value),_this.version,_this.redacted);
 }
 
 @override
@@ -56,11 +57,11 @@ abstract mixin class $TableCellCopyWith<$Res>  {
   factory $TableCellCopyWith(TableCell value, $Res Function(TableCell) _then) = _$TableCellCopyWithImpl;
 @useResult
 $Res call({
-@JsonKey(name: 'row_id') String rowId,@JsonKey(name: 'column_id') String columnId, TableCellValue? value, int version, bool? redacted
+@JsonKey(name: 'row_id') String rowId,@JsonKey(name: 'column_id') String columnId,@JsonKey(includeIfNull: true) dynamic value, int version, bool? redacted
 });
 
 
-$TableCellValueCopyWith<$Res>? get value;
+
 
 }
 /// @nodoc
@@ -78,24 +79,12 @@ class _$TableCellCopyWithImpl<$Res>
 rowId: null == rowId ? _self.rowId : rowId // ignore: cast_nullable_to_non_nullable
 as String,columnId: null == columnId ? _self.columnId : columnId // ignore: cast_nullable_to_non_nullable
 as String,value: freezed == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
-as TableCellValue?,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as dynamic,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,redacted: freezed == redacted ? _self.redacted : redacted // ignore: cast_nullable_to_non_nullable
 as bool?,
   ));
 }
-/// Create a copy of TableCell
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$TableCellValueCopyWith<$Res>? get value {
-    if (_self.value == null) {
-    return null;
-  }
 
-  return $TableCellValueCopyWith<$Res>(_self.value!, (value) {
-    return _then(_self.copyWith(value: value));
-  });
-}
 }
 
 
@@ -177,7 +166,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String columnId,  TableCellValue? value,  int version,  bool? redacted)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function(@JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String columnId, @JsonKey(includeIfNull: true)  dynamic value,  int version,  bool? redacted)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TableCell() when $default != null:
 return $default(_that.rowId,_that.columnId,_that.value,_that.version,_that.redacted);case _:
@@ -198,7 +187,7 @@ return $default(_that.rowId,_that.columnId,_that.value,_that.version,_that.redac
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String columnId,  TableCellValue? value,  int version,  bool? redacted)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function(@JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String columnId, @JsonKey(includeIfNull: true)  dynamic value,  int version,  bool? redacted)  $default,) {final _that = this;
 switch (_that) {
 case _TableCell():
 return $default(_that.rowId,_that.columnId,_that.value,_that.version,_that.redacted);case _:
@@ -218,7 +207,7 @@ return $default(_that.rowId,_that.columnId,_that.value,_that.version,_that.redac
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String columnId,  TableCellValue? value,  int version,  bool? redacted)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function(@JsonKey(name: 'row_id')  String rowId, @JsonKey(name: 'column_id')  String columnId, @JsonKey(includeIfNull: true)  dynamic value,  int version,  bool? redacted)?  $default,) {final _that = this;
 switch (_that) {
 case _TableCell() when $default != null:
 return $default(_that.rowId,_that.columnId,_that.value,_that.version,_that.redacted);case _:
@@ -233,12 +222,13 @@ return $default(_that.rowId,_that.columnId,_that.value,_that.version,_that.redac
 @JsonSerializable()
 
 class _TableCell implements TableCell {
-  const _TableCell({@JsonKey(name: 'row_id') required this.rowId, @JsonKey(name: 'column_id') required this.columnId, required this.value, required this.version, this.redacted});
+  const _TableCell({@JsonKey(name: 'row_id') required this.rowId, @JsonKey(name: 'column_id') required this.columnId, @JsonKey(includeIfNull: true) required this.value, required this.version, this.redacted});
   factory _TableCell.fromJson(Map<String, dynamic> json) => _$TableCellFromJson(json);
 
 @override@JsonKey(name: 'row_id') final  String rowId;
 @override@JsonKey(name: 'column_id') final  String columnId;
-@override final  TableCellValue? value;
+/// Sütun tipine göre tipli JSON değeri; `null` boş hücredir (TABLES-K06). Referans tipleri tekli sütunda kimlik string'i, çoklu sütunda 1–50 benzersiz, boş olmayan kimlik dizisidir (TABLES-K14): istekte boş dizi, `null`/boş/yinelenen öğe 422 `tables.input_invalid`; okuma yanıtında okuyana görünmeyen öğe AYNI konumda `null` olur (hücre `redacted: true`) — yanıt dizisi bu yüzden istek olarak geri gönderilemez. text/phone/email/date string (date `YYYY-MM-DD`, email tek adres, phone en çok 40 bayt, metin en çok 10000 bayt), number JSON ondalık (en çok 1000 karakter, mutlak üs en çok 1000), checkbox boolean. Hücre başına JSON en çok 16 KiB. Bozuk UTF-8 ya da eşlenmemiş UTF-16 vekil kaçışı (`"\uD800"`) taşıyan gövde 422 `tables.input_invalid` alır (adlar dahil).
+@override@JsonKey(includeIfNull: true) final  dynamic value;
 /// Hücre sürümü. Okumada hiç yazılmamış hücre yanıtta yoktur; yazımda 0 ilk yazımdır, sonraki yazım mevcut pozitif sürümü ister (TABLES-K03); eksik ya da `null` sürüm 0 sayılmaz, 422 `tables.input_invalid`. Okumada erişimi kaybolmuş tablo referansı `null` döner (TABLES-K07).
 @override final  int version;
 /// Yalnız okuma yanıtında ve yalnız `true` olarak bulunur: hücredeki referansın tamamı (tekli) ya da bazı öğeleri (çoklu, aynı konumda `null`) okuyana görünmediği için gizlendi; saklanan değer ve sürüm değişmedi (TABLES-K14). İstekte `true` 422 `tables.input_invalid`: kısmi redakte okuma körlemesine geri yazılamaz; gizli öğeyi bırakmak ancak açık tam değiştirmeyle olur.
@@ -257,13 +247,13 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TableCell&&(identical(other.rowId, rowId) || other.rowId == rowId)&&(identical(other.columnId, columnId) || other.columnId == columnId)&&(identical(other.value, value) || other.value == value)&&(identical(other.version, version) || other.version == version)&&(identical(other.redacted, redacted) || other.redacted == redacted));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _TableCell&&(identical(other.rowId, rowId) || other.rowId == rowId)&&(identical(other.columnId, columnId) || other.columnId == columnId)&&const DeepCollectionEquality().equals(other.value, value)&&(identical(other.version, version) || other.version == version)&&(identical(other.redacted, redacted) || other.redacted == redacted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,rowId,columnId,value,version,redacted);
+    return Object.hash(runtimeType,rowId,columnId,const DeepCollectionEquality().hash(value),version,redacted);
 }
 
 @override
@@ -279,11 +269,11 @@ abstract mixin class _$TableCellCopyWith<$Res> implements $TableCellCopyWith<$Re
   factory _$TableCellCopyWith(_TableCell value, $Res Function(_TableCell) _then) = __$TableCellCopyWithImpl;
 @override @useResult
 $Res call({
-@JsonKey(name: 'row_id') String rowId,@JsonKey(name: 'column_id') String columnId, TableCellValue? value, int version, bool? redacted
+@JsonKey(name: 'row_id') String rowId,@JsonKey(name: 'column_id') String columnId,@JsonKey(includeIfNull: true) dynamic value, int version, bool? redacted
 });
 
 
-@override $TableCellValueCopyWith<$Res>? get value;
+
 
 }
 /// @nodoc
@@ -301,25 +291,13 @@ class __$TableCellCopyWithImpl<$Res>
 rowId: null == rowId ? _self.rowId : rowId // ignore: cast_nullable_to_non_nullable
 as String,columnId: null == columnId ? _self.columnId : columnId // ignore: cast_nullable_to_non_nullable
 as String,value: freezed == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
-as TableCellValue?,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
+as dynamic,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,redacted: freezed == redacted ? _self.redacted : redacted // ignore: cast_nullable_to_non_nullable
 as bool?,
   ));
 }
 
-/// Create a copy of TableCell
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$TableCellValueCopyWith<$Res>? get value {
-    if (_self.value == null) {
-    return null;
-  }
 
-  return $TableCellValueCopyWith<$Res>(_self.value!, (value) {
-    return _then(_self.copyWith(value: value));
-  });
-}
 }
 
 // dart format on

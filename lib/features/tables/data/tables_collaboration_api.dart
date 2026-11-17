@@ -176,21 +176,23 @@ mixin _TableCollaborationApi {
     required int length,
     required String key,
   }) async {
-    final r = await uploadTableWire(
-      _http,
-      path: '${_path(l, id)}/attachments',
-      row: row,
-      column: column,
-      version: version,
-      name: name,
-      bytes: bytes,
-      length: length,
-      key: key,
-      extras: _scope(
-        l.personal
-            ? TablesClient.attachPersonalTableFileOpenapiExtras
-            : TablesClient.attachTableFileOpenapiExtras,
-        l,
+    final r = api.TableResult.fromJson(
+      await uploadTableWire(
+        _http,
+        path: '${_path(l, id)}/attachments',
+        row: row,
+        column: column,
+        version: version,
+        name: name,
+        bytes: bytes,
+        length: length,
+        key: key,
+        extras: _scope(
+          l.personal
+              ? TablesClient.attachPersonalTableFileOpenapiExtras
+              : TablesClient.attachTableFileOpenapiExtras,
+          l,
+        ),
       ),
     );
     if (r.tableId != id) throw invalidResponseError();

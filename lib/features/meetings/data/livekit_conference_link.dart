@@ -9,13 +9,18 @@ import '../../../core/i18n/generated/client_error_codes.gen.dart';
 import '../../../core/telemetry/report_source.dart';
 import '../../../core/telemetry/unexpected_error.dart';
 import '../domain/conference.dart';
+import 'screen_capture_channel.dart';
 
 /// [ConferenceLink]'in LiveKit gerçekleştirmesi. Medya NIZAM sunucusundan geçmez; oda adresi
 /// ve token `joinConference`'tan gelir. Token yalnız `Room.connect`'e verilir, alanda tutulmaz;
 /// bağlantı hatasının ham metni (bağlantı adresini ve token'ı içerebilir) rapora, log'a ve
 /// kullanıcıya gitmez (COLLABORATION-K49) — yerine `client.conference_connect_failed`.
 /// Kopan bağlantıyı LiveKit kendisi yeniden kurar. Bağlıyken ekran kilitlenmez (wakelock).
+/// Ekran paylaşımı: Android'de izin + ön plan servisi ([ScreenCaptureChannel]), iOS'ta ReplayKit
+/// yayın uzantısı (`ios/ScreenShare`; seçim penceresi LiveKit'in `BroadcastManager`'ı ile açılır,
+/// yayın başlayınca iz kendiliğinden yayımlanır).
 class LiveKitConferenceLink implements ConferenceLink {
+  final _capture = const ScreenCaptureChannel();
   lk.Room? _room;
   lk.EventsListener<lk.RoomEvent>? _events;
   final _signals = StreamController<ConferenceSignal>.broadcast();
@@ -40,7 +45,7 @@ class LiveKitConferenceLink implements ConferenceLink {
   }
 
   static ConferencePeer _peer(lk.Participant p, {required bool local}) {
-    final cam = _camera(p);
+    final cam = _video(p, lk.TrackSource.camera);
     return ConferencePeer(
       id: p.identity,
       name: p.name,
@@ -49,19 +54,24 @@ class LiveKitConferenceLink implements ConferenceLink {
       cameraOn: cam != null,
       speaking: p.isSpeaking,
       video: cam,
+      screenSharing: p.isScreenShareEnabled(),
+      screen: _video(p, lk.TrackSource.screenShareVideo),
     );
   }
 
-  /// Katılımcının yayındaki (susturulmamış) kamera izi.
-  static lk.VideoTrack? _camera(lk.Participant p) {
+  /// Katılımcının [source] kaynaklı, yayındaki (susturulmamış) görüntü izi.
+  static lk.VideoTrack? _video(lk.Participant p, lk.TrackSource source) {
     for (final pub in p.videoTrackPublications) {
       final track = pub.track;
-      if (pub.source == lk.TrackSource.camera && !pub.muted && track != null) {
+      if (pub.source == source && !pub.muted && track != null) {
         return track as lk.VideoTrack;
       }
     }
     return null;
   }
+
+  static lk.VideoTrack? _camera(lk.Participant p) =>
+      _video(p, lk.TrackSource.camera);
 
   @override
   Future<void> connect(String url, String token) async {
@@ -69,7 +79,14 @@ class LiveKitConferenceLink implements ConferenceLink {
       throw ApiError(ClientErrorCode.conferenceConnectFailed);
     }
     final room = lk.Room(
-      roomOptions: const lk.RoomOptions(adaptiveStream: true, dynacast: true),
+      roomOptions: const lk.RoomOptions(
+        adaptiveStream: true,
+        dynacast: true,
+        // iOS: başka uygulamaların ekranı yalnız yayın uzantısıyla yakalanır (Android'de etkisiz).
+        defaultScreenShareCaptureOptions: lk.ScreenShareCaptureOptions(
+          useiOSBroadcastExtension: true,
+        ),
+      ),
     );
     _room = room;
     _events = room.createListener()..listen(_onEvent);
@@ -100,6 +117,11 @@ class LiveKitConferenceLink implements ConferenceLink {
         _emit(const ConferenceReconnected());
       case lk.RoomDisconnectedEvent(:final reason):
         _emit(ConferenceDropped(conferenceEndOf(reason)));
+      case lk.LocalTrackUnpublishedEvent(:final publication)
+          when publication.source == lk.TrackSource.screenShareVideo:
+        // Paylaşım (sistem denetiminden de) bitti: Android ön plan servisi kapanır.
+        _releaseCapture().ignore();
+        _emit(const ConferencePeersChanged());
       default:
         _emit(const ConferencePeersChanged());
     }
@@ -151,6 +173,44 @@ class LiveKitConferenceLink implements ConferenceLink {
   }
 
   @override
+  Future<bool> screenShareAvailable() => _capture.available();
+
+  @override
+  Future<MediaIssue?> setScreenShare(bool on) async {
+    final me = _room?.localParticipant;
+    if (me == null) return MediaIssue.unavailable;
+    try {
+      if (on) {
+        if (!await _capture.prepare()) return MediaIssue.denied;
+        await me.setScreenShareEnabled(true);
+      } else {
+        await me.setScreenShareEnabled(false);
+        await _capture.release();
+      }
+      return null;
+    } on Object catch (e, st) {
+      reportUnexpected(
+        e,
+        st,
+        source: ReportSource.meetings,
+        expected: isKnownMediaIssue,
+      );
+      if (on) await _releaseCapture();
+      return knownMediaIssue(e) ?? MediaIssue.unavailable;
+    } finally {
+      _emit(const ConferencePeersChanged());
+    }
+  }
+
+  Future<void> _releaseCapture() async {
+    try {
+      await _capture.release();
+    } on Object catch (e, st) {
+      reportUnexpected(e, st, source: ReportSource.meetings);
+    }
+  }
+
+  @override
   Future<void> flipCamera() async {
     final me = _room?.localParticipant;
     final track = me == null ? null : _camera(me);
@@ -191,6 +251,7 @@ class LiveKitConferenceLink implements ConferenceLink {
     } on Object catch (e, st) {
       reportUnexpected(e, st, source: ReportSource.meetings);
     }
+    if (room != null) await _releaseCapture();
     await _keepAwake(false);
   }
 

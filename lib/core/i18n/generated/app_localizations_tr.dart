@@ -378,7 +378,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get errOrganizationDepartmentUsage =>
-      'Koordinatörlüğe bağlı kayıtlar var; önce bunları kaldırın.';
+      'Departman başka kayıtlarda kullanılıyor.';
 
   @override
   String get errOrganizationExistingDepartment =>
@@ -1040,6 +1040,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get errClientSessionRefreshed =>
       'Oturum yenilendi; dosya gönderilmedi. Yüklemeyi yeniden deneyin.';
+
+  @override
+  String get errClientTaskLookupLimit =>
+      'Görev aranan departman sınırına ulaşıldı. Görev listesinden departman seçerek açın.';
 
   @override
   String get errClientTimeout =>
@@ -2488,6 +2492,109 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiCoordTabCalendar => 'Takvim';
 
   @override
+  String get uiCoordDeleteMenu => 'Koordinatörlüğü sil';
+
+  @override
+  String get uiCoordDeleteTitle => 'Koordinatörlüğü sil';
+
+  @override
+  String get uiCoordDeletePermanentTitle => 'Kalıcı sil';
+
+  @override
+  String get uiCoordDeleteSoftWarning =>
+      'Bütün programlardaki görevleri Silinenler\'e taşınır; koordinatörlük geri yüklenince geri gelir. Diğer programlar da etkilenir. Toplantılar kalır.';
+
+  @override
+  String get uiCoordDeletePermanentWarning =>
+      'Bu işlem geri alınamaz. Bütün görevler (silinmişler dahil), dosyalar, program bağları ve ekip satırları kalıcı silinir. Toplantılar koordinatörlük adıyla kalır.';
+
+  @override
+  String get uiCoordDeleteBlocked =>
+      'Kalıcı silinemez: koordinatörlük tablo kayıtlarında kullanılıyor. Önce bu kayıtlar tablolardan kaldırılmalı; koordinatörlük silinmiş olarak kalabilir.';
+
+  @override
+  String get uiCoordDeleteBlockerTables => 'tablo';
+
+  @override
+  String get uiCoordDeleteBlockerProjects => 'proje';
+
+  @override
+  String get uiCoordDeleteBlockerProposals => 'bekleyen tablo önerisi';
+
+  @override
+  String get uiCoordDeleteRowThisProgram => 'Bu program';
+
+  @override
+  String get uiCoordDeleteRowFiles => 'Dosya';
+
+  @override
+  String get uiCoordDeleteRowMembers => 'Ekip';
+
+  @override
+  String get uiCoordDeleteRowMeetings => 'Toplantı';
+
+  @override
+  String get uiCoordDeleteRowDeleted => 'Silinenler\'de';
+
+  @override
+  String get uiCoordDeleteOpen => 'açık';
+
+  @override
+  String get uiCoordDeleteCompleted => 'tamamlanmış';
+
+  @override
+  String get uiCoordDeleteTask => 'görev';
+
+  @override
+  String get uiCoordDeletePerson => 'kişi';
+
+  @override
+  String get uiCoordDeleteUnlinked => 'bağ yok';
+
+  @override
+  String get uiCoordDeleteOtherProgram => 'Başka program';
+
+  @override
+  String get uiCoordDeleteConfirmLabel => 'Onay için yazın';
+
+  @override
+  String get uiCoordDeleteConfirmHelper =>
+      'Silme düğmesi yazılan metin eşleşince açılır.';
+
+  @override
+  String get uiCoordDeleteCancel => 'Vazgeç';
+
+  @override
+  String get uiCoordDeleteDelete => 'Sil';
+
+  @override
+  String get uiCoordDeletePermanentDelete => 'Kalıcı sil';
+
+  @override
+  String get uiCoordDeleteToastDeleted => 'Koordinatörlük silindi';
+
+  @override
+  String get uiCoordDeleteToastMovedTail => 'görev Silinenler\'e taşındı';
+
+  @override
+  String get uiCoordDeleteToastRestored => 'geri yüklendi';
+
+  @override
+  String get uiCoordDeleteToastRestoredTail => 'görev geri geldi';
+
+  @override
+  String get uiCoordDeleteToastPurged => 'kalıcı silindi';
+
+  @override
+  String get uiCoordDeleteToastFilesTail => 'dosya';
+
+  @override
+  String get uiCoordDeleteToastLinksTail => 'program bağı';
+
+  @override
+  String get uiCoordDeleteByDepartment => 'Koordinatörlükle silindi';
+
+  @override
   String get uiFeedbackLoading => 'Yükleniyor';
 
   @override
@@ -3401,6 +3508,34 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMeetingsCallBack => 'Toplantıya dön';
+
+  @override
+  String get uiMeetingsCallShare => 'Ekranını paylaş';
+
+  @override
+  String get uiMeetingsCallShareStop => 'Paylaşımı bitir';
+
+  @override
+  String get uiMeetingsCallSharingSelf => 'Ekranını paylaşıyorsun';
+
+  @override
+  String get uiMeetingsCallSharingSelfDesc =>
+      'Görüşmedekiler şu an ekranını görüyor. Bildirimler ve açtığın uygulamalar da görünür.';
+
+  @override
+  String get uiMeetingsCallSharingTail => 'ekranını paylaşıyor';
+
+  @override
+  String get uiMeetingsCallShareDenied =>
+      'Ekran paylaşımına izin verilmedi; paylaşım başlamadı.';
+
+  @override
+  String get uiMeetingsCallShareUnavailable =>
+      'Bu cihazda ekran paylaşımı başlatılamadı.';
+
+  @override
+  String get uiMeetingsCallShareTaken =>
+      'Ekranı şu an başka biri paylaşıyor. O bitirince paylaşabilirsin.';
 
   @override
   String get uiMeetingsTConfStarted => 'Konferans başlatıldı';

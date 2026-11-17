@@ -287,7 +287,8 @@ Future<String> postTableCopyWire(
   return TableResult.fromJson(response.data!).tableId;
 });
 
-Future<TableResult> uploadTableWire(
+/// Ham JSON döner; `TableResult` eşlemesi data katmanındadır (A3: core açık yüzü DTO taşımaz).
+Future<Map<String, dynamic>> uploadTableWire(
   Dio dio, {
   required String path,
   required String row,
@@ -311,7 +312,7 @@ Future<TableResult> uploadTableWire(
     }),
     options: Options(extra: extras, headers: {'Idempotency-Key': key}),
   );
-  return TableResult.fromJson(response.data!);
+  return response.data!;
 });
 
 /// Akış gövdesi okunmadan hatanın JSON zarfını çözmek mümkün değildir.

@@ -29,6 +29,7 @@ import 'package:path/path.dart' as p;
 import 'gen/emit.dart';
 import 'gen/inline_names.dart';
 import 'gen/response_headers.dart';
+import 'gen/scalar_unions.dart';
 import 'gen/sensitive.dart';
 import 'gen/sources.dart';
 import 'gen/wire_types.dart';
@@ -139,9 +140,13 @@ Future<void> main(List<String> args) async {
   // 1) swagger_parser — freezed modeller + retrofit istemciler.
   final work = Directory(p.join(root, '.dart_tool', 'nizamio_gen'))
     ..createSync(recursive: true);
-  final (parserSpec, hoisted) = hoistCollidingInlineObjects(specText);
+  final (hoistedSpec, hoisted) = hoistCollidingInlineObjects(specText);
   for (final h in hoisted) {
     stdout.writeln('gen: satır içi nesne bileşene taşındı (ad çakışması): $h');
+  }
+  final (parserSpec, unions, rawProps) = inlineScalarUnions(hoistedSpec);
+  for (final u in unions) {
+    stdout.writeln('gen: skaler oneOf bileşeni ham JSON değerine indi: $u');
   }
   final specFile = File(p.join(work.path, 'openapi.yaml'))
     ..writeAsStringSync(parserSpec);
@@ -186,7 +191,10 @@ swagger_parser:
       (f) => f.path.endsWith('.dart'),
     )) {
       final src = f.readAsStringSync();
-      var masked = annotateDateOnly(maskSensitiveModels(src), dateNames);
+      var masked = keepNullRawFields(
+        annotateDateOnly(maskSensitiveModels(src), dateNames),
+        rawProps,
+      );
       if (p.basename(f.path) == 'update_program_request.dart') {
         masked = rewriteProgramPatch(masked);
       }

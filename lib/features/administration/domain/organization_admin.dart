@@ -21,6 +21,18 @@ enum SortDirection { asc, desc }
 /// Silinmiş varlığın yaşam döngüsü işlemi sonucu (`restored` / `purged`).
 enum LifecycleStatus { restored, purged, unknown }
 
+/// Departman geri yükleme / kalıcı silme sonucu (`DepartmentLifecycleResult`, ADR-0043).
+/// Geri yüklemede [workItemsRestored] departmanla silinip geri gelen görevler; kalıcı silmede
+/// silinen görev, dosya, program bağı ve ekip satırı sayıları. Sunucu vermediği sayı 0.
+typedef DepartmentLifecycle = ({
+  LifecycleStatus status,
+  int workItemsRestored,
+  int workItemsDeleted,
+  int filesDeleted,
+  int programLinksRemoved,
+  int membershipsDeleted,
+});
+
 enum AccountStatus { active, disabled, unknown }
 
 final class AccountStatusChange {

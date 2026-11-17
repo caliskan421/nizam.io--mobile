@@ -2,6 +2,7 @@ import '../../../core/domain/page_slice.dart';
 import '../../scope/scope.dart' show DepartmentRole;
 import 'coordinatorship_overview.dart';
 import 'department.dart';
+import 'department_delete.dart';
 
 /// Departman, üyelik ve koordinatörlük işlemleri (organization modülü, S1). Yetki sunucudadır
 /// (çoğu yalnız şirket yöneticisi; üye listesi koordinatöre de açık); istemci yetki türetmez.
@@ -56,8 +57,13 @@ abstract interface class DepartmentRepository {
     String displayName,
   );
 
-  /// `DELETE /v1/departments/{id}` (geri alınabilir silme). Dönen: sunucu sildi mi.
-  Future<bool> deleteDepartment(String departmentId);
+  /// `DELETE /v1/departments/{id}` (geri alınabilir silme): bütün programlardaki canlı
+  /// görevler aynı işlemde "Silinenler"e taşınır. `deleted` false → zaten silinmişti.
+  Future<DepartmentDeleteResult> deleteDepartment(String departmentId);
+
+  /// `GET /v1/departments/{id}/delete-impact` (yalnız şirket yöneticisi; silinmiş departmanda
+  /// da çalışır).
+  Future<DepartmentDeleteImpact> deleteImpact(String departmentId);
 
   /// `GET /v1/departments/{id}/members`: imleçsiz; kesilme `PageSlice.truncated`.
   Future<PageSlice<TeamMember>> listMembers(String departmentId);

@@ -6484,6 +6484,54 @@ abstract class AppLocalizations {
   /// **'Toplantıya dön'**
   String get uiMeetingsCallBack;
 
+  /// ui.meetings.call_share
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekranını paylaş'**
+  String get uiMeetingsCallShare;
+
+  /// ui.meetings.call_share_stop
+  ///
+  /// In tr, this message translates to:
+  /// **'Paylaşımı bitir'**
+  String get uiMeetingsCallShareStop;
+
+  /// ui.meetings.call_sharing_self
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekranını paylaşıyorsun'**
+  String get uiMeetingsCallSharingSelf;
+
+  /// ui.meetings.call_sharing_self_desc
+  ///
+  /// In tr, this message translates to:
+  /// **'Görüşmedekiler şu an ekranını görüyor. Bildirimler ve açtığın uygulamalar da görünür.'**
+  String get uiMeetingsCallSharingSelfDesc;
+
+  /// ui.meetings.call_sharing_tail
+  ///
+  /// In tr, this message translates to:
+  /// **'ekranını paylaşıyor'**
+  String get uiMeetingsCallSharingTail;
+
+  /// ui.meetings.call_share_denied
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekran paylaşımına izin verilmedi; paylaşım başlamadı.'**
+  String get uiMeetingsCallShareDenied;
+
+  /// ui.meetings.call_share_unavailable
+  ///
+  /// In tr, this message translates to:
+  /// **'Bu cihazda ekran paylaşımı başlatılamadı.'**
+  String get uiMeetingsCallShareUnavailable;
+
+  /// ui.meetings.call_share_taken
+  ///
+  /// In tr, this message translates to:
+  /// **'Ekranı şu an başka biri paylaşıyor. O bitirince paylaşabilirsin.'**
+  String get uiMeetingsCallShareTaken;
+
   /// ui.meetings.t_conf_started
   ///
   /// In tr, this message translates to:

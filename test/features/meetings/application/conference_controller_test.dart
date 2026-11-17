@@ -1,6 +1,7 @@
 // Görüşme controller'ı (sahte oda bağı + sahte depo): katılım → bağlı, medya sorunları,
 // adres/token reddi (bağ kurulmaz), bağlantı hatası, yeniden bağlanma ve kopuş geçişleri,
-// ayrılma/bitirme, tek etkin oda ve sağlayıcı atılınca odadan çıkış. Token durumda yoktur.
+// ayrılma/bitirme, tek etkin oda ve sağlayıcı atılınca odadan çıkış; ekran paylaşımı (yayın hakkı,
+// başlat/bitir, tek paylaşan, izin reddi) ve sahnedeki paylaşımın seçimi. Token durumda yoktur.
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -54,6 +55,8 @@ class _Link implements ConferenceLink {
   Exception? connectError;
   MediaIssue? micIssue;
   MediaIssue? camIssue;
+  MediaIssue? shareIssue;
+  bool shareAvailable = true;
   String? token;
   List<ConferencePeer> current = const [
     ConferencePeer(id: 'acc-1', name: 'Muhammet Ali', isLocal: true),
@@ -87,11 +90,35 @@ class _Link implements ConferenceLink {
   }
 
   @override
+  Future<bool> screenShareAvailable() async => shareAvailable;
+
+  /// Paylaşım kabul edilirse yerel kişi paylaşıyor görünür (LiveKit'te iz yayımlanınca).
+  @override
+  Future<MediaIssue?> setScreenShare(bool on) async {
+    calls.add('share:$on');
+    final issue = on ? shareIssue : null;
+    if (issue == null) {
+      current = [
+        for (final p in current) p.isLocal ? _withShare(p, on: on) : p,
+      ];
+    }
+    return issue;
+  }
+
+  @override
   Future<void> flipCamera() async => calls.add('flip');
 
   @override
   Future<void> leave() async => calls.add('leave');
 }
+
+ConferencePeer _withShare(ConferencePeer p, {required bool on}) =>
+    ConferencePeer(
+      id: p.id,
+      name: p.name,
+      isLocal: p.isLocal,
+      screenSharing: on,
+    );
 
 ({ProviderContainer c, _Repo repo, List<_Link> links}) _setup({
   Flavor flavor = Flavor.prod,
@@ -327,5 +354,136 @@ void main() {
     s.c.dispose();
     await pumpEventQueue();
     expect(s.links.single.calls.last, 'leave');
+  });
+
+  group('ekran paylaşımı', () {
+    test(
+      'speaker: başlat → paylaşıyor, sahnede kendisi; bitir → normal',
+      () async {
+        final s = _setup();
+        await _ctl(s.c).join();
+        expect(_view(s.c).canShare, isTrue);
+        await _ctl(s.c).toggleScreenShare();
+        expect(_view(s.c).sharing, isTrue);
+        expect(_view(s.c).presenter?.id, 'acc-1');
+        expect(_view(s.c).shareIssue, isNull);
+        await _ctl(s.c).toggleScreenShare();
+        expect(_view(s.c).sharing, isFalse);
+        expect(_view(s.c).presenter, isNull);
+        expect(s.links.single.calls.where((c) => c.startsWith('share')), [
+          'share:true',
+          'share:false',
+        ]);
+      },
+    );
+
+    test('yayın hakkı yok (izleyici): istek gitmez', () async {
+      final s = _setup();
+      s.repo.role = ConferenceRole.unknown;
+      await _ctl(s.c).join();
+      expect(_view(s.c).canShare, isFalse);
+      await _ctl(s.c).toggleScreenShare();
+      expect(s.links.single.calls, isNot(contains('share:true')));
+      expect(_view(s.c).sharing, isFalse);
+    });
+
+    test(
+      'derleme desteklemiyor (iOS uzantısız): düğme yok, istek gitmez',
+      () async {
+        final s = _setup(prepare: (l) => l.shareAvailable = false);
+        await _ctl(s.c).join();
+        expect(_view(s.c).phase, ConferencePhase.connected);
+        expect(_view(s.c).canShare, isFalse);
+        await _ctl(s.c).toggleScreenShare();
+        expect(s.links.single.calls, isNot(contains('share:true')));
+      },
+    );
+
+    test('başka biri paylaşıyor: istek gitmez, "taken" sorunu', () async {
+      final s = _setup();
+      await _ctl(s.c).join();
+      final l = s.links.single;
+      l.current = [
+        ...l.current,
+        const ConferencePeer(
+          id: 'acc-2',
+          name: 'Abdullah Ateş',
+          isLocal: false,
+          screenSharing: true,
+        ),
+      ];
+      l.emit(const ConferencePeersChanged());
+      await pumpEventQueue();
+      expect(_view(s.c).presenter?.id, 'acc-2');
+      await _ctl(s.c).toggleScreenShare();
+      expect(l.calls, isNot(contains('share:true')));
+      expect(_view(s.c).shareIssue, ScreenShareIssue.taken);
+      _ctl(s.c).dismissIssues();
+      expect(_view(s.c).shareIssue, isNull);
+    });
+
+    for (final (issue, want) in [
+      (MediaIssue.denied, ScreenShareIssue.denied),
+      (MediaIssue.unavailable, ScreenShareIssue.unavailable),
+    ]) {
+      test(
+        'başlatma reddi ($issue): oda sürer, paylaşım yok, sorun açık',
+        () async {
+          final s = _setup(prepare: (l) => l.shareIssue = issue);
+          await _ctl(s.c).join();
+          await _ctl(s.c).toggleScreenShare();
+          final v = _view(s.c);
+          expect(v.phase, ConferencePhase.connected);
+          expect(v.sharing, isFalse);
+          expect(v.shareIssue, want);
+        },
+      );
+    }
+
+    test('ayrılınca paylaşım durumu sıfırlanır', () async {
+      final s = _setup();
+      await _ctl(s.c).join();
+      await _ctl(s.c).toggleScreenShare();
+      await _ctl(s.c).leave();
+      expect(_view(s.c).sharing, isFalse);
+      expect(s.links.single.calls.last, 'leave');
+    });
+  });
+
+  group('sahnedeki paylaşım (presenterOf)', () {
+    const me = ConferencePeer(id: 'a', name: '', isLocal: true);
+    const meSharing = ConferencePeer(
+      id: 'a',
+      name: '',
+      isLocal: true,
+      screenSharing: true,
+    );
+    const other = ConferencePeer(id: 'b', name: '', isLocal: false);
+    const otherSharing = ConferencePeer(
+      id: 'b',
+      name: '',
+      isLocal: false,
+      screenSharing: true,
+    );
+    const third = ConferencePeer(
+      id: 'c',
+      name: '',
+      isLocal: false,
+      screenSharing: true,
+    );
+
+    test('kimse paylaşmıyor → null', () {
+      expect(presenterOf(const [me, other]), isNull);
+      expect(presenterOf(const []), isNull);
+    });
+
+    test('yalnız ben → ben; uzak paylaşan her zaman önce', () {
+      expect(presenterOf(const [meSharing, other])?.id, 'a');
+      expect(presenterOf(const [meSharing, otherSharing])?.id, 'b');
+    });
+
+    test('yarışta iki uzak paylaşan → liste sırasıyla ilki', () {
+      expect(presenterOf(const [me, otherSharing, third])?.id, 'b');
+    });
   });
 }

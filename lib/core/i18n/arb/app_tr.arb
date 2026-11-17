@@ -4261,6 +4261,38 @@
   "@uiMeetingsCallBack": {
     "description": "ui.meetings.call_back"
   },
+  "uiMeetingsCallShare": "Ekranını paylaş",
+  "@uiMeetingsCallShare": {
+    "description": "ui.meetings.call_share"
+  },
+  "uiMeetingsCallShareStop": "Paylaşımı bitir",
+  "@uiMeetingsCallShareStop": {
+    "description": "ui.meetings.call_share_stop"
+  },
+  "uiMeetingsCallSharingSelf": "Ekranını paylaşıyorsun",
+  "@uiMeetingsCallSharingSelf": {
+    "description": "ui.meetings.call_sharing_self"
+  },
+  "uiMeetingsCallSharingSelfDesc": "Görüşmedekiler şu an ekranını görüyor. Bildirimler ve açtığın uygulamalar da görünür.",
+  "@uiMeetingsCallSharingSelfDesc": {
+    "description": "ui.meetings.call_sharing_self_desc"
+  },
+  "uiMeetingsCallSharingTail": "ekranını paylaşıyor",
+  "@uiMeetingsCallSharingTail": {
+    "description": "ui.meetings.call_sharing_tail"
+  },
+  "uiMeetingsCallShareDenied": "Ekran paylaşımına izin verilmedi; paylaşım başlamadı.",
+  "@uiMeetingsCallShareDenied": {
+    "description": "ui.meetings.call_share_denied"
+  },
+  "uiMeetingsCallShareUnavailable": "Bu cihazda ekran paylaşımı başlatılamadı.",
+  "@uiMeetingsCallShareUnavailable": {
+    "description": "ui.meetings.call_share_unavailable"
+  },
+  "uiMeetingsCallShareTaken": "Ekranı şu an başka biri paylaşıyor. O bitirince paylaşabilirsin.",
+  "@uiMeetingsCallShareTaken": {
+    "description": "ui.meetings.call_share_taken"
+  },
   "uiMeetingsTConfStarted": "Konferans başlatıldı",
   "@uiMeetingsTConfStarted": {
     "description": "ui.meetings.t_conf_started"

@@ -105,6 +105,8 @@ abstract final class NzIcons {
   static const IconData micOff = Icons.mic_off_rounded;
   static const IconData flipCamera = Icons.flip_camera_ios_outlined;
   static const IconData callEnd = Icons.call_end_rounded;
+  static const IconData screenShare = Icons.screen_share_outlined;
+  static const IconData screenShareStop = Icons.stop_screen_share_outlined;
   static const IconData openFull = Icons.open_in_full_rounded;
   static const IconData viewList = Icons.view_list_rounded;
   static const IconData viewWeek = Icons.view_week_outlined;

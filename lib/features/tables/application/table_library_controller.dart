@@ -74,7 +74,8 @@ class TableLibraryWrites extends Notifier<TableLibraryWriteState> {
     } on Object catch (e, st) {
       final error = toReportedApiError(e, st, source: ReportSource.provider);
       if (ref.mounted && identical(epoch, _epoch)) {
-        if (!isOutcomeUnknown(error) && error.code != 'client.invalid_response') {
+        if (!isOutcomeUnknown(error) &&
+            error.code != 'client.invalid_response') {
           _pending = null;
         }
         state = TableLibraryWriteState(

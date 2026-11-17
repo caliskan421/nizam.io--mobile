@@ -12,12 +12,25 @@ void main() {
     expect(block?.fix, contains('"Altyapı"'));
   });
 
-  test('kullanımdaki koordinatörlük görev sekmesine yönlendirir', () {
+  test('koordinatörlükle silinen görev: geri yükleme koordinatörlükten', () {
+    final block = deletedActionBlock(
+      DeletedKind.task,
+      'work.department_unavailable',
+      departmentName: 'Altyapı',
+      byDepartment: true,
+    );
+    expect(block?.goTo, DeletedKind.coordinatorship);
+    expect(block?.reason, contains('birlikte silindi'));
+    expect(block?.fix, contains('kendiliğinden geri gelir'));
+  });
+
+  test('tablo engelindeki koordinatörlük: yönlendirme yok (ADR-0043)', () {
     final block = deletedActionBlock(
       DeletedKind.coordinatorship,
       'organization.department_in_use',
     );
-    expect(block?.goTo, DeletedKind.task);
+    expect(block, isNotNull);
+    expect(block?.goTo, isNull);
   });
 
   test('silinmiş olmayan kayıt bütün modüllerde aynı açıklamayı alır', () {

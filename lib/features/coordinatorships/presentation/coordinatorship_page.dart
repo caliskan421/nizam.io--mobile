@@ -17,6 +17,7 @@ import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../../core/ui/widgets/overlays/overlays.dart';
 import '../../tasks/tasks.dart';
+import '../application/coordinatorship_delete_controller.dart';
 import '../application/coordinatorship_detail_controller.dart';
 import '../application/coordinatorship_form_controller.dart';
 import '../application/coordinatorship_profiles_controller.dart';
@@ -24,6 +25,7 @@ import '../application/coordinatorships_controller.dart';
 import '../domain/coordinatorship_board.dart';
 import '../domain/coordinatorship_overview.dart';
 import 'coord_archive_meetings_tabs.dart';
+import 'coord_delete_sheet.dart';
 import 'coord_detail_texts.dart';
 import 'coord_form_sheet.dart';
 import 'coord_general_tab.dart';
@@ -192,6 +194,28 @@ class CoordinatorshipPage extends ConsumerWidget {
     );
   }
 
+  /// Silme onayı → `DELETE /v1/departments/{id}`; başarıda bildirim ve listeye dönüş.
+  Future<void> _delete(BuildContext context, CoordinatorshipDetail d) async {
+    final l = context.l10n;
+    final nav = context.appNav;
+    final container = ProviderScope.containerOf(context, listen: false);
+    final result = await showDepartmentDeleteSheet(
+      context,
+      departmentId: d.stats.code,
+      name: d.stats.name,
+      code: d.department?.code ?? d.stats.shortCode,
+      permanent: false,
+      run: () => deleteCoordinatorship(container, d.stats.code),
+    );
+    if (result == null || !context.mounted) return;
+    NzToast.show(
+      context,
+      coordDeletedToast(l, result.workItemsDeleted),
+      tone: NzToastTone.success,
+    );
+    nav.openCoordinatorships();
+  }
+
   void _showMoreActions(
     BuildContext context,
     WidgetRef ref,
@@ -241,6 +265,23 @@ class CoordinatorshipPage extends ConsumerWidget {
                   ),
               ],
             ),
+            // Silme yalnız şirket yöneticisine (deleteDepartment); ayrı grupta, danger.
+            if (canManage) ...[
+              const Gap(NizamioSpacing.space3),
+              NzMenuGroup(
+                rows: [
+                  NzMenuRow(
+                    icon: NzIcons.delete,
+                    label: l.uiCoordDeleteMenu,
+                    danger: true,
+                    onTap: () {
+                      Navigator.of(sheet).pop();
+                      if (context.mounted) _delete(context, d);
+                    },
+                  ),
+                ],
+              ),
+            ],
           ],
         );
       },

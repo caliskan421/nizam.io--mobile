@@ -11,7 +11,7 @@ Kapsam kapısı (`tool/error_paths.dart`, `make boundaries`): `lib/` altındaki 
 | denetim akışı | 1 |
 | iletilir | 15 |
 | istisna | 61 |
-| rapor | 210 |
+| rapor | 212 |
 
 Sahip anlamları: `rapor` = hata çevrilmeden/yutulmadan ÖNCE sınıflandırılıp raporlanır (beklenen sınıflar süzülür); `iletilir` = `rethrow`/aynı hata yeniden fırlatılır (üst sınır raporlar); `denetim akışı` = aynı dosyadaki `ExpectedFailure` işaretli beklenen sonuç sınıfı; `istisna` = aşağıdaki gerekçe.
 
@@ -178,6 +178,7 @@ Küresel ağlar (yutulmayan ya da kaçan hatalar için): `FlutterError.onError` 
 | `features/assistant/data/assistant_api_repository.dart` | `ApiAssistantRepository.chat` | rawDio | istisna | 1 |
 | `features/calendar/presentation/coordinatorship_calendar.dart` | `_Calendar.build` | asyncError | istisna | 1 |
 | `features/coordinatorships/application/coord_member_controller.dart` | `CoordMemberController.submit` | catch | rapor | 1 |
+| `features/coordinatorships/application/coordinatorship_delete_controller.dart` | `deleteCoordinatorship` | catch | rapor | 2 |
 | `features/coordinatorships/application/coordinatorship_detail_controller.dart` | `coordinatorshipDetail` | asyncError | istisna | 2 |
 | `features/coordinatorships/application/coordinatorship_form_controller.dart` | `CoordinatorshipFormController.create` | catch | rapor | 3 |
 | `features/coordinatorships/application/coordinatorship_form_controller.dart` | `CoordinatorshipFormController.edit` | catch | rapor | 2 |

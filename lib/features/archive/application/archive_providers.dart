@@ -1,3 +1,4 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/api_error.dart';
@@ -47,3 +48,37 @@ Future<ArchiveScope> archiveScope(Ref ref) async {
   }
   return ArchiveScope(department: department, admin: pick.admin);
 }
+
+/// Sunucu etkin görünümü değil hesabın gerçek rollerini kullanır. Daha geniş erişim varsa
+/// görev listesindeki aynı yerel kapsam arşive de uygulanır; tek rollü akışa dokunulmaz.
+final archiveViewFilterProvider = FutureProvider<ArchiveViewFilter?>((
+  ref,
+) async {
+  final scope = ref.watch(scopeStateProvider);
+  final catalog = await ref.watch(taskCatalogControllerProvider.future);
+  final view = catalog.viewIn(scope);
+  final access = catalog.access;
+  final program = view.programId;
+  final department = view.departmentId;
+  if (!view.known ||
+      view.isAdminView ||
+      access == null ||
+      program == null ||
+      department == null) {
+    return null;
+  }
+  final wider =
+      access.companyAdmin ||
+      (view.isMemberView && access.coordinatesIn(program, department));
+  if (!wider) return null;
+  return ArchiveViewFilter(
+    member: view.isMemberView,
+    partial: catalog.truncated,
+    taskIds: scopedTasks(
+      catalog.tasks,
+      role: view.role,
+      departmentId: department,
+      me: catalog.me,
+    ).map((t) => t.code),
+  );
+});

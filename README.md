@@ -65,6 +65,11 @@ Baştan kurmak: `down.sh`
 sonra yeniden `dev-up.sh`. `make integration` boş kurulum bekler: önce `down.sh` + `up.sh`. Android emülatöründen
 adres `http://10.0.2.2:18140`.
 
+Arşiv, etkin görünümün görev kapsamını izler. Çoklu rollü hesabın sunucudan daha geniş veri
+alabildiği durumda üye görünümü yalnız seçili koordinatörlükte kendisine atanan görevleri,
+koordinatör görünümü yalnız seçili koordinatörlüğü gösterir; dosyalar, sayaçlar ve ZIP seçimi
+aynı kümeyle daraltılır. Yönetici görünümü dönem genelidir; sunucu yetkileri değiştirilmez.
+
 ## Flavor'lar
 
 | Flavor | Giriş noktası | Android / iOS kimliği | Ağ |

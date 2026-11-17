@@ -41,7 +41,7 @@ final class ArchiveFoldersControllerProvider
 }
 
 String _$archiveFoldersControllerHash() =>
-    r'62304453fbf5d9c6b160824997f83c1689830e73';
+    r'a5e7e24d949d95e548bcc15626e6b957838b726d';
 
 /// Arşiv klasörleri (`archiveFolders`; yönetici tüm koordinatörlükler, koordinatör kendi
 /// klasörü, üye tek sanal klasör). Kapsam değişince yeniden okunur; aksi hâlde yalnız dokunuşla.

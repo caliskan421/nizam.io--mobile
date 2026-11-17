@@ -41,6 +41,7 @@ class PersonFilesController extends _$PersonFilesController {
     bool filterArchive = false,
   }) async {
     _generation++;
+    await ref.watch(archiveViewFilterProvider.future);
     _tags = filterArchive
         ? ref.watch(archiveControllerProvider.select((s) => s.tags))
         : const {};
@@ -65,6 +66,7 @@ class PersonFilesController extends _$PersonFilesController {
     String? cursor,
   }) async {
     final repo = ref.read(archiveRepositoryProvider);
+    final projection = await ref.read(archiveViewFilterProvider.future);
     for (var i = 0; i < 5; i++) {
       final page = await repo.archiveAttachments(
         department: department,
@@ -77,7 +79,10 @@ class PersonFilesController extends _$PersonFilesController {
       );
       final files = [
         for (final file in page.items)
-          if (tags.isEmpty || tags.contains(file.tag)) file,
+          if ((tags.isEmpty || tags.contains(file.tag)) &&
+              (projection == null ||
+                  projection.taskIds.contains(file.workItemId)))
+            file,
       ];
       if (files.isNotEmpty || !page.hasMore || i == 4) {
         return PageSlice(

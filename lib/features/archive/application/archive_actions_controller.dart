@@ -13,6 +13,7 @@ import 'archive_folder_controller.dart';
 import 'archive_folder_sources.dart';
 import 'archive_folders_controller.dart';
 import 'archive_providers.dart';
+import 'archive_summary_provider.dart';
 import 'person_files_controller.dart';
 
 part 'archive_actions_controller.g.dart';
@@ -76,6 +77,19 @@ class ArchiveActionsController extends _$ArchiveActionsController {
   Future<ArchiveOutcome> downloadZip(String name) => _run(() async {
     final ctx = await _context();
     final view = ref.read(archiveFolderControllerProvider(code));
+    final projection = await ref.read(archiveViewFilterProvider.future);
+    if (!view.filtered && projection != null) {
+      final files = await ref.read(archiveFileSetProvider.future);
+      final ids = files.files.map((f) => f.id).toSet().toList();
+      if (ids.isEmpty) return _cancelled;
+      if (files.partial || ids.length > RecordsDownloadTargets.maxSelection) {
+        throw ApiError('records.too_many_files');
+      }
+      return _save(
+        name,
+        await _repo.downloadSelectionZip(ids, department: ctx.department),
+      );
+    }
     if (!view.filtered) {
       return _save(
         name,

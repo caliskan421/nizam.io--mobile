@@ -3060,7 +3060,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get uiHomeMemberTasksEmpty => 'Açık görevin yok.';
 
   @override
-  String get uiHomeMemberUpcomingTitle => 'Yaklaşanlar';
+  String get uiHomeMemberUpcomingTitle => 'Yaklaşan toplantılar';
 
   @override
   String get uiHomeMemberUpcomingMeetings => 'Toplantılar';
@@ -3879,6 +3879,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get uiMeetingsInstantTitle => 'Anlık toplantı';
+
+  @override
+  String get uiMeetingsNoteTaskSwitchRole =>
+      'Notu göreve dönüştürmek için Yönetici veya Koordinatör görünümüne geç.';
 
   @override
   String get uiMessagesTitle => 'Mesajlar';

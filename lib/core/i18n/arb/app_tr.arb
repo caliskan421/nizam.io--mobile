@@ -3833,7 +3833,7 @@
   "@uiHomeMemberTasksEmpty": {
     "description": "ui.home.member_tasks_empty"
   },
-  "uiHomeMemberUpcomingTitle": "Yaklaşanlar",
+  "uiHomeMemberUpcomingTitle": "Yaklaşan toplantılar",
   "@uiHomeMemberUpcomingTitle": {
     "description": "ui.home.member_upcoming_title"
   },
@@ -4872,6 +4872,10 @@
   "uiMeetingsInstantTitle": "Anlık toplantı",
   "@uiMeetingsInstantTitle": {
     "description": "ui.meetings.instant_title"
+  },
+  "uiMeetingsNoteTaskSwitchRole": "Notu göreve dönüştürmek için Yönetici veya Koordinatör görünümüne geç.",
+  "@uiMeetingsNoteTaskSwitchRole": {
+    "description": "ui.meetings.note_task_switch_role"
   },
   "uiMessagesTitle": "Mesajlar",
   "@uiMessagesTitle": {

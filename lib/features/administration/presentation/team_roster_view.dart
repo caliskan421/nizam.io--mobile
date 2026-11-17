@@ -25,8 +25,9 @@ import 'admin_user_list_row.dart';
 /// Kullanıcılar sayfasının koordinatör/üye yüzü ("Ekibim", prototip `users` koordinatör dalı):
 /// başlık, sağda arama simgesi ve "+" (yalnız ekip yönetme hakkı), açılır arama,
 /// üç öğeli rol bölücü (CSV ve koordinatörlük süzgeci yok). Koordinatörde yönetici dizininin
-/// satır bileşeni ([AdminUserListRow]); üyede ad ve rol rozeti. On satırdan sonrası "Tümünü göster (n)". Üye görünümünde liste
-/// türetilmiştir ve salt okunurdur; satır sonunda kişiyle sohbet açan mesaj düğmesi vardır
+/// satır bileşeni ([AdminUserListRow]) iki görünümde de avatar, ad ve rol ile kullanılır.
+/// On satırdan sonrası "Tümünü göster (n)". Üye görünümü salt okunurdur;
+/// satır sonunda kişiyle sohbet açan mesaj düğmesi vardır
 /// (kendi satırı hariç).
 class TeamRosterView extends ConsumerStatefulWidget {
   const TeamRosterView({super.key, required this.onOpen});
@@ -195,10 +196,6 @@ class _TeamRosterViewState extends ConsumerState<TeamRosterView> {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  if (source.derived) ...[
-                    NzBanner.info(message: l.uiUsersTeamDerived),
-                    const Gap(NizamioSpacing.space3),
-                  ],
                   if (team.truncated) ...[
                     NzBanner.warning(message: l.uiUsersDirectoryPartial),
                     const Gap(NizamioSpacing.space3),
@@ -274,41 +271,6 @@ class _TeamRow extends StatelessWidget {
       if (load != null) '${load.open} ${l.uiUsersTeamOpen}',
       if (load != null && load.late > 0) '${load.late} ${l.uiUsersTeamLate}',
     ].join(' · ');
-    if (message) {
-      return NzPressable(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onOpen,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(
-              vertical: NizamioSpacing.space3,
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    self ? '${person.name} (${l.uiUsersTeamYou})' : person.name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: context.text.bodyMd,
-                  ),
-                ),
-                const Gap(NizamioSpacing.space2),
-                Flexible(child: NzBadge.neutral(label: role)),
-                if (!self) ...[
-                  const Gap(NizamioSpacing.space2),
-                  NzIconButton(
-                    icon: NzIcons.messages,
-                    semanticLabel: l.uiUsersMessage,
-                    onPressed: () => openPersonChat(context, person.accountId),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      );
-    }
     return AdminUserListRow(
       name: person.name,
       nameSuffix: self ? '(${l.uiUsersTeamYou})' : null,

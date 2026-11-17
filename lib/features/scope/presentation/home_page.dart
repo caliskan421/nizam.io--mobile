@@ -238,18 +238,8 @@ class _Feed extends ConsumerWidget {
               const Gap(NizamioSpacing.gapXl),
               HomeCoordinatorFeed(
                 wide: wide,
-                // Geniş: başlık kart içinde 2×2 kare dokunaç; dar: yönetici ile aynı bileşen
-                // (başlık + tek satır).
                 quick: actions.isEmpty
                     ? null
-                    : wide
-                    ? HomeQuickActionsBar(
-                        onAction: onQuickAction,
-                        actions: actions,
-                        title: context.l10n.uiHomeQuickActionsTitle,
-                        columns: 2,
-                        tileAspect: null,
-                      )
                     : HomeQuickActions(
                         onAction: onQuickAction,
                         actions: actions,

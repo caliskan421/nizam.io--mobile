@@ -65,7 +65,18 @@ void main() {
   for (final screen in [screenMatrix.first, screenMatrix.last]) {
     testWidgets('kamerasız görüşme ekranı · ${screen.name}', (tester) async {
       useScreen(tester, screen);
-      final s = MeetingsServer()..conference = conferenceWire();
+      final s = MeetingsServer()
+        ..conference = conferenceWire()
+        ..notes = [
+          noteWire('n1', content: 'Kendi notum'),
+          noteWire('n2', author: 'acc-2', content: 'Diğer kişinin notu'),
+          noteWire(
+            'n3',
+            author: 'acc-2',
+            content: 'Göreve aktarılan not',
+            task: 'w9',
+          ),
+        ];
       final (h, c) = await real(tester, () => openMeetings(s));
       final link = _Link();
       h.composition.locator
@@ -91,6 +102,21 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Gündem, notlar ve kişiler').last);
       await settle(tester);
       expect(find.text('görüşmede'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+
+      await tester.tap(find.bySemanticsLabel(RegExp('^Notlar,')));
+      await settle(tester);
+      await tester.tap(find.bySemanticsLabel(RegExp('^Göreve dönüşen,')));
+      await settle(tester);
+      expect(find.text('Göreve aktarılan not'), findsOneWidget);
+      expect(find.text('Kendi notum'), findsNothing);
+      await tester.tap(find.bySemanticsLabel(RegExp('^Benim,')));
+      await settle(tester);
+      expect(find.text('Kendi notum'), findsOneWidget);
+      expect(find.text('Göreve aktarılan not'), findsNothing);
+      await tester.tap(find.bySemanticsLabel(RegExp('^Tümü,')));
+      await settle(tester);
+      expect(find.text('Diğer kişinin notu'), findsOneWidget);
       expect(tester.takeException(), isNull);
 
       // Telefonda panel alt sayfadır, çubuğu örter: kapatılır.

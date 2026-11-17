@@ -19,11 +19,10 @@ import 'home_sections.dart';
 import 'home_wide.dart';
 
 /// Ana sayfanın üye bölümleri (tasarım §4.1; yönetici/koordinatör ana sayfasının dili): odak kartı,
-/// iade kartı (varsa), dört özet kutusu (gecikme, onayda, iade, tamamlanma), Görevlerim (en çok
-/// 5 açık satır), Yaklaşanlar (toplantılar kartla + kendi bitişleri; 7 gün). Hızlı işlem, ekip
-/// yükü ve bekleyen işler üyede yok (yetki/veri üyeye kapalı). Geniş düzen: genel durum (kendi
-/// görevleri) + odak kartı aynı yükseklikte; kutular tek satır; iade tam genişlik; Görevlerim +
-/// Yaklaşanlar yan yana.
+/// iade kartı (varsa), dört özet kutusu (gecikme, onayda, iade, tamamlanma), Yaklaşanlar
+/// (toplantılar kartla + kendi bitişleri; 7 gün). Hızlı işlem, ekip yükü ve bekleyen işler
+/// üyede yok (yetki/veri üyeye kapalı). Geniş düzen: genel durum (kendi görevleri) + odak kartı
+/// aynı yükseklikte; kutular tek satır; iade ve Yaklaşanlar tam genişlik.
 class HomeMemberFeed extends ConsumerWidget {
   const HomeMemberFeed({super.key, required this.wide});
 
@@ -39,8 +38,6 @@ class HomeMemberFeed extends ConsumerWidget {
     if (home == null || catalog == null) {
       return const NzSkeleton.block(height: 190);
     }
-    final l = context.l10n;
-    final c = context.colors;
     final today = catalog.today;
     String? code(TaskItem t) =>
         catalog.coordinatorship(t.coordinatorship)?.label;
@@ -65,45 +62,18 @@ class HomeMemberFeed extends ConsumerWidget {
         truncated: home.truncated,
       ),
     );
-    final tasks = HomeSectionFrame(
-      title: l.uiHomeMemberTasksTitle,
-      count: home.open.length,
-      onAll: context.appNav.openTasks,
-      empty: l.uiHomeMemberTasksEmpty,
-      below: home.truncated
-          ? Text(
-              l.uiListsTruncated,
-              style: context.text.bodySm.copyWith(color: c.textMuted),
-            )
-          : null,
-      children: [
-        for (final t in home.open.take(MemberHome.rows))
-          HomeMemberTaskRow(task: t, code: code(t)),
-      ],
-    );
     final upcoming = _MemberUpcoming(home: home, today: today, code: code);
     if (!wide) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final (i, w) in [
-            focus,
-            ?returned,
-            kpis,
-            tasks,
-            upcoming,
-          ].indexed) ...[if (i > 0) const Gap(NizamioSpacing.gapXl), w],
+          for (final (i, w) in [focus, ?returned, kpis, upcoming].indexed) ...[
+            if (i > 0) const Gap(NizamioSpacing.gapXl),
+            w,
+          ],
         ],
       );
     }
-    Widget pair(Widget a, Widget b) => Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: a),
-        const Gap(homeWideGap),
-        Expanded(child: b),
-      ],
-    );
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -129,7 +99,7 @@ class HomeMemberFeed extends ConsumerWidget {
         kpis,
         if (returned != null) ...[const Gap(NizamioSpacing.gapXl), returned],
         const Gap(NizamioSpacing.gapXl),
-        pair(tasks, upcoming),
+        upcoming,
       ],
     );
   }
@@ -173,8 +143,8 @@ class _MemberUpcoming extends ConsumerWidget {
           return HomeSectionFrame(
             title: l.uiHomeMemberUpcomingTitle,
             count: 0,
-            onAll: nav.openCalendar,
-            allLabel: l.uiHomeModuleCalendar,
+            onAll: nav.openMeetings,
+            allLabel: l.uiHomeSeeAll,
             empty: l.uiHomeMemberUpcomingEmpty,
             children: const [],
           );
@@ -186,13 +156,11 @@ class _MemberUpcoming extends ConsumerWidget {
             NzSectionHeader(
               l.uiHomeMemberUpcomingTitle,
               count: meetings.length + dues.length,
-              onAll: nav.openCalendar,
-              allLabel: l.uiHomeModuleCalendar,
+              onAll: nav.openMeetings,
+              allLabel: l.uiHomeSeeAll,
             ),
             if (meetings.isNotEmpty) ...[
               const Gap(NizamioSpacing.gapMd),
-              NzKicker(l.uiHomeMemberUpcomingMeetings),
-              const Gap(NizamioSpacing.space2),
               for (final (i, m) in meetings.take(n).indexed) ...[
                 if (i > 0) const Gap(NizamioSpacing.gapMd),
                 MeetingCard(

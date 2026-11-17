@@ -60,6 +60,23 @@ final class ArchiveScope {
   int get hashCode => Object.hash(department, admin);
 }
 
+/// Hesabın sunucu yetkisi aktif görünümden genişken uygulanacak istemci daraltması.
+/// Kimlikler görev listesinin aynı rol/koordinatörlük/atama kümesinden gelir.
+@immutable
+final class ArchiveViewFilter {
+  ArchiveViewFilter({
+    required this.member,
+    required Iterable<String> taskIds,
+    this.partial = false,
+  }) : taskIds = Set.unmodifiable(taskIds);
+
+  final bool member;
+  final Set<String> taskIds;
+
+  /// Katalog kesikse bilinmeyen görevler gösterilmez; özet alt sınırdır.
+  final bool partial;
+}
+
 /// Arşiv dosya listesinin sıralama ekseni (`sort`): [recent] → varsayılan (yükleme zamanı
 /// azalan), [name] → `name`, [size] → `size`. Eksen değişince imleç geçersizleşir.
 enum ArchiveSort { recent, name, size }

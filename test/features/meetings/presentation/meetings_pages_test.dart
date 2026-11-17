@@ -5,8 +5,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nizamio/core/domain/effective_role.dart';
 import 'package:nizamio/core/i18n/generated/app_localizations_tr.dart';
+import 'package:nizamio/core/providers.dart';
 import 'package:nizamio/features/meetings/meetings.dart';
+import 'package:nizamio/features/tasks/tasks.dart';
 
 import '../../../support/recording_app_nav.dart';
 import '../../pilot_support.dart';
@@ -152,6 +155,43 @@ void main() {
     );
   }
 
+  for (final memberView in [true, false]) {
+    testWidgets(
+      'yönetici hesabı, üye görünümü=$memberView: nottan görev geri bildirimi',
+      (tester) async {
+        _screen(tester, 390, 1);
+        final server = MeetingsServer(seat: 'uye')
+          ..notes = [noteWire('n1', content: 'Göreve dönüşecek not')];
+        final (h, c) = await real(tester, () => openMeetings(server));
+        final view = c.read(effectiveAccessProvider);
+        expect(
+          c
+              .read(scopeControllerProvider)
+              .selectRole(
+                memberView ? EffectiveRole.member : EffectiveRole.admin,
+                view.grants,
+              ),
+          isTrue,
+        );
+        await pumpScreen(tester, h, const MeetingPage(id: 'm1'));
+        await settle(tester);
+        await _tap(tester, find.textContaining(_l.uiMeetingsTabNotes));
+        expect(c.read(canCreateTaskProvider), !memberView);
+        h.backend.requests.clear();
+        await _tap(tester, find.text(_l.uiMeetingsToTask));
+        if (memberView) {
+          expect(find.text(_l.uiMeetingsNoteTaskSwitchRole), findsOneWidget);
+          expect(find.text(_l.uiTasksNoteTaskTitle), findsNothing);
+          expect(calls(h), isEmpty);
+        } else {
+          expect(find.text(_l.uiTasksNoteTaskTitle), findsOneWidget);
+          expect(find.text(_l.uiMeetingsNoteTaskSwitchRole), findsNothing);
+        }
+        expect(tester.takeException(), isNull);
+      },
+    );
+  }
+
   testWidgets('not: uçuşta yazılan yeni metin geç gelen başarıyla silinmez', (
     tester,
   ) async {
@@ -199,15 +239,33 @@ void main() {
     expect(tester.widget<TextField>(field).controller!.text, isEmpty);
   });
 
-  testWidgets('yönetici olmayana Silinenler sekmesi yok', (tester) async {
-    _screen(tester, 390, 1);
-    final (h, _) = await real(
+  for (final seat in ['koordinator', 'uye']) {
+    testWidgets('$seat: kişisel davet koordinatörlük dışında da listelenir', (
       tester,
-      () => openMeetings(MeetingsServer(admin: false, seat: 'koordinator')),
-    );
-    await pumpScreen(tester, h, const MeetingsPage());
-    await settle(tester);
-    expect(find.textContaining(_l.uiMeetingsTabUpcoming), findsOneWidget);
-    expect(find.textContaining(_l.uiMeetingsTabDeleted), findsNothing);
-  });
+    ) async {
+      _screen(tester, 390, 1);
+      final server = MeetingsServer(admin: false, seat: seat)
+        ..pages = [
+          [
+            meetingWire(title: 'Ekip toplantısı', departments: const ['d1']),
+            meetingWire(
+              id: 'm2',
+              title: 'Kişisel davet',
+              departments: const ['d2'],
+              inviteMode: 'person',
+            ),
+          ],
+        ];
+      final (h, _) = await real(tester, () => openMeetings(server));
+      final nav = RecordingAppNav();
+      await pumpScreen(tester, h, const MeetingsPage(), nav: nav);
+      await settle(tester);
+      expect(find.text('Ekip toplantısı'), findsOneWidget);
+      expect(find.text('Kişisel davet'), findsOneWidget);
+      expect(find.textContaining(_l.uiMeetingsTabDeleted), findsNothing);
+      await _tap(tester, find.text('Kişisel davet'));
+      expect(nav.calls, ['meeting:m2']);
+      expect(tester.takeException(), isNull);
+    });
+  }
 }

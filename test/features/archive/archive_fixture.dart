@@ -240,13 +240,16 @@ void useArchiveFakes(
 /// koordinatör mü), programın departmanları ve görevler (kimlik → departman).
 TaskCatalog archiveCatalog({
   bool admin = false,
+  bool truncated = false,
   Map<String, bool> seats = const {'d1': true},
   List<String> departments = const ['d1', 'd2'],
   Map<String, String> tasks = const {},
+  Map<String, List<String>> assignees = const {},
 }) {
   final today = DateTime(2026, 11, 8);
   return TaskCatalog(
     today: today,
+    truncated: truncated,
     me: 'acc-1',
     people: const [
       Person(id: 'acc-9', name: 'Ali Veli', role: PersonRole.member),
@@ -280,7 +283,7 @@ TaskCatalog archiveCatalog({
           priority: TaskPriority.medium,
           start: today,
           due: today,
-          assignees: const [],
+          assignees: assignees[id] ?? const [],
         ),
     ],
   );
@@ -302,13 +305,20 @@ ProviderContainer archiveContainer(
   DownloadSink? sink,
   UploadPicker? picker,
   UploadDigest? digest,
+  ScopeSelection scope = const ScopeSelection(programId: 'p1'),
+  ValueNotifier<ScopeSelection>? scopeChanges,
 }) {
   final c = ProviderContainer(
     retry: (_, _) => null,
     overrides: [
-      scopeStateProvider.overrideWithValue(
-        const ScopeSelection(programId: 'p1'),
-      ),
+      sessionGenerationProvider.overrideWithValue(1),
+      scopeStateProvider.overrideWith((ref) {
+        if (scopeChanges == null) return scope;
+        void changed() => ref.invalidateSelf();
+        scopeChanges.addListener(changed);
+        ref.onDispose(() => scopeChanges.removeListener(changed));
+        return scopeChanges.value;
+      }),
       localeProvider.overrideWithValue(const Locale('tr')),
       taskCatalogControllerProvider.overrideWith(
         () => _Catalog(catalog ?? archiveCatalog()),

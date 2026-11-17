@@ -20,14 +20,16 @@ typedef ArchiveFileSet = ({List<RecordFile> files, bool partial});
 final archiveFileSetProvider = FutureProvider.autoDispose<ArchiveFileSet>((
   ref,
 ) async {
+  final filterFuture = ref.watch(archiveViewFilterProvider.future);
   final scope = await ref.watch(archiveScopeProvider.future);
+  final filter = await filterFuture;
   final folders = await ref.watch(archiveFoldersControllerProvider.future);
   final repo = ref.read(archiveRepositoryProvider);
   final departments = scope.admin
       ? {scope.department}
       : {for (final f in folders) scope.departmentFor(f)};
   final files = <RecordFile>[];
-  var partial = false;
+  var partial = filter?.partial ?? false;
   for (final department in departments) {
     String? cursor;
     var pages = 0;
@@ -36,7 +38,11 @@ final archiveFileSetProvider = FutureProvider.autoDispose<ArchiveFileSet>((
         department: department,
         page: PageRequest(limit: 200, cursor: cursor),
       );
-      files.addAll(page.items);
+      files.addAll(
+        page.items.where(
+          (f) => filter == null || filter.taskIds.contains(f.workItemId),
+        ),
+      );
       cursor = page.nextCursor;
       pages++;
     } while (cursor != null && pages < archiveSummaryMaxPages);

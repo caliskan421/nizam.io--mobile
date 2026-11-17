@@ -22,6 +22,7 @@ ProviderContainer _container(FakeArchiveRepository repo) {
       scopeStateProvider.overrideWithValue(
         const ScopeSelection(programId: 'p1'),
       ),
+      archiveViewFilterProvider.overrideWith((ref) async => null),
       archiveScopeProvider.overrideWith(
         (ref) async => const ArchiveScope(department: 'd1', admin: true),
       ),

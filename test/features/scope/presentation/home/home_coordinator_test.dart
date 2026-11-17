@@ -94,7 +94,7 @@ void main() {
               child: SingleChildScrollView(
                 child: HomeCoordinatorFeed(
                   wide: wide,
-                  quick: HomeQuickActionsBar(
+                  quick: HomeQuickActions(
                     onAction: (_) {},
                     actions: const [
                       HomeQuickAction.newTask,
@@ -102,9 +102,6 @@ void main() {
                       HomeQuickAction.member,
                       HomeQuickAction.report,
                     ],
-                    title: wide ? 'Hızlı işlemler' : null,
-                    columns: wide ? 2 : 0,
-                    tileAspect: null,
                   ),
                 ),
               ),

@@ -6,6 +6,7 @@ import '../domain/archive.dart';
 import '../domain/records.dart';
 import 'archive_folders_controller.dart';
 import 'archive_providers.dart';
+import 'archive_summary_provider.dart';
 
 part 'archive_folder_sources.g.dart';
 
@@ -39,11 +40,19 @@ Future<List<ArchiveTaskSummary>> archiveFolderTasks(
   Ref ref,
   String code,
 ) async {
+  final filterFuture = ref.watch(archiveViewFilterProvider.future);
   final ctx = await ref.watch(archiveFolderContextProvider(code).future);
   if (ctx == null) return const [];
+  final filter = await filterFuture;
   final tasks = await ref
       .read(archiveRepositoryProvider)
       .archiveTasks(department: ctx.department);
+  if (filter != null) {
+    return [
+      for (final t in tasks)
+        if (filter.taskIds.contains(t.workItemId)) t,
+    ];
+  }
   if (!ctx.scope.widerThan(ctx.folder)) return tasks;
   final catalog = await ref.read(taskCatalogControllerProvider.future);
   return [
@@ -55,8 +64,13 @@ Future<List<ArchiveTaskSummary>> archiveFolderTasks(
 /// Klasörde süzgeç olarak seçilebilen yükleyenler (`archiveUploaders`; yalnız kimlik).
 @riverpod
 Future<List<String>> archiveFolderUploaders(Ref ref, String code) async {
+  final filterFuture = ref.watch(archiveViewFilterProvider.future);
   final ctx = await ref.watch(archiveFolderContextProvider(code).future);
   if (ctx == null) return const [];
+  if (await filterFuture != null) {
+    final files = await ref.watch(archiveFileSetProvider.future);
+    return files.files.map((f) => f.uploaderId).nonNulls.toSet().toList();
+  }
   return ref
       .read(archiveRepositoryProvider)
       .archiveUploaders(department: ctx.department);

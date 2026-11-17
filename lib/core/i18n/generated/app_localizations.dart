@@ -5845,7 +5845,7 @@ abstract class AppLocalizations {
   /// ui.home.member_upcoming_title
   ///
   /// In tr, this message translates to:
-  /// **'Yaklaşanlar'**
+  /// **'Yaklaşan toplantılar'**
   String get uiHomeMemberUpcomingTitle;
 
   /// ui.home.member_upcoming_meetings
@@ -7401,6 +7401,12 @@ abstract class AppLocalizations {
   /// In tr, this message translates to:
   /// **'Anlık toplantı'**
   String get uiMeetingsInstantTitle;
+
+  /// ui.meetings.note_task_switch_role
+  ///
+  /// In tr, this message translates to:
+  /// **'Notu göreve dönüştürmek için Yönetici veya Koordinatör görünümüne geç.'**
+  String get uiMeetingsNoteTaskSwitchRole;
 
   /// ui.messages.title
   ///

@@ -24,39 +24,28 @@ final class MeetingsView {
     this.tab = MeetingsTab.upcoming,
     this.query = '',
     this.searchOpen = false,
-    this.unitOnly = false,
   });
 
   final MeetingsTab tab;
   final String query;
   final bool searchOpen;
 
-  /// Birim süzgeci: yalnız etkin koordinatörlüğün bağlı olduğu toplantılar (Koordinatör/Üye
-  /// görünümü; yöneticide kullanılmaz).
-  final bool unitOnly;
-
-  MeetingsView copyWith({
-    MeetingsTab? tab,
-    String? query,
-    bool? searchOpen,
-    bool? unitOnly,
-  }) => MeetingsView(
-    tab: tab ?? this.tab,
-    query: query ?? this.query,
-    searchOpen: searchOpen ?? this.searchOpen,
-    unitOnly: unitOnly ?? this.unitOnly,
-  );
+  MeetingsView copyWith({MeetingsTab? tab, String? query, bool? searchOpen}) =>
+      MeetingsView(
+        tab: tab ?? this.tab,
+        query: query ?? this.query,
+        searchOpen: searchOpen ?? this.searchOpen,
+      );
 
   @override
   bool operator ==(Object other) =>
       other is MeetingsView &&
       other.tab == tab &&
       other.query == query &&
-      other.searchOpen == searchOpen &&
-      other.unitOnly == unitOnly;
+      other.searchOpen == searchOpen;
 
   @override
-  int get hashCode => Object.hash(tab, query, searchOpen, unitOnly);
+  int get hashCode => Object.hash(tab, query, searchOpen);
 }
 
 @Riverpod(keepAlive: true)
@@ -67,8 +56,6 @@ class MeetingsViewController extends _$MeetingsViewController {
   void selectTab(MeetingsTab tab) => state = state.copyWith(tab: tab);
 
   void setQuery(String q) => state = state.copyWith(query: q);
-
-  void setUnitOnly(bool on) => state = state.copyWith(unitOnly: on);
 
   /// Arama kapanınca sorgu da temizlenir (prototip `toggleSearch`).
   void toggleSearch() => state = state.searchOpen

@@ -88,7 +88,8 @@ class _MeetingNotesState extends ConsumerState<MeetingNotes> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       spacing: NizamioSpacing.space3,
       children: [
-        NzFilterRail(
+        NzPillTabs(
+          compact: true,
           semanticLabel: l.uiMeetingsNfLabel,
           selected: widget.filter.index,
           onSelected: (i) => ref
@@ -96,9 +97,9 @@ class _MeetingNotesState extends ConsumerState<MeetingNotes> {
                 meetingDetailViewControllerProvider(room.meeting.id).notifier,
               )
               .filterNotes(NoteFilter.values[i]),
-          options: [
+          tabs: [
             for (final f in NoteFilter.values)
-              NzFilterOption(label: l.noteFilterLabel(f, count(f))),
+              NzPillTab(label: l.noteFilterLabel(f), count: count(f)),
           ],
         ),
         if (perms.canAddNote)

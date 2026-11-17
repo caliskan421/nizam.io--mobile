@@ -161,7 +161,7 @@ final class ArchiveFolderTasksProvider
 }
 
 String _$archiveFolderTasksHash() =>
-    r'f87ceeb3bd133e4d7d3c69719a46c6f538ee65d9';
+    r'2e0702418c733cd26807d4aec3bce58e5f2fc432';
 
 /// Klasörün dosyalı görevleri (`archiveTasks`). Yöneticide uç dönem genelidir: görev
 /// kataloğunda departmanı bu klasör olan görevler kalır (katalogda olmayan görev düşer).
@@ -249,7 +249,7 @@ final class ArchiveFolderUploadersProvider
 }
 
 String _$archiveFolderUploadersHash() =>
-    r'0c53114e9a7cef35f957b87c72779da0c0e2325c';
+    r'abfd2af5238b1bb0fe761cf1dd0a38160c17b93f';
 
 /// Klasörde süzgeç olarak seçilebilen yükleyenler (`archiveUploaders`; yalnız kimlik).
 

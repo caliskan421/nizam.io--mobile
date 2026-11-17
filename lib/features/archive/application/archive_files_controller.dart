@@ -55,9 +55,12 @@ final class ArchiveFilesState {
 class ArchiveFilesController extends _$ArchiveFilesController {
   /// İstek başına satır.
   static const pageSize = 50;
+  int _generation = 0;
 
   @override
   Future<ArchiveFilesState> build(String code) async {
+    _generation++;
+    await ref.watch(archiveViewFilterProvider.future);
     // Süzgeç değişince liste baştan yüklenir (değer [_page]'de okunur).
     ref.watch(archiveFolderControllerProvider(code).select((v) => v.filter));
     final ctx = await ref.watch(archiveFolderContextProvider(code).future);
@@ -71,6 +74,7 @@ class ArchiveFilesController extends _$ArchiveFilesController {
     final ctx = await ref.read(archiveFolderContextProvider(code).future);
     if (ctx == null) return PageSlice.empty();
     final filter = ref.read(archiveFolderControllerProvider(code)).filter;
+    final projection = await ref.read(archiveViewFilterProvider.future);
     final page = await ref
         .read(archiveRepositoryProvider)
         .archiveAttachments(
@@ -78,6 +82,16 @@ class ArchiveFilesController extends _$ArchiveFilesController {
           filter: filter,
           page: request,
         );
+    if (projection != null) {
+      return PageSlice(
+        items: [
+          for (final f in page.items)
+            if (projection.taskIds.contains(f.workItemId)) f,
+        ],
+        nextCursor: page.nextCursor,
+        truncated: page.truncated,
+      );
+    }
     if (!ctx.scope.widerThan(ctx.folder)) return page;
     final tasks = await ref.read(archiveFolderTasksProvider(code).future);
     final ids = {for (final t in tasks) t.workItemId};
@@ -96,12 +110,14 @@ class ArchiveFilesController extends _$ArchiveFilesController {
     final filter = ref.read(archiveFolderControllerProvider(code)).filter;
     final cursor = s?.nextCursor;
     if (s == null || cursor == null || s.loadingMore) return;
+    final generation = _generation;
     state = AsyncData(s.copyWith(loadingMore: true, moreError: () => null));
     try {
       final page = await _page(PageRequest(limit: pageSize, cursor: cursor));
       // Süzgeç bu arada değiştiyse liste baştan yüklenmiştir: eski sonuç atılır.
       final now = state.value;
       if (!ref.mounted ||
+          generation != _generation ||
           now == null ||
           now.nextCursor != cursor ||
           ref.read(archiveFolderControllerProvider(code)).filter != filter) {
@@ -119,6 +135,7 @@ class ArchiveFilesController extends _$ArchiveFilesController {
       final api = toReportedApiError(e, st, source: ReportSource.archive);
       final now = state.value;
       if (!ref.mounted ||
+          generation != _generation ||
           now == null ||
           now.nextCursor != cursor ||
           ref.read(archiveFolderControllerProvider(code)).filter != filter) {

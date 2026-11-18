@@ -9,7 +9,7 @@ import '../../../../core/ui/widgets/nz_icons.dart';
 import '../../../../core/ui/widgets/surfaces/surfaces.dart';
 
 /// Çekmece başlığı (`sidebar-rol.png`): avatar, ad, alt satır ("Koordinatör · Altyapı ve
-/// tesisat"), ">" (profil) ve kapat düğmesi. Ad satırına dokunuş profili açar ([onProfile]).
+/// tesisat") ve kapat düğmesi. Ad satırına dokunuş profili açar ([onProfile]).
 class HomeDrawerHeader extends StatelessWidget {
   const HomeDrawerHeader({
     super.key,
@@ -71,12 +71,6 @@ class HomeDrawerHeader extends StatelessWidget {
                           ),
                         ],
                       ),
-                    ),
-                    const Gap(NizamioSpacing.space2),
-                    NzIcon(
-                      NzIcons.chevronRight,
-                      size: NizamioSize.iconSizeSm,
-                      color: c.textMuted,
                     ),
                   ],
                 ),

@@ -24,6 +24,7 @@ import 'router_test_support.dart';
 const _scopedOnly = [
   '/tasks',
   '/profile',
+  '/home/profile',
   '/home/history',
   '/tasks/ALT-7',
   '/coordinatorships',
@@ -144,12 +145,12 @@ void main() {
       for (final path in _scopedOnly) {
         router.go(path);
         await settle(tester);
-        expect(locationOf(router), path);
-        // Zaman çizelgesi, sohbet ve profil kabuk dışıdır (alt menü yok).
-        final fullScreen =
-            path == '/timeline' ||
-            path == '/profile' ||
-            path.startsWith('/chat/');
+        expect(
+          locationOf(router),
+          path == '/profile' ? const ProfileRoute().location : path,
+        );
+        // Zaman çizelgesi ve sohbet kabuk dışıdır; profil kabuğun içinde kalır.
+        final fullScreen = path == '/timeline' || path.startsWith('/chat/');
         expect(
           find.byType(NzAdaptiveShell),
           fullScreen ? findsNothing : findsOneWidget,

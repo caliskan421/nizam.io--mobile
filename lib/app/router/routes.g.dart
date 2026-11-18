@@ -20,7 +20,7 @@ List<RouteBase> get $appRoutes => [
   $timelineRoute,
   $chatRoute,
   $conferenceRoute,
-  $profileRoute,
+  $legacyProfileRoute,
 ];
 
 RouteBase get $deletedTasksRoute => GoRouteData.$route(
@@ -276,6 +276,11 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
               hasOverriddenOnExit: false,
               factory: $HistoryRoute._fromState,
             ),
+            GoRouteData.$route(
+              path: 'profile',
+              hasOverriddenOnExit: false,
+              factory: $ProfileRoute._fromState,
+            ),
           ],
         ),
       ],
@@ -433,6 +438,26 @@ mixin $HistoryRoute on GoRouteData {
         'trail': _self.trail.map((e) => e).toList(),
     },
   );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ProfileRoute on GoRouteData {
+  static ProfileRoute _fromState(GoRouterState state) => const ProfileRoute();
+
+  @override
+  String get location => GoRouteData.$location('/home/profile');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -1053,14 +1078,15 @@ mixin $ConferenceRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
-RouteBase get $profileRoute => GoRouteData.$route(
+RouteBase get $legacyProfileRoute => GoRouteData.$route(
   path: '/profile',
   hasOverriddenOnExit: false,
-  factory: $ProfileRoute._fromState,
+  factory: $LegacyProfileRoute._fromState,
 );
 
-mixin $ProfileRoute on GoRouteData {
-  static ProfileRoute _fromState(GoRouterState state) => const ProfileRoute();
+mixin $LegacyProfileRoute on GoRouteData {
+  static LegacyProfileRoute _fromState(GoRouterState state) =>
+      const LegacyProfileRoute();
 
   @override
   String get location => GoRouteData.$location('/profile');

@@ -131,7 +131,10 @@ class ScopeRoute extends NzRouteData with $ScopeRoute {
       routes: [
         TypedGoRoute<HomeRoute>(
           path: '/home',
-          routes: [TypedGoRoute<HistoryRoute>(path: 'history')],
+          routes: [
+            TypedGoRoute<HistoryRoute>(path: 'history'),
+            TypedGoRoute<ProfileRoute>(path: 'profile'),
+          ],
         ),
       ],
     ),
@@ -519,13 +522,22 @@ class ConferenceRoute extends NzRouteData with $ConferenceRoute {
       ConferencePage(key: ValueKey(id), id: id);
 }
 
-@TypedGoRoute<ProfileRoute>(path: '/profile')
-class ProfileRoute extends NzRouteData with $ProfileRoute {
+class ProfileRoute extends NzTabRouteData with $ProfileRoute {
   const ProfileRoute();
 
   @override
   Widget build(BuildContext context, GoRouterState state) =>
       const ProfilePage();
+}
+
+/// Eski profil bağlantıları da alt gezinmesi korunan görünümü açar.
+@TypedGoRoute<LegacyProfileRoute>(path: '/profile')
+class LegacyProfileRoute extends GoRouteData with $LegacyProfileRoute {
+  const LegacyProfileRoute();
+
+  @override
+  String redirect(BuildContext context, GoRouterState state) =>
+      const ProfileRoute().location;
 }
 
 // ---- Birleştirme ----

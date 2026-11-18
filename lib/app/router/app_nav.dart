@@ -119,7 +119,7 @@ class GoRouterAppNav implements NzAppNav {
   void openChat(String id) => _router.push(ChatRoute(id: id).location);
 
   @override
-  void openProfile() => _router.push(const ProfileRoute().location);
+  void openProfile() => _router.go(const ProfileRoute().location);
 
   @override
   void openUsers() => _router.go(const UsersRoute().location);

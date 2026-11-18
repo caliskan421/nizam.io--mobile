@@ -50,6 +50,9 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
   /// Son girilen modül (yok → etkin rolün varsayılan yuvası, [shellSlotFor]).
   ShellModule? _module;
 
+  /// Profil başka bir sekmenin arkasında kalsa da Ana sayfa düğmesi ana akışı açar.
+  bool _homeShowsProfile = false;
+
   /// Görevler kökünün son açılış süzgeci (sol bölmedeki liste, alt rotada da aynı kalır).
   var _tasksRoot = const TasksRoute();
 
@@ -82,6 +85,9 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
   }
 
   void _remember() {
+    if (_location.startsWith(const HomeRoute().location)) {
+      _homeShowsProfile = _location == const ProfileRoute().location;
+    }
     final m = moduleOf(_location);
     if (m != null) _module = m;
     if (_location == const TasksRoute().location) {
@@ -106,6 +112,10 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
   /// Başka sekme → o sekmenin son konumu. Etkin sekmeye yeniden dokunma → o sayfanın kısayol
   /// menüsü ([ShellReselectEvents]; sayfa kendisi görünürse açar).
   void _select(int index) {
+    if (index == 0 && _homeShowsProfile) {
+      GoRouter.of(context).go(const HomeRoute().location);
+      return;
+    }
     if (index == _shell.currentIndex) {
       ref.read(shellReselectEventsProvider.notifier).fire(index);
       return;
@@ -131,6 +141,11 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
   /// tek bölmede telefondaki gibi kısayol olayı.
   void _selectRail(RailModule target, {required bool split}) {
     final router = GoRouter.of(context);
+    if (target == RailModule.home &&
+        _location == const ProfileRoute().location) {
+      router.go(const HomeRoute().location);
+      return;
+    }
     if (target == railModuleOf(_location)) {
       if (!split) {
         ref
@@ -236,7 +251,8 @@ class _NzAdaptiveShellState extends ConsumerState<NzAdaptiveShell> {
       current: current,
       onSelect: (m) => _selectRail(m, split: split),
     );
-    if (!split) {
+    // Profil bir kayıt ayrıntısı değildir: rayın yanında tek içerik alanı kullanır.
+    if (!split || _location == const ProfileRoute().location) {
       return Scaffold(
         body: Row(
           children: [

@@ -10,6 +10,7 @@ import '../../../core/ui/page/nz_page.dart';
 import '../../../core/ui/state/nz_async_view.dart';
 import '../../../core/ui/widgets/inputs/inputs.dart';
 import '../../../core/ui/widgets/lists/lists.dart';
+import '../../../core/ui/widgets/navigation/navigation.dart';
 import '../../../core/ui/widgets/nz_icons.dart';
 import '../../notifications/notifications.dart';
 import '../../scope/scope.dart';
@@ -21,7 +22,8 @@ import 'profile_password_sheet.dart';
 import 'profile_work.dart';
 import 'sign_out_button.dart';
 
-/// Kendi profili: kimlik, kapsamlı roller, görünür iş özeti ve kişisel tercihler.
+/// Kabuk içi profil: ortak üst çubuk, sabitlenen sekmeler ve korunan alt gezinme.
+/// Kimlik, kapsamlı roller, görünür iş özeti ve kişisel tercihler aynı veri akışını kullanır.
 class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({super.key});
 
@@ -36,70 +38,70 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
   Widget build(BuildContext context) {
     final l = context.l10n;
     final hasProgram = ref.watch(scopeStateProvider).hasProgram;
-    return NzPage(
-      title: l.uiIdentityProfileTitle,
+    return NzPage.feed(
+      topBar: const RootTopBar(),
       width: NzContentWidth.reading,
-      body: ListView(
-        padding: const EdgeInsets.symmetric(vertical: NizamioSpacing.space6),
-        children: [
-          NzAsyncView(
-            value: ref.watch(currentAccountControllerProvider),
-            onRetry: () => ref.invalidate(currentAccountControllerProvider),
-            data: (account) => ProfileIdentity(account: account),
-          ),
-          const Gap(NizamioSpacing.space6),
-          NzPillTabs(
-            tabs: [
-              NzPillTab(label: l.uiIdentityProfileGeneral),
-              NzPillTab(label: l.uiIdentityProfileWork),
-              NzPillTab(label: l.uiUsersAccount),
-            ],
-            selected: _tab,
-            onSelected: (tab) => setState(() => _tab = tab),
-          ),
-          const Gap(NizamioSpacing.space6),
-          if (_tab == 0 && hasProgram)
-            NzAsyncView(
-              value: ref.watch(currentProgramControllerProvider),
-              onRetry: () => ref.invalidate(currentProgramControllerProvider),
-              skeletonOnReload: true,
-              data: (program) => program == null
-                  ? const SizedBox.shrink()
-                  : NzAsyncView(
-                      value: ref.watch(taskCatalogControllerProvider),
-                      skeletonOnReload: true,
-                      onRetry: () =>
-                          ref.invalidate(taskCatalogControllerProvider),
-                      data: (catalog) => ProfileMemberships(
-                        program: program,
-                        catalog: catalog,
-                      ),
-                    ),
-            ),
-          if (_tab == 1 && hasProgram)
-            NzAsyncView(
-              value: ref.watch(taskCatalogControllerProvider),
-              skeletonOnReload: true,
-              onRetry: () => ref.invalidate(taskCatalogControllerProvider),
-              data: (catalog) => ProfileWork(catalog: catalog),
-            ),
-          if (_tab == 2) ...[
-            NzMenuGroup(
-              rows: [
-                NzMenuRow(
-                  icon: NzIcons.key,
-                  label: l.uiIdentityPasswordTitle,
-                  onTap: () => showProfilePasswordSheet(context),
-                ),
-              ],
-            ),
-            const Gap(NizamioSpacing.space6),
-            const NotificationPreferencesCard(),
-            const CrashReportsCard(),
-            const SignOutButton(),
-          ],
+      pinned: NzPillTabs(
+        tabs: [
+          NzPillTab(label: l.uiIdentityProfileGeneral),
+          NzPillTab(label: l.uiIdentityProfileWork),
+          NzPillTab(label: l.uiUsersAccount),
         ],
+        selected: _tab,
+        onSelected: (tab) => setState(() => _tab = tab),
       ),
+      afterKey: ValueKey(_tab),
+      after: [
+        const Gap(NizamioSpacing.space6),
+        if (_tab == 0 && hasProgram)
+          NzAsyncView(
+            value: ref.watch(currentProgramControllerProvider),
+            onRetry: () => ref.invalidate(currentProgramControllerProvider),
+            skeletonOnReload: true,
+            data: (program) => program == null
+                ? const SizedBox.shrink()
+                : NzAsyncView(
+                    value: ref.watch(taskCatalogControllerProvider),
+                    skeletonOnReload: true,
+                    onRetry: () =>
+                        ref.invalidate(taskCatalogControllerProvider),
+                    data: (catalog) =>
+                        ProfileMemberships(program: program, catalog: catalog),
+                  ),
+          ),
+        if (_tab == 1 && hasProgram)
+          NzAsyncView(
+            value: ref.watch(taskCatalogControllerProvider),
+            skeletonOnReload: true,
+            onRetry: () => ref.invalidate(taskCatalogControllerProvider),
+            data: (catalog) => ProfileWork(catalog: catalog),
+          ),
+        if (_tab == 2) ...[
+          NzMenuGroup(
+            rows: [
+              NzMenuRow(
+                icon: NzIcons.key,
+                label: l.uiIdentityPasswordTitle,
+                onTap: () => showProfilePasswordSheet(context),
+              ),
+            ],
+          ),
+          const Gap(NizamioSpacing.space6),
+          const NotificationPreferencesCard(),
+          const CrashReportsCard(),
+          const SignOutButton(),
+        ],
+      ],
+      children: [
+        NzPageHeader(title: l.uiIdentityProfileTitle),
+        const Gap(NizamioSpacing.space6),
+        NzAsyncView(
+          value: ref.watch(currentAccountControllerProvider),
+          onRetry: () => ref.invalidate(currentAccountControllerProvider),
+          data: (account) => ProfileIdentity(account: account),
+        ),
+        const Gap(NizamioSpacing.space6),
+      ],
     );
   }
 }

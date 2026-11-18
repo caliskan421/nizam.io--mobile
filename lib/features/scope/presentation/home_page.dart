@@ -219,7 +219,7 @@ class _Feed extends ConsumerWidget {
           wide: wide,
           onOpen: nav.openCoordinatorship,
         );
-        // Üye: odak, iade, Görevlerim, Yaklaşanlar (KPI, genel durum, koordinatörlük kartı yok).
+        // Üye: kendi görevleriyle genel durum, odak, iade, özet kutuları ve Yaklaşanlar.
         if (access.isMemberView) {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,

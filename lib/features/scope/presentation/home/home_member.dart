@@ -18,8 +18,8 @@ import 'home_overview.dart';
 import 'home_sections.dart';
 import 'home_wide.dart';
 
-/// Ana sayfanın üye bölümleri (tasarım §4.1; yönetici/koordinatör ana sayfasının dili): odak kartı,
-/// iade kartı (varsa), dört özet kutusu (gecikme, onayda, iade, tamamlanma), Yaklaşanlar
+/// Ana sayfanın üye bölümleri (tasarım §4.1; yönetici/koordinatör ana sayfasının dili): genel durum,
+/// odak kartı, iade kartı (varsa), dört özet kutusu (gecikme, onayda, iade, tamamlanma), Yaklaşanlar
 /// (toplantılar kartla + kendi bitişleri; 7 gün). Hızlı işlem, ekip yükü ve bekleyen işler
 /// üyede yok (yetki/veri üyeye kapalı). Geniş düzen: genel durum (kendi görevleri) + odak kartı
 /// aynı yükseklikte; kutular tek satır; iade ve Yaklaşanlar tam genişlik.
@@ -63,14 +63,22 @@ class HomeMemberFeed extends ConsumerWidget {
       ),
     );
     final upcoming = _MemberUpcoming(home: home, today: today, code: code);
+    final overview = HomeOverview(
+      statuses: [for (final t in home.tasks) t.status],
+      truncated: home.truncated,
+      legendGrid: wide,
+    );
     if (!wide) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (final (i, w) in [focus, ?returned, kpis, upcoming].indexed) ...[
-            if (i > 0) const Gap(NizamioSpacing.gapXl),
-            w,
-          ],
+          for (final (i, w) in [
+            overview,
+            focus,
+            ?returned,
+            kpis,
+            upcoming,
+          ].indexed) ...[if (i > 0) const Gap(NizamioSpacing.gapXl), w],
         ],
       );
     }
@@ -82,14 +90,7 @@ class HomeMemberFeed extends ConsumerWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                flex: 5,
-                child: HomeOverview(
-                  statuses: [for (final t in home.tasks) t.status],
-                  truncated: home.truncated,
-                  legendGrid: true,
-                ),
-              ),
+              Expanded(flex: 5, child: overview),
               const Gap(homeWideGap),
               Expanded(flex: 4, child: focus),
             ],
